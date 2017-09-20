@@ -6,14 +6,19 @@ using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
 using System.Threading;
+using System.ComponentModel;
+using System.Timers;
+using System.Linq;
 
 namespace WhalesFargo
 {
     public static class MyGlobals
     {
-        
+
         public static int RTotal = 0; // can change because not const
-        public static Boolean Debug = true;
+        public static Boolean Debug = false;
+
+
     }
 
     class Program
@@ -22,55 +27,148 @@ namespace WhalesFargo
         private DiscordSocketClient client;
         private IServiceProvider services;
 
-        
 
         // Bot Token. Do not share with other people
         string token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
-        
-      
-
 
 
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
-        
-    
-    
+
+
+        /* The main task runner */
+
         public async Task MainAsync()
         {
             /* Start to make the connection to the server */
             client = new DiscordSocketClient();
             commands = new CommandService();
             services = new ServiceCollection().BuildServiceProvider();
-           
-
 
             await InstallCommands();
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
-            
             // Send Messages, and userJoined to appropriate places
             client.Log += Log;
             client.UserJoined += UserJoined;
             client.Ready += SetBotStatus;
 
-              // Start the Colo Reminders
-              // Rerun the function every 5 minutes
-              var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromMinutes(1);
 
-           
-            
-            
+            // Interval of 5 minutes
+            const double interval5Minutes = 4 * 30 * 1000; 
+            // Creates a new system timer, and checks every 5 minutes for elapsed time.
+            System.Timers.Timer checkForTime = new System.Timers.Timer(interval5Minutes);
+            checkForTime.Elapsed += new ElapsedEventHandler(CheckForTime_ElapsedAsync);
+            checkForTime.Enabled = true;
+
+
             // Doesn't end the program until the whole thing is done.
             await Task.Delay(-1);
         }
+
+        /* This sets the bots status as default. Can easily be changed. */
         public async Task SetBotStatus()
         {
             await client.SetGameAsync("With Rogue Tonight ;D");
         }
 
-    private async Task CheckRouge(SocketMessage arg)
+        /* Checks time elapsed. Essential for the auto messasging of channels */
+        public async void CheckForTime_ElapsedAsync(object sender, ElapsedEventArgs e)
+        {
+
+            string event_name = WhaleHelp.TimeIsReady();
+            bool colo = String.Equals(event_name, "colo", StringComparison.Ordinal);
+            bool gb = String.Equals(event_name, "gb", StringComparison.Ordinal);
+
+            if (colo){
+                SendColo();
+            }
+            else if (gb)
+            {
+                SendGb();
+            }
+        }
+
+
+        /* Sends the Guild Battle Notification */
+        public async Task SendGb()
+        {
+            // Gets the colo channel 
+            var colochannel = client.GetChannel(223181247902515210) as SocketTextChannel;
+            /* You can add references to any channel you wish */
+            await colochannel.SendMessageAsync("@Team A, Guild Battle/Guild Raid will begin shortly.");
+        }
+
+
+        /* Sends the Colo Notification */
+        public async Task SendColo()
+        {
+            // Gets the colo channel 
+            var colochannel = client.GetChannel(357943551264555010) as SocketTextChannel;
+            /* You can add references to any channel you wish */
+            await colochannel.SendMessageAsync("@everyone, Coliseum will begin shortly.");
+        }
+
+        private async Task CheckSenpai(SocketMessage arg)
+        {
+            var user = arg.Author;
+            var chnl = arg.Channel as SocketTextChannel;
+            var message = arg as SocketUserMessage;
+            string str_message = message.ToString();
+
+            // Done 
+            bool salt = str_message.IndexOf("salt", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool fart = str_message.IndexOf("swoosh", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool noob = str_message.IndexOf("noob", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool scam = str_message.IndexOf("scam", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool spawn = str_message.IndexOf("spawn", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            // Todo
+            bool skumbag = str_message.IndexOf("skumbag", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool senpai = str_message.IndexOf("senpai", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (salt)
+            {
+                Console.WriteLine("Salt activated");
+                await chnl.SendMessageAsync("https://imgur.com/1S9x2fH" );
+            }
+            else if (fart)
+            {
+                Console.WriteLine("fart activated");
+                await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
+                
+            }
+            else if (noob)
+            {
+                Console.WriteLine("noob activated");
+                await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
+                
+            }
+            else if (scam)
+            {
+                Console.WriteLine("scam activated");
+                await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
+                
+            }
+            else if (spawn)
+            {
+                Random rnd = new Random();
+                int rannum = rnd.Next(1, 6);
+                if (rannum == 1)
+                {
+                    await chnl.SendMessageAsync("https://imgur.com/XoXcx1X");
+                    await chnl.SendMessageAsync("Are you sure you want to spawn??");
+
+                }
+                if (rannum == 2)
+                {
+                    await chnl.SendMessageAsync("https://vignette2.wikia.nocookie.net/unisonleague/images/5/59/Gear-Behemoth_Icon.png");
+                    await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
+                }
+            }
+            //await chnl.SendMessageAsync("Rogue, I think you're cute :D");
+
+        }
+        private async Task TrollRogue(SocketMessage arg)
         {
             //Rogue
             ulong userID = 339836073716744194;
@@ -124,13 +222,13 @@ namespace WhalesFargo
 
         }
 
+      
 
-
-        /* Welcome Message */
+        /* This message is sent once a user joins the server. */
 
         public async Task UserJoined(SocketGuildUser user)
         {
-            var channel = client.GetChannel(338430635775623180) as SocketTextChannel;
+            var channel = client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
             await channel.SendMessageAsync("Welcome to the server" + user.Mention + "! Don't be a bitch and become a whale!");
 
@@ -160,7 +258,8 @@ namespace WhalesFargo
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(client.CurrentUser, ref argPos)))
             {
                 // If it isn't a command, check to see if rogue sent it.
-                await CheckRouge(messageParam);
+                await TrollRogue(messageParam);
+                await CheckSenpai(messageParam);
                 return;
             }
             // Create a Command Context

@@ -10,6 +10,8 @@ using System.Linq;
 
 namespace WhalesFargo
 {
+
+
     public class Commands : ModuleBase
     {
 
@@ -105,9 +107,13 @@ namespace WhalesFargo
                 Console.WriteLine("Egg is " + egg);
                 Console.WriteLine("Kesa is " + kesapasa);
             }
+            await Context.Message.DeleteAsync();
+
+           
+
             if (egg)
             {
-                await Context.Message.DeleteAsync();
+                
                 var emb = new EmbedBuilder();
                 emb.WithTitle("**Upcoming Egg Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
@@ -195,9 +201,9 @@ namespace WhalesFargo
                 await ReplyAsync("", false, emb);
 
             } // End of Egg 
-            else if (keymin)
+            if (keymin)
             {
-                await Context.Message.DeleteAsync();
+                
                 var emb = new EmbedBuilder();
                 emb.WithTitle("**Upcoming Keymin Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
@@ -307,13 +313,14 @@ namespace WhalesFargo
                     System.TimeSpan diff = EK3.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
                 }
+                await Task.Delay(1000);
 
                 await ReplyAsync("", false, emb);
 
             } 
-            else if (kesapasa)
+            if (kesapasa)
             {
-                await Context.Message.DeleteAsync();
+               
                 var emb = new EmbedBuilder();
                 emb.WithTitle("**Upcoming Kesapasa Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
@@ -446,14 +453,42 @@ namespace WhalesFargo
                     System.TimeSpan diff = EP3.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
+                await Task.Delay(1000);
+
                 await ReplyAsync("", false, emb);
             }
 
-           
+            
+            DateTime NextSun = WhaleHelp.Next(currentETC, DayOfWeek.Sunday);
+            DateTime NextSat = WhaleHelp.Next(currentETC, DayOfWeek.Saturday);
+            DateTime NextMon = WhaleHelp.Next(currentETC, DayOfWeek.Monday);
+            
+
+            DateTime SA1 = new DateTime(NextSat.Year, NextSat.Month, NextSat.Day, 13, 0, 0);
+            DateTime SA1_End = SA1.AddMinutes(20);
+            DateTime SA2 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 1, 0, 0);
+            DateTime SA2_End = SA2.AddMinutes(20);
+            DateTime SA3 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 13, 0, 0);
+            DateTime SA3_End = SA3.AddMinutes(20);
+            DateTime SA4 = new DateTime(NextMon.Year, NextMon.Month, NextMon.Day, 1, 0, 0);
+            DateTime SA4_End = SA4.AddMinutes(20);
+
+            DateTime SG1 = new DateTime(NextSat.Year, NextSat.Month, NextSat.Day, 17, 30, 0);
+            DateTime SG1_End = SG1.AddMinutes(20);
+            DateTime SG2 = new DateTime(NextSat.Year, NextSat.Month, NextSat.Day, 23, 30, 0);
+            DateTime SG2_End = SG2.AddMinutes(20);
+            DateTime SG3 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 17, 30, 0);
+            DateTime SG3_End = SG3.AddMinutes(20);
+            DateTime SG4 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 23, 30, 0);
+            DateTime SG4_End = SG4.AddMinutes(20);
+
+
+            
+
             /* TODO: Need to add super augment */
-            else if (augment)
+            if (augment)
             {
-                await Context.Message.DeleteAsync();
+                
                 var emb = new EmbedBuilder();
                 emb.WithTitle("**Upcoming Augment Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
@@ -534,20 +569,193 @@ namespace WhalesFargo
                     System.TimeSpan diff = AUG1.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
+                emb.AddField("Super Augment", "If you are looking for super augment, do !next super", true);
+                await Task.Delay(1000);
                 await ReplyAsync("", false, emb);
             }
-            else if (gold)
+
+            
+            if (gold)
             {
+                
+                var emb = new EmbedBuilder();
+                emb.WithTitle("**Upcoming Gold Quest:**");
+                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
+                emb.Color = new Color(250, 250, 20);
+                 // Off between 1st
+                if (DateTime.Compare(currentETC, SG1) < 0)
+                {
+                    System.TimeSpan diff = SG1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"dd") + " day(s) " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+                // between first aug
+                else if (DateTime.Compare(currentETC, SG1) > 0 & DateTime.Compare(currentETC, SG1_End) < 0)
+                {
+                    System.TimeSpan diff = SG1_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Gold (SG1)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SG2.Subtract(currentETC);
+                    emb.AddField("**Next SG2 (SG2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SG1_End) > 0 & DateTime.Compare(currentETC, SG2) < 0)
+                {
+                    System.TimeSpan diff = SG2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SG2) > 0 & DateTime.Compare(currentETC, SG2_End) < 0)
+                {
+                    System.TimeSpan diff = SG3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Gold (SG2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SG3.Subtract(currentETC);
+                    emb.AddField("**Next SG3 (SG3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SG2_End) > 0 & DateTime.Compare(currentETC, SG3) < 0)
+                {
+                    System.TimeSpan diff = SG3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SG3) > 0 & DateTime.Compare(currentETC, SG3_End) < 0)
+                {
+                    System.TimeSpan diff = SG3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Gold (SG3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SG4.Subtract(currentETC);
+                    emb.AddField("**Next SG4 (SG4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SG3_End) > 0 & DateTime.Compare(currentETC, SG4) < 0)
+                {
+                    System.TimeSpan diff = SG4.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SG4) > 0 & DateTime.Compare(currentETC, SG4_End) < 0)
+                {
+                    System.TimeSpan diff = SG4_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Gold (SG4)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SG1.Subtract(currentETC);
+                    emb.AddField("**Next SG1 (SG1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SG4_End) > 0 )
+                {
+                    System.TimeSpan diff = SG1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                await Task.Delay(1000);
+                await ReplyAsync("", false, emb);
 
             }
-            else if (super)
+            if (super)
             {
 
+                var emb = new EmbedBuilder();
+                emb.WithTitle("**Upcoming Super Augment Quest:**");
+                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
+                emb.Color = new Color(250, 250, 20);
+                // between first aug
+                // First case, Before 1st SA and last, so M-F times.
+                if (DateTime.Compare(currentETC, SA1) < 0 && DateTime.Compare(currentETC, SA4) < 0)
+                {
+                    System.TimeSpan diff = SA1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"dd") + " day(s) " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SA1) > 0 & DateTime.Compare(currentETC, SA1_End) < 0)
+                {
+                    System.TimeSpan diff = SA1_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Super Augment (SA1)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SA2.Subtract(currentETC);
+                    emb.AddField("**Next SA2 (SA2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SA1_End) > 0 & DateTime.Compare(currentETC, SA2) < 0)
+                {
+                    System.TimeSpan diff = SA2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SA2) > 0 & DateTime.Compare(currentETC, SA2_End) < 0)
+                {
+                    System.TimeSpan diff = SA3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Super Augment (SA2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SA3.Subtract(currentETC);
+                    emb.AddField("**Next SA3 (SA3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SA2_End) > 0 & DateTime.Compare(currentETC, SA3) < 0)
+                {
+                    System.TimeSpan diff = SA3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SA3) > 0 & DateTime.Compare(currentETC, SA3_End) < 0)
+                {
+                    System.TimeSpan diff = SA3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Super Augment (SA3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SA4.Subtract(currentETC);
+                    emb.AddField("**Next SA4 (SA4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SA3_End) > 0 & DateTime.Compare(currentETC, SA4) < 0)
+                {
+                    System.TimeSpan diff = SA4.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                else if (DateTime.Compare(currentETC, SA4) > 0 & DateTime.Compare(currentETC, SA4_End) < 0)
+                {
+                    System.TimeSpan diff = SA4_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Super Augment (SA4)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = SA1.Subtract(currentETC);
+                    emb.AddField("**Next SA1 (SA1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // Off between 1st
+                else if (DateTime.Compare(currentETC, SA4_End) > 0 & DateTime.Compare(currentETC, SA1) < 0)
+                {
+                    System.TimeSpan diff = SA1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+                await Task.Delay(1000);
+                await ReplyAsync("", false, emb);
+
             }
-            else
+            if (!egg && !keymin && !augment && !gold && !super)
             {
-                await Context.Message.DeleteAsync();
+                
                 var emb = new EmbedBuilder();
                 emb.WithTitle("*Error:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
@@ -557,7 +765,38 @@ namespace WhalesFargo
                
             }
         }
-        
+
+        /* clear messages */
+        [Command("Clear")]
+        public async Task clear([Remainder] int Delete = 0)
+        {
+            IGuildUser Bot = await Context.Guild.GetUserAsync(Context.Client.CurrentUser.Id);
+            if (!Bot.GetPermissions(Context.Channel as ITextChannel).ManageMessages)
+            {
+                await Context.Channel.SendMessageAsync("`Bot does not have enough permissions to manage messages`");
+                return;
+            }
+            await Context.Message.DeleteAsync();
+            var GuildUser = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (!GuildUser.GetPermissions(Context.Channel as ITextChannel).ManageMessages)
+            {
+                await Context.Channel.SendMessageAsync("`You do not have enough permissions to manage messages`");
+                return;
+            }
+            if (Delete == null)
+            {
+                await Context.Channel.SendMessageAsync("`You need to specify the amount | !clear (amount) | Replace (amount) with anything`");
+            }
+            int Amount = 0;
+            foreach (var Item in await Context.Channel.GetMessagesAsync(Delete).Flatten())
+            {
+
+                Amount++;
+                await Item.DeleteAsync();
+
+            }
+            await Context.Channel.SendMessageAsync($"`{Context.User.Username} deleted {Amount} messages`");
+        }
 
         /* Add I am */
 
