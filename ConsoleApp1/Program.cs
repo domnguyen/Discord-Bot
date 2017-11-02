@@ -61,24 +61,19 @@ namespace WhalesFargo
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
-          
-
             // Send Messages, and userJoined to appropriate places
             client.Log += Log;
             client.UserJoined += UserJoined;
             client.UserLeft += UserLeft;
             client.Ready += SetBotStatus;
 
-
+            // Important for the publishing of GVG announcements!
             // Interval of 5 minutes
             const double interval5Minutes = 4 * 30 * 1000;
             // Creates a new system timer, and checks every 5 minutes for elapsed time.
             System.Timers.Timer checkForTime = new System.Timers.Timer(interval5Minutes);
             checkForTime.Elapsed += new ElapsedEventHandler(CheckForTime_ElapsedAsync);
             checkForTime.Enabled = true;
-
-
-
 
             // Doesn't end the program until the whole thing is done.
             await Task.Delay(-1);
