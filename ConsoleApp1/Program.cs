@@ -9,6 +9,9 @@ using System.Threading;
 using System.ComponentModel;
 using System.Timers;
 using System.Linq;
+using Discord.Audio;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace WhalesFargo
 {
@@ -16,50 +19,65 @@ namespace WhalesFargo
     {
 
         public static int RTotal = 0; // can change because not const
-        public static Boolean Debug = false;
-
-
+        public static Boolean Debug = false; // Turn on for cmd printing
+        public static int BotScan = 0;
+        public static int volume = 15;
+        public static IAudioClient BotAudioClient;
+        public static ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
+        
+        public static ConcurrentQueue<string> songQueue = new ConcurrentQueue<String>();
     }
 
     class Program
     {
         private CommandService commands;
+  
+        
         private DiscordSocketClient client;
         private IServiceProvider services;
 
+      
+
 
         // Bot Token. Do not share with other people
-        string token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
-
-
+        // Developemnt token
+        string token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
+        
+         // Live Token
+        // string token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
-
-        /* The main task runner */
 
         public async Task MainAsync()
         {
             /* Start to make the connection to the server */
             client = new DiscordSocketClient();
             commands = new CommandService();
+           
             services = new ServiceCollection().BuildServiceProvider();
+  
 
             await InstallCommands();
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
+          
+
             // Send Messages, and userJoined to appropriate places
             client.Log += Log;
             client.UserJoined += UserJoined;
+            client.UserLeft += UserLeft;
             client.Ready += SetBotStatus;
 
 
             // Interval of 5 minutes
-            const double interval5Minutes = 4 * 30 * 1000; 
+            const double interval5Minutes = 4 * 30 * 1000;
             // Creates a new system timer, and checks every 5 minutes for elapsed time.
             System.Timers.Timer checkForTime = new System.Timers.Timer(interval5Minutes);
             checkForTime.Elapsed += new ElapsedEventHandler(CheckForTime_ElapsedAsync);
             checkForTime.Enabled = true;
+
+
 
 
             // Doesn't end the program until the whole thing is done.
@@ -80,6 +98,7 @@ namespace WhalesFargo
             bool colo = String.Equals(event_name, "colo", StringComparison.Ordinal);
             bool gb = String.Equals(event_name, "gb", StringComparison.Ordinal);
 
+            Console.WriteLine("Testing Elapsed section");
             if (colo){
                 SendColo();
             }
@@ -96,7 +115,7 @@ namespace WhalesFargo
             // Gets the colo channel 
             var colochannel = client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
-            await colochannel.SendMessageAsync("@Team A, Guild Battle/Guild Raid will begin shortly.");
+            await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
         }
 
 
@@ -109,6 +128,8 @@ namespace WhalesFargo
             await colochannel.SendMessageAsync("@everyone, Coliseum will begin shortly.");
         }
 
+
+        /* Check contents of various messages sent */
         private async Task CheckSenpai(SocketMessage arg)
         {
             var user = arg.Author;
@@ -126,115 +147,106 @@ namespace WhalesFargo
             // Todo
             bool skumbag = str_message.IndexOf("skumbag", StringComparison.OrdinalIgnoreCase) >= 0;
             bool senpai = str_message.IndexOf("senpai", StringComparison.OrdinalIgnoreCase) >= 0;
-            if (salt)
+            bool op = str_message.IndexOf("op", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            // If the bot scan is on
+            if (MyGlobals.BotScan == 1)
             {
-                Console.WriteLine("Salt activated");
-                await chnl.SendMessageAsync("https://imgur.com/1S9x2fH" );
-            }
-            else if (fart)
-            {
-                Console.WriteLine("fart activated");
-                await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
-                
-            }
-            else if (noob)
-            {
-                Console.WriteLine("noob activated");
-                await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
-                
-            }
-            else if (scam)
-            {
-                Console.WriteLine("scam activated");
-                await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
-                
-            }
-            else if (spawn)
-            {
-                Random rnd = new Random();
-                int rannum = rnd.Next(1, 6);
-                if (rannum == 1)
+                if (salt)
                 {
-                    await chnl.SendMessageAsync("https://imgur.com/XoXcx1X");
-                    await chnl.SendMessageAsync("Are you sure you want to spawn??");
+
+                    Console.WriteLine("Salt activated");
+                    await chnl.SendMessageAsync("https://imgur.com/1S9x2fH");
+                }
+                else if (fart)
+                {
+                    Console.WriteLine("fart activated");
+                    await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
 
                 }
-                if (rannum == 2)
+                else if (noob)
                 {
-                    await chnl.SendMessageAsync("https://vignette2.wikia.nocookie.net/unisonleague/images/5/59/Gear-Behemoth_Icon.png");
-                    await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
-                }
-            }
-            //await chnl.SendMessageAsync("Rogue, I think you're cute :D");
+                    Random rnd = new Random();
+                    int rannum = rnd.Next(1, 10);
+                    if (rannum % 2 == 0)
+                    {
+                        Console.WriteLine("noob activated");
+                        await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
+                    }
 
+                }
+                else if (scam)
+                {
+                    Random rnd = new Random();
+                    int rannum = rnd.Next(1, 10);
+                    if (rannum % 2 == 0)
+                    {
+                        Console.WriteLine("scam activated");
+                        await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
+                    }
+                }
+                else if (spawn)
+                {
+                    Random rnd = new Random();
+                    int rannum = rnd.Next(1, 10);
+                    if (rannum == 1)
+                    {
+                        await chnl.SendMessageAsync("https://imgur.com/XoXcx1X");
+                        await chnl.SendMessageAsync("Are you sure you want to spawn??");
+
+                    }
+                    if (rannum == 2)
+                    {
+                        await chnl.SendMessageAsync("https://vignette2.wikia.nocookie.net/unisonleague/images/5/59/Gear-Behemoth_Icon.png");
+                        await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
+                    }
+                }
+                //await chnl.SendMessageAsync("Rogue, I think you're cute :D");
+            }
         }
         private async Task TrollRogue(SocketMessage arg)
-        {
-            //Rogue
-            ulong userID = 339836073716744194;
+        { 
+          
 
-            //Dom
-            //ulong userID = 319719246940602368;
-
-            var user = arg.Author;
-            var chnl = arg.Channel as SocketTextChannel;
-
-            var message = arg as SocketUserMessage;
-
-            //var channel = client.GetChannel(338430635775623180) as SocketTextChannel;
-
-            if (MyGlobals.Debug)
+            if (MyGlobals.RTotal == 1)
             {
-                Console.WriteLine("User:" + user);
-                Console.WriteLine("Client User:" + client.GetUser(userID));
-                Console.WriteLine("Current RogueVal: " + MyGlobals.RTotal);
+                //User to troll's ID
+                ulong userID = 339836073716744194;
+                var user = arg.Author;
+                var chnl = arg.Channel as SocketTextChannel;
+                var message = arg as SocketUserMessage;
+                if (user.Id == userID)
+                {
+                    Random rnd = new Random();
+                    if ((rnd.Next(1, 100) % 2) == 0)
+                    {
+                        string msg = WhaleHelp.getTrollUserMessage();
+                        await chnl.SendMessageAsync(msg);
+                    }
+                }
             }
-            if (user.Id == userID && MyGlobals.RTotal == 1 )
-            {
-                //Random
-                Random rnd = new Random();
-                int rannum = rnd.Next(1, 12);
-                if (rannum == 1)
-                {
-                    await chnl.SendMessageAsync("Rogue, I think you're cute :D");
-                }
-                if (rannum == 2)
-                {
-                    await chnl.SendMessageAsync("Rogue's the cute one :wink:");
-                }
-                if (rannum == 3)
-                {
-                    await chnl.SendMessageAsync("Reon is a crayon");
-                }
-                if (rannum == 4)
-                {
-                    await chnl.SendMessageAsync("Cute sleepy rogue");
-                }
-                if (rannum == 5)
-                {
-                    await chnl.SendMessageAsync("Noob Lancer");
-                }
-                
-            }
-
-    
-       
-
         }
 
-      
-
+     
         /* This message is sent once a user joins the server. */
-
         public async Task UserJoined(SocketGuildUser user)
         {
-            var channel = client.GetChannel(223181247902515210) as SocketTextChannel;
+            var channel = user.Guild.DefaultChannel;
             /* You can add references to any channel you wish */
-            await channel.SendMessageAsync("Welcome to the server" + user.Mention + "! Don't be a bitch and become a whale!");
+            await channel.SendMessageAsync("Welcome to the Discord server" + user.Mention + "! Feel free to ask around if you need help!");
 
         }
 
-       
+        /* This message is sent once a user joins the server. */
+        public async Task UserLeft(SocketGuildUser user)
+        {
+            var channel = user.Guild.DefaultChannel;
+            /* You can add references to any channel you wish */
+            await channel.SendMessageAsync(user.Mention + " has left the Discord server.");
+
+        }
+
+
 
         /* This is where you install all possible commands for our bot.
          * Essentially, it will take the Messages Received and send it into our Handler */
@@ -276,7 +288,7 @@ namespace WhalesFargo
 
 
 
-        private Task Log(LogMessage msg)
+        public Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;

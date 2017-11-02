@@ -6,7 +6,9 @@ using Discord.WebSocket;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
-
+using System.Diagnostics;
+using Discord.Audio;
+using System.IO;
 
 namespace WhalesFargo
 {
@@ -18,6 +20,14 @@ namespace WhalesFargo
         public ConcurrentDictionary<ulong, string> GuildMuteRoles { get; }
 
 
+        [Command("say")]
+        [Summary("Says message")]
+        [Alias("say")]
+        public async Task Say([Remainder] string usr_msg = "")
+        {
+            await Context.Message.DeleteAsync();
+            await ReplyAsync(usr_msg);
+        }
 
         /* Check Next Quest */
         [Command("help")]
@@ -27,24 +37,32 @@ namespace WhalesFargo
         {
             await Context.Message.DeleteAsync();
 
-      
+
             var emb = new EmbedBuilder();
             emb.WithTitle("This is the help command");
-            emb.Color = new Color(250,20,20);
+            emb.Color = new Color(250, 20, 20);
             emb.AddField("**Admin Commands**", "*Requires admin role*", false);
             emb.AddField("!mute (user) /!unmute (user)", "This allows admins to mute/unmute annoying users.", true);
-            emb.AddField("!rogue", "This turns on/off the rogue chat detection.", true);
-
-            emb.AddField("**Regular Commands**", "*Coming soon!*", false);
-            emb.AddField("!next (egg/aug/augment/keymin/kesa/pasa/kesapasa/super/gold)", "This returns the next augment/egg/keymin/super/gold quest.", true);
-            
-         
+            emb.AddField("!rogue", "This turns on/off the Rogue chat detection.", true);
+            emb.AddField("!sass", "Turns on and off the bot's sassy responses.", true);
+            emb.AddField("!clear [num]", "Clears [num] amount of messages from current channel", true);
+            emb.AddField("!botstatus [status]", "Sets the bot's current game to [status]", true);
             await ReplyAsync("", false, emb);
+
+            var emb2 = new EmbedBuilder();
+            emb2.WithTitle("Regular Commands");
+            emb2.Color = new Color(250, 20, 20);
+            emb2.AddField("!next (egg/aug/augment/keymin/kesa/pasa/kesapasa/super/gold)", "This returns the next augment/egg/keymin/super/gold quest.", true);
+            emb2.AddField("!say [msg]", "The bot will respond in the same channel with the message said.", true);
+
+            emb2.AddField("!join ", "The bot will join the voice channel of who said the command.", true);
+            emb2.AddField("!stop/leave ", "Bot will end song and leave..", true);
+            emb2.AddField("!play [url]", "Bot will play youtube URL song.", true);
+            await ReplyAsync("", false, emb2);
 
 
 
         }
-
 
         /* Check Next Quest */
         [Command("enhance")]
@@ -109,360 +127,31 @@ namespace WhalesFargo
             }
             await Context.Message.DeleteAsync();
 
-           
 
-            if (egg)
+            /* Variables for Augment quest */
+            DateTime NextSat = WhaleHelp.Next(currentETC, DayOfWeek.Saturday);
+            DateTime NextSun = WhaleHelp.Next(currentETC, DayOfWeek.Sunday);
+            DateTime NextMon = WhaleHelp.Next(currentETC, DayOfWeek.Monday);
+
+            //IF today is Saturday, we want to tell u dont need the next saturday
+            if (currentETC.DayOfWeek == DayOfWeek.Saturday)
             {
-                
-                var emb = new EmbedBuilder();
-                emb.WithTitle("**Upcoming Egg Quest:**");
-                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
-                emb.Color = new Color(250, 20, 20);
-                // from 0:00:00 - 2:00:00 and ON
-                // If greater than EK3 and less than EK3_end.
-                if (DateTime.Compare(currentETC, EK3) > 0 & DateTime.Compare(currentETC, EK3_End) < 0)
-                {
-                    System.TimeSpan diff = EK3_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Egg and Keymin (EK03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
-                    emb.AddField("**Next Egg (EP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 2-4 and ON
-                else if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
-                {
-                    System.TimeSpan diff = EP3_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Kesapasa (EP03)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EK1.Subtract(currentETC);
-                    emb.AddField("**Next Egg (EK01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 4:00:00 - 8:00:00 and OFF
-                else if (DateTime.Compare(currentETC, EP3_End) > 0 & DateTime.Compare(currentETC, EK1) < 0)
-                {
-                    System.TimeSpan diff = EK1.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // 8:00:00 - 10:00:00 and ON
-                else if (DateTime.Compare(currentETC, EK1) > 0 & DateTime.Compare(currentETC, EK1_End) < 0)
-                {
-                    System.TimeSpan diff = EK1_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Keymin (EK01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP1.Subtract(currentETC);
-                    emb.AddField(" **Next Egg (EP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-                // 10:00:00 - 12:00:00 and ON
-                else if (DateTime.Compare(currentETC, EP1) > 0 & DateTime.Compare(currentETC, EP1_End) < 0)
-                {
-                    System.TimeSpan diff = EP1_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Kesapasa (EP01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-
-                    System.TimeSpan diff2 = EK2.Subtract(currentETC);
-                    emb.AddField("**Next Egg (EK02) :** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-                // 12:00:00 - 16:00:00 and OFF
-                else if (DateTime.Compare(currentETC, EP1_End) > 0 & DateTime.Compare(currentETC, EK2) < 0)
-                {
-                    System.TimeSpan diff = EK2.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-                }
-                // 16:00:00 - 18:00:00 and ON
-                else if (DateTime.Compare(currentETC, EK2) > 0 & DateTime.Compare(currentETC, EK2_End) < 0)
-                {
-                    System.TimeSpan diff = EK2_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Keymin (EK02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-
-                    System.TimeSpan diff2 = EP2.Subtract(currentETC);
-                    emb.AddField("**Next Egg (EP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-                // 18:00:00 - 20:00:00 and ON
-                else if (DateTime.Compare(currentETC, EP2) > 0 & DateTime.Compare(currentETC, EP2_End) < 0)
-                {
-                    System.TimeSpan diff = EP2_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Pasa (EP02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-
-                    System.TimeSpan diff2 = EK3.Subtract(currentETC);
-                    emb.AddField("**Next Egg (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 20:00:00 - 0:00:00 and OFF
-                else if (DateTime.Compare(currentETC, EP2_End) > 0 & DateTime.Compare(currentETC, EK3) < 0)
-                {
-                    System.TimeSpan diff = EK3.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-                }
-
-                await ReplyAsync("", false, emb);
-
-            } // End of Egg 
-            if (keymin)
+                NextSat = currentETC;
+            }
+            // If today is sunday, set nextSun equal to today
+            else if ((currentETC.DayOfWeek == DayOfWeek.Sunday))
             {
-                
-                var emb = new EmbedBuilder();
-                emb.WithTitle("**Upcoming Keymin Quest:**");
-                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
-                emb.Color = new Color(250, 20, 20);
-                // from 0:00:00 - 2:00:00 and ON
-                // If greater than EK3 and less than EK3_end.
-                if (DateTime.Compare(currentETC, EK3) > 0 & DateTime.Compare(currentETC, EK3_End) < 0)
-                {
-                    System.TimeSpan diff = EK3_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Egg and Keymin (EK03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
-                    emb.AddField("**Next Keymin (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 2-4 and OFF
-                else if (DateTime.Compare(currentETC, EK3_End) > 0 & DateTime.Compare(currentETC, KP1) < 0)
-                {
-                    System.TimeSpan diff = KP1.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // 4:00:00 - 6:00:00 and ON
-                else if (DateTime.Compare(currentETC, KP1) > 0 & DateTime.Compare(currentETC, KP1_End) < 0)
-                {
-                    System.TimeSpan diff = KP1_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Keymin and Pasa (KP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EK1.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // 6-8 and OFF
-                else if (DateTime.Compare(currentETC, KP1_End) > 0 & DateTime.Compare(currentETC, EK1) < 0)
-                {
-                    System.TimeSpan diff = EK1.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-
-                // 8:00:00 - 10:00:00 and ON
-                else if (DateTime.Compare(currentETC, EK1) > 0 & DateTime.Compare(currentETC, EK1_End) < 0)
-                {
-                    System.TimeSpan diff = EK1_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Keymin (EK01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = KP2.Subtract(currentETC);
-                    emb.AddField(" **Next Keymin (KP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-                // 10:00:00 - 12:00:00 and OFF
-                else if (DateTime.Compare(currentETC, EK1_End) > 0 & DateTime.Compare(currentETC, KP2) < 0)
-                {
-                    System.TimeSpan diff = KP2.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // 12-14 and ON
-                else if (DateTime.Compare(currentETC, KP2) > 0 & DateTime.Compare(currentETC, KP2_End) < 0)
-                {
-                    System.TimeSpan diff = KP2_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Keymin & Kesapasa (KP02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EK2.Subtract(currentETC);
-                    emb.AddField(" **Next Egg (EK02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-
-                // 14:00:00 - 16:00:00 and OFF
-                else if (DateTime.Compare(currentETC, KP2_End) > 0 & DateTime.Compare(currentETC, EK2) < 0)
-                {
-                    System.TimeSpan diff = EK2.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-                }
-                // 16:00:00 - 18:00:00 and ON
-                else if (DateTime.Compare(currentETC, EK2) > 0 & DateTime.Compare(currentETC, EK2_End) < 0)
-                {
-                    System.TimeSpan diff = EK2_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Egg and Keymin (EK02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-
-                    System.TimeSpan diff2 = KP3.Subtract(currentETC);
-                    emb.AddField("**Next Keymin (KP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-
-                // 18:00:00 - 20:00:00 and OFF
-                else if (DateTime.Compare(currentETC, EK2_End) > 0 & DateTime.Compare(currentETC, KP3) < 0)
-                {
-                    System.TimeSpan diff = KP3.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-                }
-
-                // 20:00:00 - 22:00:00 and ON
-                else if (DateTime.Compare(currentETC, KP3) > 0 & DateTime.Compare(currentETC, KP3_End) < 0)
-                {
-                    System.TimeSpan diff = KP3_End.Subtract(currentETC);
-                    emb.AddField("**Current : **Keymin and Pasa (KP03)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-
-                    System.TimeSpan diff2 = EK3.Subtract(currentETC);
-                    emb.AddField("**Next Keymin (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 22:00:00 - 0:00:00 and OFF
-                else if (DateTime.Compare(currentETC, KP3_End) > 0 & DateTime.Compare(currentETC, EK3) < 0)
-                {
-                    System.TimeSpan diff = EK3.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
-                }
-                await Task.Delay(1000);
-
-                await ReplyAsync("", false, emb);
-
-            } 
-            if (kesapasa)
+                NextSat = currentETC.AddDays(-1);
+                NextSun = currentETC;
+            }
+            else if ((currentETC.DayOfWeek == DayOfWeek.Monday))
             {
-               
-                var emb = new EmbedBuilder();
-                emb.WithTitle("**Upcoming Kesapasa Quest:**");
-                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
-                emb.Color = new Color(250, 20, 20);
-                // from 2-4  and ON
-                if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
-                {
-                    System.TimeSpan diff = EP3_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Egg and Kesapasa (EP03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 4-6
-                else if (DateTime.Compare(currentETC, KP1) > 0 & DateTime.Compare(currentETC, KP1_End) < 0)
-                {
-                    System.TimeSpan diff = KP1_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Keymin and Kesapasa (KP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = GP1.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (GP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-                // 6-8
-                else if (DateTime.Compare(currentETC, GP1) > 0 & DateTime.Compare(currentETC, GP1_End) < 0)
-                {
-                    System.TimeSpan diff = GP1_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Glorious Kesapasa (GP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP1.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (EP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 8-10 and OFF
-                else if (DateTime.Compare(currentETC, GP1_End) > 0 & DateTime.Compare(currentETC, EP1) < 0)
-                {
-                    System.TimeSpan diff = EP1.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // from 10-12  and ON
-                else if (DateTime.Compare(currentETC, EP1) > 0 & DateTime.Compare(currentETC, EP1_End) < 0)
-                {
-                    System.TimeSpan diff = EP1_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Egg and Kesapasa (EP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = KP2.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (KP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-
-                // from 12-14  and ON
-                else if (DateTime.Compare(currentETC, KP2) > 0 & DateTime.Compare(currentETC, KP2_End) < 0)
-                {
-                    System.TimeSpan diff = KP2_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Keymin and Kesapasa (KP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = GP2.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (GP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // from 14-16  and ON
-                else if (DateTime.Compare(currentETC, GP2) > 0 & DateTime.Compare(currentETC, GP2_End) < 0)
-                {
-                    System.TimeSpan diff = GP2_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Keymin and Kesapasa (KP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP2.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (EP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 16-18 and OFF
-                else if (DateTime.Compare(currentETC, GP2_End) > 0 & DateTime.Compare(currentETC, EP2) < 0)
-                {
-                    System.TimeSpan diff = EP2.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-
-                // from 18-20  and ON
-                else if (DateTime.Compare(currentETC, EP2) > 0 & DateTime.Compare(currentETC, EP2_End) < 0)
-                {
-                    System.TimeSpan diff = EP2_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Egg and Kesapasa (EP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = KP3.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (KP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // from 20-22  and ON
-                else if (DateTime.Compare(currentETC, KP3) > 0 & DateTime.Compare(currentETC, KP3_End) < 0)
-                {
-                    System.TimeSpan diff = KP3_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Keymin and Kesapasa (KP3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = GP3.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (GP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // from 22-0  and ON
-                else if (DateTime.Compare(currentETC, GP3) > 0 & DateTime.Compare(currentETC, GP3_End) < 0)
-                {
-                    System.TimeSpan diff = GP3_End.Subtract(currentETC);
-
-
-                    emb.AddField("**Current : **Glorious Kesapasa (GP3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
-                    emb.AddField("**Next Pasa (EP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
-                }
-
-                // 0-2 and OFF
-                else if (DateTime.Compare(currentETC, GP3_End) > 0 & DateTime.Compare(currentETC, EP3) < 0)
-                {
-                    System.TimeSpan diff = EP3.Subtract(currentETC);
-                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-                }
-                await Task.Delay(1000);
-
-                await ReplyAsync("", false, emb);
+                NextSat = currentETC.AddDays(-2);
+                NextSun = currentETC.AddDays(-1);
+                NextMon = currentETC;
             }
 
-            
-            DateTime NextSun = WhaleHelp.Next(currentETC, DayOfWeek.Sunday);
-            DateTime NextSat = WhaleHelp.Next(currentETC, DayOfWeek.Saturday);
-            DateTime NextMon = WhaleHelp.Next(currentETC, DayOfWeek.Monday);
-            
+
 
             DateTime SA1 = new DateTime(NextSat.Year, NextSat.Month, NextSat.Day, 13, 0, 0);
             DateTime SA1_End = SA1.AddMinutes(20);
@@ -482,14 +171,386 @@ namespace WhalesFargo
             DateTime SG4 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 23, 30, 0);
             DateTime SG4_End = SG4.AddMinutes(20);
 
+            /* Create Embeded Text Discord builder */
 
-            
+            var emb = new EmbedBuilder();
 
-            /* TODO: Need to add super augment */
-            if (augment)
+            /* Now we check which command was called */
+            if (egg)
             {
+
                 
-                var emb = new EmbedBuilder();
+                emb.WithTitle("**Upcoming Egg Quest:**");
+                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
+                emb.Color = new Color(250, 20, 20);
+                // from 0:00:00 - 2:00:00 and ON
+                // If greater than EK3 and less than EK3_end.
+                if (DateTime.Compare(currentETC, EK3) > 0 & DateTime.Compare(currentETC, EK3_End) < 0)
+                {
+                    System.TimeSpan diff = EK3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Egg and Keymin (EK03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+
+                    emb.AddField("**Next Egg (EP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 2-4 and ON
+                else if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
+                {
+                    System.TimeSpan diff = EP3_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Kesapasa (EP03)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EK1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Egg (EK01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 4:00:00 - 8:00:00 and OFF
+                else if (DateTime.Compare(currentETC, EP3_End) > 0 & DateTime.Compare(currentETC, EK1) < 0)
+                {
+                    System.TimeSpan diff = EK1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // 8:00:00 - 10:00:00 and ON
+                else if (DateTime.Compare(currentETC, EK1) > 0 & DateTime.Compare(currentETC, EK1_End) < 0)
+                {
+                    System.TimeSpan diff = EK1_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Keymin (EK01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField(" **Next Egg (EP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // 10:00:00 - 12:00:00 and ON
+                else if (DateTime.Compare(currentETC, EP1) > 0 & DateTime.Compare(currentETC, EP1_End) < 0)
+                {
+                    System.TimeSpan diff = EP1_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Kesapasa (EP01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+
+                    System.TimeSpan diff2 = EK2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Egg (EK02) :** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // 12:00:00 - 16:00:00 and OFF
+                else if (DateTime.Compare(currentETC, EP1_End) > 0 & DateTime.Compare(currentETC, EK2) < 0)
+                {
+                    System.TimeSpan diff = EK2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+                }
+                // 16:00:00 - 18:00:00 and ON
+                else if (DateTime.Compare(currentETC, EK2) > 0 & DateTime.Compare(currentETC, EK2_End) < 0)
+                {
+                    System.TimeSpan diff = EK2_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Keymin (EK02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+
+                    System.TimeSpan diff2 = EP2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Egg (EP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // 18:00:00 - 20:00:00 and ON
+                else if (DateTime.Compare(currentETC, EP2) > 0 & DateTime.Compare(currentETC, EP2_End) < 0)
+                {
+                    System.TimeSpan diff = EP2_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Pasa (EP02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+
+                    System.TimeSpan diff2 = EK3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+
+                    
+
+                   
+                    emb.AddField("**Next Egg (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 20:00:00 - 0:00:00 and OFF
+                else if (DateTime.Compare(currentETC, EP2_End) > 0 & DateTime.Compare(currentETC, EK3) < 0)
+                {
+                    System.TimeSpan diff = EK3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+                }
+
+
+            } // End of Egg 
+            else if (keymin)
+            {
+
+                
+                emb.WithTitle("**Upcoming Keymin Quest:**");
+                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
+                emb.Color = new Color(250, 20, 20);
+                // from 0:00:00 - 2:00:00 and ON
+                // If greater than EK3 and less than EK3_end.
+                if (DateTime.Compare(currentETC, EK3) > 0 & DateTime.Compare(currentETC, EK3_End) < 0)
+                {
+                    System.TimeSpan diff = EK3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Egg and Keymin (EK03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Keymin (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 2-4 and OFF
+                else if (DateTime.Compare(currentETC, EK3_End) > 0 & DateTime.Compare(currentETC, KP1) < 0)
+                {
+                    System.TimeSpan diff = KP1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // 4:00:00 - 6:00:00 and ON
+                else if (DateTime.Compare(currentETC, KP1) > 0 & DateTime.Compare(currentETC, KP1_End) < 0)
+                {
+                    System.TimeSpan diff = KP1_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Keymin and Pasa (KP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EK1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // 6-8 and OFF
+                else if (DateTime.Compare(currentETC, KP1_End) > 0 & DateTime.Compare(currentETC, EK1) < 0)
+                {
+                    System.TimeSpan diff = EK1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+
+                // 8:00:00 - 10:00:00 and ON
+                else if (DateTime.Compare(currentETC, EK1) > 0 & DateTime.Compare(currentETC, EK1_End) < 0)
+                {
+                    System.TimeSpan diff = EK1_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Keymin (EK01)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = KP2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField(" **Next Keymin (KP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // 10:00:00 - 12:00:00 and OFF
+                else if (DateTime.Compare(currentETC, EK1_End) > 0 & DateTime.Compare(currentETC, KP2) < 0)
+                {
+                    System.TimeSpan diff = KP2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // 12-14 and ON
+                else if (DateTime.Compare(currentETC, KP2) > 0 & DateTime.Compare(currentETC, KP2_End) < 0)
+                {
+                    System.TimeSpan diff = KP2_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Keymin & Kesapasa (KP02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EK2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField(" **Next Egg (EK02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+
+                // 14:00:00 - 16:00:00 and OFF
+                else if (DateTime.Compare(currentETC, KP2_End) > 0 & DateTime.Compare(currentETC, EK2) < 0)
+                {
+                    System.TimeSpan diff = EK2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+                }
+                // 16:00:00 - 18:00:00 and ON
+                else if (DateTime.Compare(currentETC, EK2) > 0 & DateTime.Compare(currentETC, EK2_End) < 0)
+                {
+                    System.TimeSpan diff = EK2_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Egg and Keymin (EK02)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+
+                    System.TimeSpan diff2 = KP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Keymin (KP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+
+                // 18:00:00 - 20:00:00 and OFF
+                else if (DateTime.Compare(currentETC, EK2_End) > 0 & DateTime.Compare(currentETC, KP3) < 0)
+                {
+                    System.TimeSpan diff = KP3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+                }
+
+                // 20:00:00 - 22:00:00 and ON
+                else if (DateTime.Compare(currentETC, KP3) > 0 & DateTime.Compare(currentETC, KP3_End) < 0)
+                {
+                    System.TimeSpan diff = KP3_End.Subtract(currentETC);
+                    emb.AddField("**Current : **Keymin and Pasa (KP03)", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+
+                    System.TimeSpan diff2 = EK3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Keymin (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 22:00:00 - 0:00:00 and OFF
+                else if (DateTime.Compare(currentETC, KP3_End) > 0 & DateTime.Compare(currentETC, EK3) < 0)
+                {
+                    System.TimeSpan diff = EK3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
+                }
+                
+
+               
+
+            }
+            else if (kesapasa)
+            {
+
+                
+                emb.WithTitle("**Upcoming Kesapasa Quest:**");
+                emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
+                emb.Color = new Color(250, 20, 20);
+                // from 2-4  and ON
+                if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
+                {
+                    System.TimeSpan diff = EP3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Egg and Kesapasa (EP03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 4-6
+                else if (DateTime.Compare(currentETC, KP1) > 0 & DateTime.Compare(currentETC, KP1_End) < 0)
+                {
+                    System.TimeSpan diff = KP1_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Keymin and Kesapasa (KP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = GP1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (GP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+                // 6-8
+                else if (DateTime.Compare(currentETC, GP1) > 0 & DateTime.Compare(currentETC, GP1_End) < 0)
+                {
+                    System.TimeSpan diff = GP1_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Glorious Kesapasa (GP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (EP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 8-10 and OFF
+                else if (DateTime.Compare(currentETC, GP1_End) > 0 & DateTime.Compare(currentETC, EP1) < 0)
+                {
+                    System.TimeSpan diff = EP1.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // from 10-12  and ON
+                else if (DateTime.Compare(currentETC, EP1) > 0 & DateTime.Compare(currentETC, EP1_End) < 0)
+                {
+                    System.TimeSpan diff = EP1_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Egg and Kesapasa (EP01)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = KP2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (KP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+
+                // from 12-14  and ON
+                else if (DateTime.Compare(currentETC, KP2) > 0 & DateTime.Compare(currentETC, KP2_End) < 0)
+                {
+                    System.TimeSpan diff = KP2_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Keymin and Kesapasa (KP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = GP2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (GP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // from 14-16  and ON
+                else if (DateTime.Compare(currentETC, GP2) > 0 & DateTime.Compare(currentETC, GP2_End) < 0)
+                {
+                    System.TimeSpan diff = GP2_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Keymin and Kesapasa (KP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (EP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 16-18 and OFF
+                else if (DateTime.Compare(currentETC, GP2_End) > 0 & DateTime.Compare(currentETC, EP2) < 0)
+                {
+                    System.TimeSpan diff = EP2.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+
+                // from 18-20  and ON
+                else if (DateTime.Compare(currentETC, EP2) > 0 & DateTime.Compare(currentETC, EP2_End) < 0)
+                {
+                    System.TimeSpan diff = EP2_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Egg and Kesapasa (EP2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = KP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (KP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // from 20-22  and ON
+                else if (DateTime.Compare(currentETC, KP3) > 0 & DateTime.Compare(currentETC, KP3_End) < 0)
+                {
+                    System.TimeSpan diff = KP3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Keymin and Kesapasa (KP3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = GP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (GP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // from 22-0  and ON
+                else if (DateTime.Compare(currentETC, GP3) > 0 & DateTime.Compare(currentETC, GP3_End) < 0)
+                {
+                    System.TimeSpan diff = GP3_End.Subtract(currentETC);
+
+
+                    emb.AddField("**Current : **Glorious Kesapasa (GP3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    emb.AddField("**Next Pasa (EP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
+                }
+
+                // 0-2 and OFF
+                else if (DateTime.Compare(currentETC, GP3_End) > 0 & DateTime.Compare(currentETC, EP3) < 0)
+                {
+                    System.TimeSpan diff = EP3.Subtract(currentETC);
+                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+                }
+                
+
+                
+            }
+            else if (augment)
+            {
+
+               
                 emb.WithTitle("**Upcoming Augment Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
                 emb.Color = new Color(250, 20, 20);
@@ -502,6 +563,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Augment (AUG1)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = AUG2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -521,6 +583,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Augment (AUG2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = AUG3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -541,6 +604,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Augment (AUG3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = AUG4.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -560,6 +624,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Augment (AUG3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = AUG1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -570,20 +635,17 @@ namespace WhalesFargo
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
                 emb.AddField("Super Augment", "If you are looking for super augment, do !next super", true);
-                await Task.Delay(1000);
-                await ReplyAsync("", false, emb);
-            }
-
-            
-            if (gold)
-            {
                 
-                var emb = new EmbedBuilder();
+            }
+            else if (gold)
+            {
+
+                
                 emb.WithTitle("**Upcoming Gold Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
                 emb.Color = new Color(250, 250, 20);
-                 // Off between 1st
-                if (DateTime.Compare(currentETC, SG1) < 0)
+                // Off between 1st
+                if (DateTime.Compare(currentETC, SG1) < 0 )
                 {
                     System.TimeSpan diff = SG1.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"dd") + " day(s) " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
@@ -597,6 +659,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Gold (SG1)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SG2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SG2 (SG2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
                 // Off between 1st
@@ -614,6 +677,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Gold (SG2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SG3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SG3 (SG3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -632,6 +696,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Gold (SG3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SG4.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SG4 (SG4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -650,24 +715,24 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Gold (SG4)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SG1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SG1 (SG1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
                 // Off between 1st
-                else if (DateTime.Compare(currentETC, SG4_End) > 0 )
+                else if (DateTime.Compare(currentETC, SG4_End) > 0)
                 {
                     System.TimeSpan diff = SG1.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
 
-                await Task.Delay(1000);
-                await ReplyAsync("", false, emb);
+              
 
             }
-            if (super)
+            else if (super)
             {
 
-                var emb = new EmbedBuilder();
+                
                 emb.WithTitle("**Upcoming Super Augment Quest:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
                 emb.Color = new Color(250, 250, 20);
@@ -687,6 +752,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Super Augment (SA1)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SA2.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SA2 (SA2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
                 // Off between 1st
@@ -704,6 +770,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Super Augment (SA2)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SA3.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SA3 (SA3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -722,6 +789,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Super Augment (SA3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SA4.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SA4 (SA4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -740,6 +808,7 @@ namespace WhalesFargo
                     emb.AddField("**Current : **Super Augment (SA4)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = SA1.Subtract(currentETC);
+                    diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next SA1 (SA1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -749,24 +818,27 @@ namespace WhalesFargo
                     System.TimeSpan diff = SA1.Subtract(currentETC);
                     emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-                await Task.Delay(1000);
-                await ReplyAsync("", false, emb);
+               
 
             }
-            if (!egg && !keymin && !augment && !gold && !super)
+            else if (!egg && !keymin && !augment && !gold && !super)
             {
-                
-                var emb = new EmbedBuilder();
+
+               
                 emb.WithTitle("*Error:**");
                 emb.WithDescription("Requested by :" + Context.Message.Author.Mention);
                 emb.Color = new Color(250, 20, 20);
                 emb.AddField("Error. Invalid argument.", "Please type !help for assistance.", true);
-                await ReplyAsync("", false, emb);
-               
+                
+
             }
+
+            /* Then we send the information  */
+            await Task.Delay(1000);
+            await ReplyAsync("", false, emb);
         }
 
-        /* clear messages */
+        /* Clears X amount of messages from the current discord channel  */
         [Command("Clear")]
         public async Task clear([Remainder] int Delete = 0)
         {
@@ -798,29 +870,20 @@ namespace WhalesFargo
             await Context.Channel.SendMessageAsync($"`{Context.User.Username} deleted {Amount} messages`");
         }
 
-        /* Add I am */
-
-
-
-        /* Turn off their chat if they spam. */
+        /* This mutes a user based on their roles. They will be added to a role where they cannot send messages.*/
         [Command("mute")]
         [Summary("Turn on Mute")]
         [Alias("mute")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [RequireUserPermission(GuildPermission.MuteMembers)]
-      
+
         public async Task Mute([Remainder] IGuildUser user = null)
         {
-
-
-
             Console.WriteLine(user);
             var role = Context.Guild.Roles.FirstOrDefault(x => x.Name == "mute");
             Console.WriteLine("The mute role is : " + role);
             await (user as IGuildUser).AddRoleAsync(role);
             await ReplyAsync(user.Mention + " has been muted.");
-
-           
         }
 
         /* Turn off their chat if they spam. */
@@ -832,9 +895,6 @@ namespace WhalesFargo
 
         public async Task Unmute([Remainder] IGuildUser user = null)
         {
-
-
-
             Console.WriteLine(user);
             var role = Context.Guild.Roles.FirstOrDefault(x => x.Name == "mute");
             Console.WriteLine("The mute role is : " + role);
@@ -844,52 +904,9 @@ namespace WhalesFargo
 
         }
 
-
-
-
-        /* Remind Colo On */
-        [Command("colo")]
-        [Summary("Turn on Colo Reminders")]
-        [Alias("colo", "coliremind", "coli")]
-
-        public async Task Colo()
-        {
-                var now = DateTime.Now;
-                // 5am 
-                var colo_time_1 = new DateTime(now.Year, now.Month, now.Day, 8, 0, 0);
-                var colo_time_2 = new DateTime(now.Year, now.Month, now.Day, 15, 0, 0);
-                var colo_time_3 = new DateTime(now.Year, now.Month, now.Day, 18, 30, 0);
-                var colo_time_4 = new DateTime(now.Year, now.Month, now.Day, 23, 34, 0);
-
-                /* Establish the UTC Timezone */
-                TimeZoneInfo eastInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-
-                /* Get current time, and next time with 5 minute interval */
-                DateTime currentETC = DateTime.UtcNow;
-                DateTime easternTime = TimeZoneInfo.ConvertTimeFromUtc(currentETC, eastInfo);
-                DateTime currentETC5 = easternTime.AddMinutes(5);
-                if (
-                      // if current, ex 4:55 and 5:00 and 5:00 and 5:00 , so exactly 5 minutes before
-                      (DateTime.Compare(currentETC, colo_time_1) < 0 & DateTime.Compare(currentETC5, colo_time_1) == 0) ||
-                      (DateTime.Compare(currentETC, colo_time_2) < 0 & DateTime.Compare(currentETC5, colo_time_2) == 0) ||
-                      (DateTime.Compare(currentETC, colo_time_3) < 0 & DateTime.Compare(currentETC5, colo_time_3) == 0) ||
-                      (DateTime.Compare(currentETC, colo_time_4) < 0 & DateTime.Compare(currentETC5, colo_time_4) == 0))
-                {
-                    //If we get a valid time, we return one.
-                    await Context.Channel.SendMessageAsync("@Everyone, Coliseum will begin shortly.");
-                }
-                else
-                {
-                    // If the time is not valid, then return a 0.
-                    Console.WriteLine("Colisium not up.");
-
-                }
-                await Task.Delay(10000);
-            
-        }
-
+        /* This activates a response detection commmand upon a certain user talking. The bot will respond with various sassy comments */
         [Command("rogue")]
-        [Summary("turn on and off Rogue")]
+        [Summary("Will respond to a user everytime they speak")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [Alias("rogue")]
         public async Task Rogue()
@@ -900,22 +917,161 @@ namespace WhalesFargo
             {
                 Console.WriteLine(rogue);
             }
-                // Was 0 before, so off
-                if (rogue == 0)
-                {
-                    MyGlobals.RTotal = 1;
-                    await Task.Delay(1000);
-                    await ReplyAsync(Context.Message.Author.Mention + " Rogue has been activated.");
-                }
-                //It was on before, so now 0
-                if (rogue == 1)
-                {
-                    MyGlobals.RTotal = 0;
-                    await Task.Delay(1000);
-                    await ReplyAsync(Context.Message.Author.Mention + " Rogue has been deactivated.");
-                }
+            // Was 0 before, so off
+            if (rogue == 0)
+            {
+                MyGlobals.RTotal = 1;
+                await Task.Delay(1000);
+                await ReplyAsync("`" + Context.Message.Author.Mention + " Rogue has been activated.`");
+            }
+            //It was on before, so now 0
+            if (rogue == 1)
+            {
+                MyGlobals.RTotal = 0;
+                await Task.Delay(1000);
+                await ReplyAsync("`" + Context.Message.Author.Mention + " Rogue has been deactivated.`");
+            }
+
+        }
+
+        /* This activates a response detection commmand upon certain phrases being said. The bot will respond with various sassy comments */
+        [Command("ChatRespond")]
+        [Summary("Turns on and off chat responses.")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Alias("sass")]
+        public async Task ChatRespond()
+        {
+            var respond = MyGlobals.BotScan;
+            var GuildUser = await Context.Guild.GetUserAsync(Context.User.Id);
+            if (MyGlobals.Debug)
+            {
+                Console.WriteLine(respond);
+            }
+            // Was 0 before, so off
+            if (respond == 0)
+            {
+                MyGlobals.BotScan = 1;
+                await Task.Delay(1000);
+                await ReplyAsync("`" + Context.Message.Author.Mention + " Bot Response has been activated.`");
+            }
+            //It was on before, so now 0
+            if (respond == 1)
+            {
+                MyGlobals.BotScan = 0;
+                await Task.Delay(1000);
+                await ReplyAsync("`" + Context.Message.Author.Mention + " Bot Response has been deactivated.`");
+            }
+
+        }
+
+
+        [Command("botStatus")]
+        [Summary("Sets the bot's status")]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
+        [Alias("botstatus")]
+
+        public async Task SetBotStatus([Remainder] string botStatus)
+        {
+         await (Context.Client as DiscordSocketClient).SetGameAsync(botStatus);
+             
+               
+         
+        }
+
+   
+
+        
+
+        [Command("join", RunMode = RunMode.Async)]
+        public async Task MusicJoin()
+        {
+            IGuild guild = Context.Guild;
+            IVoiceChannel BotVoiceChannel = (Context.User as IVoiceState).VoiceChannel;
+
+            MyGlobals.BotAudioClient = await BotVoiceChannel.ConnectAsync();
+
+            if (MyGlobals.ConnectedChannels.TryAdd(guild.Id, MyGlobals.BotAudioClient))
+            {
+                Console.WriteLine("Connected to voice channel.");
+            }
+
+
+            }
+        [Command("leave", RunMode = RunMode.Async)]
+        public async Task MusicLeave()
+        {
+            IGuild guild = Context.Guild;
+            IVoiceChannel BotVoiceChannel = (Context.User as IVoiceState).VoiceChannel;
+
+            if (MyGlobals.ConnectedChannels.TryRemove(guild.Id, out MyGlobals.BotAudioClient))
+            {
+                await MyGlobals.BotAudioClient.StopAsync();
+                //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
+                Console.WriteLine("Left voice channel.");
+            }
+
             
+
+
+
         }
+        private AudioOutStream stream;
+        private int blockSize = 2880;
+        private byte[] buffer = new byte[2880];
+        private int byteCount = 0;
+
+        [Command("volume", RunMode = RunMode.Async)]
+        public async Task MusicVolume(int volNum)
+        {
+            MyGlobals.volume = volNum;
+            await stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, MyGlobals.volume), 0, byteCount);
+            
+            await stream.FlushAsync().ConfigureAwait(false);
+
+
+
+
         }
+        
+
+        [Command("play", RunMode = RunMode.Async)]
+        public async Task MusicPlay(string url)
+        {
+            IGuild guild = Context.Guild;
+            IMessageChannel talkChannel = Context.Channel;
+           
+
+            if (MyGlobals.ConnectedChannels.TryGetValue(guild.Id, out MyGlobals.BotAudioClient))
+            {
+
+                await ReplyAsync("Now Playing:" + url + " Requested by: " + Context.User.Mention);         
+               
+                var output = WhaleHelp.CreateStream(url).StandardOutput.BaseStream;
+
+                byteCount = await output.ReadAsync(buffer, 0, blockSize);
+
+                stream = MyGlobals.BotAudioClient.CreatePCMStream(AudioApplication.Music, 128 * 1024);
+                
+
+                await stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, MyGlobals.volume), 0, byteCount);
+                await output.CopyToAsync(stream);
+                await stream.FlushAsync().ConfigureAwait(false);
+            }
+                
+        }
+
+        [Command("stop", RunMode = RunMode.Async)]
+        public async Task MusicStop()
+        {
+            await MyGlobals.BotAudioClient.StopAsync();
+            return;
+        }
+
+
+
+
     }
+    }
+
+    
 

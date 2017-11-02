@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 
 namespace WhalesFargo
 {
     public static class WhaleHelp
     {
+        /* Helper function to obtain the next DayofWeek from the current */
         public static DateTime Next(this DateTime from, DayOfWeek dayOfWeek)
         {
             int start = (int)from.DayOfWeek;
@@ -21,10 +24,10 @@ namespace WhalesFargo
             return from.AddDays(target - start);
         }
 
-        /* The function checks to see if the current time is 5 mintues before COLO.
-  * If it is, it returns true.
-  * Otherwise, it returns false
-  */
+        /* The function checks to see if the current time is 5 mintues before Guild Battle and Colo.
+        *  If it is, it returns a string containing which event is about to occur.
+        *  Otherwise, it returns none.
+        */
         public static string TimeIsReady()
         {
             DateTime currentUTC = DateTime.UtcNow;
@@ -55,8 +58,8 @@ namespace WhalesFargo
             DateTime GuildBattle_C = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 1, 55, 0);
             DateTime GuildBattle_C_End = GuildBattle_C.AddMinutes(5);
 
-
-            if (DateTime.Compare(currentUTC, Colo1) > 0 & DateTime.Compare(currentUTC, Colo1_End) < 0)
+            // Disable Colo for now
+           /* if (DateTime.Compare(currentUTC, Colo1) > 0 & DateTime.Compare(currentUTC, Colo1_End) < 0)
             {
                 return "colo";
             }
@@ -71,9 +74,9 @@ namespace WhalesFargo
             else if (DateTime.Compare(currentUTC, Colo4) > 0 & DateTime.Compare(currentUTC, Colo4_End) < 0)
             {
                 return "colo";
-            }
+            } */
 
-            else if (DateTime.Compare(currentUTC, GuildBattle_A) > 0 & DateTime.Compare(currentUTC, GuildBattle_A_End) < 0)
+            if (DateTime.Compare(currentUTC, GuildBattle_A) > 0 & DateTime.Compare(currentUTC, GuildBattle_A_End) < 0)
             {
                 return "gb";
             }
@@ -90,6 +93,106 @@ namespace WhalesFargo
                 return "none";
             }
 
+        }
+
+        public static string getTrollUserMessage()
+        {
+            Random rnd = new Random();
+                int rannum = rnd.Next(1, 5);
+                if (rannum == 1)
+                    {
+                        return "Rogue, I think you're cute :D";
+                    }
+                else if (rannum == 2)
+                    {
+                 return "Rogue's the cute one :wink:";
+                    }
+                else if (rannum == 3)
+                {
+                return "Reon is a crayon";
+                }
+                else if (rannum == 4)
+                {
+                return "Cute sleepy rogue";
+                }
+                else if (rannum == 5){
+                return "Noob Lancer";
+                }
+            else
+            {
+                return "none";
+            }
+           
+        }
+
+        public static TimeSpan CheckNextDay(TimeSpan current)
+        {
+            if (TimeSpan.Compare(current, new TimeSpan(0, 0, 0)) == -1)
+            {
+                TimeSpan toReturn = current.Add(new TimeSpan(1, 0, 0, 0));
+                return toReturn;
+            }
+            else
+            {
+                return current;
+            }
+            
+        }
+
+        public static bool IsRunning(this Process process)
+        {
+            try { Process.GetProcessById(process.Id); }
+            catch (InvalidOperationException) { return false; }
+            catch (ArgumentException) { return false; }
+            return true;
+        }
+
+        public static Process CreateStream(string url)
+        {
+            Process currentsong = new Process();
+
+            currentsong.StartInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/C youtube-dl.exe -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+
+            
+            currentsong.Start();
+            return currentsong;
+        }
+
+
+        public static byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
+        {
+            Contract.Requires(audioSamples != null);
+            Contract.Requires(audioSamples.Length % 2 == 0);
+            Contract.Requires(volume >= 0f && volume <= 1f);
+
+            var output = new byte[audioSamples.Length];
+            if (Math.Abs(volume - 1f) < 0.0001f)
+            {
+                Buffer.BlockCopy(audioSamples, 0, output, 0, audioSamples.Length);
+                return output;
+            }
+
+            // 16-bit precision for the multiplication
+            int volumeFixed = (int)Math.Round(volume * 65536d);
+
+            for (var i = 0; i < output.Length; i += 2)
+            {
+                // The cast to short is necessary to get a sign-extending conversion
+                int sample = (short)((audioSamples[i + 1] << 8) | audioSamples[i]);
+                int processed = (sample * volumeFixed) >> 16;
+
+                output[i] = (byte)processed;
+                output[i + 1] = (byte)(processed >> 8);
+            }
+
+            return output;
         }
     }
 }
