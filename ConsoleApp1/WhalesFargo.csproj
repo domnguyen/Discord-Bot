@@ -172,6 +172,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioModule.cs" />
+    <Compile Include="AudioService.cs" />
     <Compile Include="WhaleHelp.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Program.cs" />

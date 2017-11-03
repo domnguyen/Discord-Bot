@@ -159,7 +159,6 @@ namespace WhalesFargo
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             };
-
             
             currentsong.Start();
             return currentsong;

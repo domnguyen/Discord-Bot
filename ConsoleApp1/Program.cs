@@ -42,7 +42,7 @@ namespace WhalesFargo
         // Private variables.
         private DiscordSocketClient m_Client; // Discord client.
         private CommandService m_Commands;
-        private IServiceProvider m_Services;
+        private IServiceProvider m_Services; // TODO: Probably need to change this to include more services.
         private string m_Token = ""; // Bot Token. Do not share with other people
 
        /**
@@ -67,17 +67,11 @@ namespace WhalesFargo
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
-            m_Services = new ServiceCollection().BuildServiceProvider();
+            m_Services = new ServiceCollection().BuildServiceProvider(); //TODO: Probably need to change this to include more services.
 
             await InstallCommands();
             await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
             await m_Client.StartAsync();
-
-            // Send Messages, and userJoined to appropriate places
-            m_Client.Ready += SetBotStatus;
-            m_Client.UserJoined += UserJoined;
-            m_Client.UserLeft += UserLeft;
-            m_Client.Log += Log;
 
             // Important for the publishing of GVG announcements!
             // Interval of 5 minutes
@@ -98,8 +92,15 @@ namespace WhalesFargo
          */
         public async Task InstallCommands()
         {
+            // Send Messages, and userJoined to appropriate places
+            m_Client.Ready += SetBotStatus;
+            m_Client.UserJoined += UserJoined;
+            m_Client.UserLeft += UserLeft;
+            m_Client.Log += Log;
+
             // Hook the MessageReceived Event into our Command Handler
             m_Client.MessageReceived += HandleCommand;
+
             // Discover all of the commands in this assembly and load them.
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }

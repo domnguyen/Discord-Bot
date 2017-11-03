@@ -1014,6 +1014,7 @@ namespace WhalesFargo
 
 
         }
+
         private AudioOutStream stream;
         private int blockSize = 2880;
         private byte[] buffer = new byte[2880];
