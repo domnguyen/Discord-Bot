@@ -67,11 +67,12 @@ namespace WhalesFargo
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
-            m_Services = new ServiceCollection().BuildServiceProvider(); //TODO: Probably need to change this to include more services.
+            m_Services = InstallServices(); // We install services by adding it to a service collection.
 
-            await InstallCommands();
+            // Startup the client.
             await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
             await m_Client.StartAsync();
+            await InstallCommands();
 
             // Important for the publishing of GVG announcements!
             // Interval of 5 minutes
@@ -86,13 +87,31 @@ namespace WhalesFargo
         }
 
         /**
+         * InstallServices
+         * This is where you install all necessary services for our bot.
+         */
+        private IServiceProvider InstallServices()
+        {
+            ServiceCollection services = new ServiceCollection();
+
+            // Add all additional services here.
+            services.AddSingleton<AudioService>(); // AudioModule : AudioService
+
+            // Return the service provider.
+            return services.BuildServiceProvider();
+        }
+
+        /**
          * InstallCommands
          * This is where you install all possible commands for our bot.
          * Essentially, it will take the Messages Received and send it into our Handler 
          */
         public async Task InstallCommands()
         {
-            // Send Messages, and userJoined to appropriate places
+            // Before we install commands, we should check if everything was set up properly. Check if logged in.
+            if (m_Client.LoginState != (LoginState.LoggedIn)) return;
+
+            // Add tasks to send Messages, and userJoined to appropriate places
             m_Client.Ready += SetBotStatus;
             m_Client.UserJoined += UserJoined;
             m_Client.UserLeft += UserLeft;
@@ -108,6 +127,7 @@ namespace WhalesFargo
        /**
         * HandleCommand
         * Handles commands with prefixes '!' and mention prefix.
+        * Others get passed to TrolRogue and CheckSenpai
         * @param messageParam   The command parsed as a SocketMessage.
         */
         public async Task HandleCommand(SocketMessage messageParam)

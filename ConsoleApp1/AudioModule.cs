@@ -32,6 +32,7 @@ namespace WhalesFargo
         public async Task JoinVoiceChannel()
         {
             await m_Service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+            Console.WriteLine("Connected to voice channel.");
         }
 
         // Remember to add preconditions to your commands,
@@ -41,6 +42,7 @@ namespace WhalesFargo
         public async Task LeaveVoiceChannel()
         {
             await m_Service.LeaveAudio(Context.Guild);
+            Console.WriteLine("Left voice channel.");
         }
 
         [Command("playvoice", RunMode = RunMode.Async)]
@@ -49,11 +51,6 @@ namespace WhalesFargo
            await m_Service.SendAudioAsync(Context.Guild, Context.Channel, song);
         }
 
-        [Command("pausevoice", RunMode = RunMode.Async)]
-        public async Task PauseVoiceChannel()
-        {
-      
-        }
-
+        // Add more commands here.
     }
 }
