@@ -53,6 +53,30 @@ namespace WhalesFargo
            Console.WriteLine("Playing song: " + song);
         }
 
+        [Command("pause", RunMode = RunMode.Async)]
+        public async Task PauseVoiceChannel()
+        {
+            m_Service.PauseAudio();
+            Console.WriteLine("Pausing voice.");
+            await Task.Delay(0);
+        }
+
+        [Command("resume", RunMode = RunMode.Async)]
+        public async Task ResumeVoiceChannel()
+        {
+            m_Service.ResumeAudio();
+            Console.WriteLine("Resuming voice.");
+            await Task.Delay(0);
+        }
+
+        [Command("stop", RunMode = RunMode.Async)]
+        public async Task StopVoiceChannel()
+        {
+            m_Service.StopAudio();
+            Console.WriteLine("Stopping voice.");
+            await Task.Delay(0);
+        }
+
         [Command("volume")]
         public async Task VolumeVoiceChannel([Remainder] float volume)
         {

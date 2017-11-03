@@ -23,6 +23,7 @@ namespace WhalesFargo
 
         Process m_Process;
         Stream m_Stream;
+        bool m_IsPlaying = false;
         float m_Volume = 1.0f;
 
         public void Init(IAudioClient client, ConcurrentDictionary<ulong, IAudioClient> connectedChannels)
@@ -110,6 +111,8 @@ namespace WhalesFargo
 
                 await Task.Delay(4000); // We should wait for ffmpeg to buffer some of the audio first.
 
+                m_IsPlaying = true;
+
                 // While true, we stream the audio in chunks.
                 while (true)
                 {
@@ -117,8 +120,10 @@ namespace WhalesFargo
                     if (m_Process.HasExited)
                         break;
 
+                    while (!m_IsPlaying) await Task.Delay(2000);
+
                     // Read the stream in chunks.
-                    int blockSize = 2880;
+                    int blockSize = 3840;
                     byte[] buffer = new byte[blockSize];
                     int byteCount;
                     byteCount = await m_Process.StandardOutput.BaseStream.ReadAsync(buffer, 0, blockSize);
@@ -132,10 +137,62 @@ namespace WhalesFargo
                 }
                 await m_Stream.FlushAsync();
 
+
                 // Reset values.
+                await Task.Delay(500);
+                if (isNetwork && File.Exists(path))
+                    File.Delete(path);
                 m_Process = null;
                 m_Stream = null;
+                m_IsPlaying = false;
             }
+        }
+
+        /**
+         *  PauseAudio
+         *  Stops the stream if it's playing.
+         */
+        public void PauseAudio()
+        {
+            if (m_Process == null)
+            {
+                Console.WriteLine("There's no audio currently playing.");
+                return;
+            }
+
+            if (m_IsPlaying)
+                m_IsPlaying = false;
+        }
+
+        /**
+         *  ResumeAudio
+         *  Stops the stream if it's playing.
+         */
+        public void ResumeAudio()
+        {
+            if (m_Process == null)
+            {
+                Console.WriteLine("There's no audio currently playing.");
+                return;
+            }
+
+            if (!m_IsPlaying)
+                m_IsPlaying = true;
+        }
+
+        /**
+         *  StopAudio
+         *  Stops the stream if it's playing.
+         */
+        public void StopAudio()
+        {
+            if (m_Process == null)
+            {
+                Console.WriteLine("There's no audio currently playing.");
+                return;
+            }
+
+            m_Process.Kill();
         }
 
         /**
