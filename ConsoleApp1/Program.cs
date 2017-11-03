@@ -41,10 +41,10 @@ namespace WhalesFargo
 
         // Bot Token. Do not share with other people
         // Developemnt token
-        string token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
+       // string token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
         
          // Live Token
-        // string token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
+         string token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
 
