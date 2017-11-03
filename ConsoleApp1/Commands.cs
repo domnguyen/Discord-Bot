@@ -855,7 +855,7 @@ namespace WhalesFargo
                 await Context.Channel.SendMessageAsync("`You do not have enough permissions to manage messages`");
                 return;
             }
-            if (Delete == null)
+            if (Delete == 0) // Check if Delete is 0, int cannot be null.
             {
                 await Context.Channel.SendMessageAsync("`You need to specify the amount | !clear (amount) | Replace (amount) with anything`");
             }
@@ -876,7 +876,6 @@ namespace WhalesFargo
         [Alias("mute")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [RequireUserPermission(GuildPermission.MuteMembers)]
-
         public async Task Mute([Remainder] IGuildUser user = null)
         {
             Console.WriteLine(user);
