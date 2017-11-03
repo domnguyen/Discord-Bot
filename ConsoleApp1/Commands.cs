@@ -968,110 +968,13 @@ namespace WhalesFargo
         [Summary("Sets the bot's status")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         [Alias("botstatus")]
-
         public async Task SetBotStatus([Remainder] string botStatus)
         {
-         await (Context.Client as DiscordSocketClient).SetGameAsync(botStatus);
-             
-               
-         
+            await (Context.Client as DiscordSocketClient).SetGameAsync(botStatus);
         }
-
-   
-
-        
-
-        [Command("join", RunMode = RunMode.Async)]
-        public async Task MusicJoin()
-        {
-            IGuild guild = Context.Guild;
-            IVoiceChannel BotVoiceChannel = (Context.User as IVoiceState).VoiceChannel;
-
-            MyGlobals.BotAudioClient = await BotVoiceChannel.ConnectAsync();
-
-            if (MyGlobals.ConnectedChannels.TryAdd(guild.Id, MyGlobals.BotAudioClient))
-            {
-                Console.WriteLine("Connected to voice channel.");
-            }
-
-
-            }
-        [Command("leave", RunMode = RunMode.Async)]
-        public async Task MusicLeave()
-        {
-            IGuild guild = Context.Guild;
-            IVoiceChannel BotVoiceChannel = (Context.User as IVoiceState).VoiceChannel;
-
-            if (MyGlobals.ConnectedChannels.TryRemove(guild.Id, out MyGlobals.BotAudioClient))
-            {
-                await MyGlobals.BotAudioClient.StopAsync();
-                //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
-                Console.WriteLine("Left voice channel.");
-            }
-
-            
-
-
-
-        }
-
-        private AudioOutStream stream;
-        private int blockSize = 2880;
-        private byte[] buffer = new byte[2880];
-        private int byteCount = 0;
-
-        [Command("volume", RunMode = RunMode.Async)]
-        public async Task MusicVolume(int volNum)
-        {
-            MyGlobals.volume = volNum;
-            await stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, MyGlobals.volume), 0, byteCount);
-            
-            await stream.FlushAsync().ConfigureAwait(false);
-
-
-
-
-        }
-        
-
-        [Command("play", RunMode = RunMode.Async)]
-        public async Task MusicPlay(string url)
-        {
-            IGuild guild = Context.Guild;
-            IMessageChannel talkChannel = Context.Channel;
-           
-
-            if (MyGlobals.ConnectedChannels.TryGetValue(guild.Id, out MyGlobals.BotAudioClient))
-            {
-
-                await ReplyAsync("Now Playing:" + url + " Requested by: " + Context.User.Mention);         
-               
-                var output = WhaleHelp.CreateStream(url).StandardOutput.BaseStream;
-
-                byteCount = await output.ReadAsync(buffer, 0, blockSize);
-
-                stream = MyGlobals.BotAudioClient.CreatePCMStream(AudioApplication.Music, 128 * 1024);
-                
-
-                await stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, MyGlobals.volume), 0, byteCount);
-                await output.CopyToAsync(stream);
-                await stream.FlushAsync().ConfigureAwait(false);
-            }
-                
-        }
-
-        [Command("stop", RunMode = RunMode.Async)]
-        public async Task MusicStop()
-        {
-            await MyGlobals.BotAudioClient.StopAsync();
-            return;
-        }
-
-
-
 
     }
-    }
+}
 
     
 

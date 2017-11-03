@@ -45,9 +45,9 @@ namespace WhalesFargo
         private IServiceProvider m_Services; // TODO: Probably need to change this to include more services.
         private string m_Token = ""; // Bot Token. Do not share with other people
 
-       /**
-        * Main
-        */
+        /**
+         * Main
+         */
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
        /**
@@ -342,6 +342,6 @@ namespace WhalesFargo
             await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
         }
 
-
+        public DiscordSocketClient GetClient() { return m_Client; }
     }
 }
