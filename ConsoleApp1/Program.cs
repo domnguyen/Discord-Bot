@@ -28,8 +28,7 @@ namespace WhalesFargo
         public static Boolean Debug = false; // Turn on for cmd printing
         public static int BotScan = 0;
         public static int volume = 15;
-        public static IAudioClient BotAudioClient;
-        public static ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
+        //public static ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
         public static ConcurrentQueue<string> songQueue = new ConcurrentQueue<String>();
     }
 

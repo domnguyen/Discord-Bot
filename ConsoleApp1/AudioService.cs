@@ -18,19 +18,16 @@ namespace WhalesFargo
      */
     public class AudioService
     {
-        IAudioClient m_Client;
-        ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels;
+        // This makes the whole thing work, still figuring it out.5
+        private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
+        private IAudioClient m_Client;
 
-        Process m_Process;
-        Stream m_Stream;
-        bool m_IsPlaying = false;
-        float m_Volume = 1.0f;
+        // Private variables.
+        private Process m_Process; // Process that runs when playing.
+        private Stream m_Stream; // Steam output when playing.
 
-        public void Init(IAudioClient client, ConcurrentDictionary<ulong, IAudioClient> connectedChannels)
-        {
-            m_Client = client;
-            m_ConnectedChannels = connectedChannels;
-        }
+        private bool m_IsPlaying = false;
+        private float m_Volume = 1.0f;
 
         /**
          *  JoinAudio
@@ -40,11 +37,7 @@ namespace WhalesFargo
          */
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)
         {
-            // Get the current Audio Client and connected channels.
-            IAudioClient client = GetAudioClient();
-            ConcurrentDictionary<ulong, IAudioClient> connectedChannels = GetConnectedChannels();
-
-            if (connectedChannels.TryGetValue(guild.Id, out client))
+            if (m_ConnectedChannels.TryGetValue(guild.Id, out m_Client))
             {
                 return;
             }
@@ -56,10 +49,12 @@ namespace WhalesFargo
             var audioClient = await target.ConnectAsync();
 
             // Join voice channel.
-            if (connectedChannels.TryAdd(guild.Id, audioClient))
+            if (m_ConnectedChannels.TryAdd(guild.Id, audioClient))
             {
-                // await Log(LogSeverity.Info, $"Connected to voice on {guild.Name}.");
+                return;
             }
+
+            Console.WriteLine("Unable to join channel.");
         }
 
         /**
@@ -69,13 +64,9 @@ namespace WhalesFargo
          */
         public async Task LeaveAudio(IGuild guild)
         {
-            // Get the current Audio Client and connected channels.
-            IAudioClient client = GetAudioClient();
-            ConcurrentDictionary<ulong, IAudioClient> connectedChannels = GetConnectedChannels();
-
-            if (connectedChannels.TryRemove(guild.Id, out client))
+            if (m_ConnectedChannels.TryRemove(guild.Id, out m_Client))
             {
-                await client.StopAsync();
+                await m_Client.StopAsync();
             }
         }
 
@@ -90,10 +81,6 @@ namespace WhalesFargo
          */
         public async Task PlayAudioAsync(IGuild guild, IMessageChannel channel, string path)
         {
-            // Get the current Audio Client and connected channels.
-            IAudioClient client = GetAudioClient();
-            ConcurrentDictionary<ulong, IAudioClient> connectedChannels = GetConnectedChannels();
-
             bool isNetwork = VerifyNetworkPath(path); // Check if network path.
 
             // Check if network or local path, if local file doesn't exist, return.
@@ -103,11 +90,11 @@ namespace WhalesFargo
                 return;
             }
 
-            if (connectedChannels.TryGetValue(guild.Id, out client))
+            if (m_ConnectedChannels.TryGetValue(guild.Id, out m_Client))
             {
                 // Start a new process and create an output stream.
                 m_Process = isNetwork ? CreateNetworkStream(path) : CreateLocalStream(path);
-                m_Stream = client.CreatePCMStream(AudioApplication.Music);
+                m_Stream = m_Client.CreatePCMStream(AudioApplication.Music);
 
                 await Task.Delay(4000); // We should wait for ffmpeg to buffer some of the audio first.
 
@@ -210,20 +197,6 @@ namespace WhalesFargo
 
             // Update the volume
             m_Volume = volume;
-        }
-
-        /* Get the current audio client. TODO: Replace once global is out!! */
-        private IAudioClient GetAudioClient()
-        {
-            if (m_Client != null) return m_Client;
-            return MyGlobals.BotAudioClient;
-        }
-
-        /* Get the current connected channels dictionary. TODO: Replace once global is out!! */
-        private ConcurrentDictionary<ulong, IAudioClient> GetConnectedChannels()
-        {
-            if (m_ConnectedChannels != null) return m_ConnectedChannels;
-            return MyGlobals.ConnectedChannels;
         }
 
         /* Add more arguments here, but we'll just check based on http and assume a network link. */

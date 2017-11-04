@@ -29,6 +29,10 @@ namespace WhalesFargo
 
         // You *MUST* mark these commands with 'RunMode.Async'
         // otherwise the bot will not respond until the Task times out.
+        // Remember to add preconditions to your commands,
+        // this is merely the minimal amount necessary.
+        // Adding more commands of your own is also encouraged.
+
         [Command("join", RunMode = RunMode.Async)]
         public async Task JoinVoiceChannel()
         {
@@ -36,9 +40,6 @@ namespace WhalesFargo
             Console.WriteLine("Connected to voice channel.");
         }
 
-        // Remember to add preconditions to your commands,
-        // this is merely the minimal amount necessary.
-        // Adding more commands of your own is also encouraged.
         [Command("leave", RunMode = RunMode.Async)]
         public async Task LeaveVoiceChannel()
         {
