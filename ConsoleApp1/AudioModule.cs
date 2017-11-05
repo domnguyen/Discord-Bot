@@ -10,6 +10,7 @@ using Discord.WebSocket;
 
 namespace WhalesFargo
 {
+   
     /**
      * AudioModule
      * Class that handles the audio portion of the program.
@@ -36,53 +37,61 @@ namespace WhalesFargo
         [Command("join", RunMode = RunMode.Async)]
         public async Task JoinVoiceChannel()
         {
+            Console.WriteLine("Connecting to voice channel.");
             await m_Service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
-            Console.WriteLine("Connected to voice channel.");
         }
 
         [Command("leave", RunMode = RunMode.Async)]
         public async Task LeaveVoiceChannel()
         {
+            Console.WriteLine("Leaving voice channel.");
             await m_Service.LeaveAudio(Context.Guild);
-            Console.WriteLine("Left voice channel.");
         }
 
         [Command("play", RunMode = RunMode.Async)]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
-           await m_Service.PlayAudioAsync(Context.Guild, Context.Channel, song);
-           Console.WriteLine("Playing song: " + song);
+            Console.WriteLine("Playing song : " + song);
+
+            // Get the stream information and display necessary information.
+            AudioFile info = await m_Service.GetStreamData(song);
+            await (Context.Client as DiscordSocketClient).SetGameAsync(info.Title); // Set 'playing' as the song title.
+
+            await ReplyAsync("Now Playing : " + song);
+
+            // Play the audio. This function is BLOCKING. Call this last!
+            await m_Service.PlayAudioAsync(Context.Guild, Context.Channel, song);
         }
 
         [Command("pause", RunMode = RunMode.Async)]
         public async Task PauseVoiceChannel()
         {
-            m_Service.PauseAudio();
             Console.WriteLine("Pausing voice.");
+            m_Service.PauseAudio();
             await Task.Delay(0);
         }
 
         [Command("resume", RunMode = RunMode.Async)]
         public async Task ResumeVoiceChannel()
         {
-            m_Service.ResumeAudio();
             Console.WriteLine("Resuming voice.");
+            m_Service.ResumeAudio();
             await Task.Delay(0);
         }
 
         [Command("stop", RunMode = RunMode.Async)]
         public async Task StopVoiceChannel()
         {
-            m_Service.StopAudio();
             Console.WriteLine("Stopping voice.");
+            m_Service.StopAudio();
             await Task.Delay(0);
         }
 
         [Command("volume")]
         public async Task VolumeVoiceChannel([Remainder] float volume)
         {
-            m_Service.AdjustVolume(volume);
             Console.WriteLine("Adjusting volume: " + volume);
+            m_Service.AdjustVolume(volume);
             await Task.Delay(0);
         }
 

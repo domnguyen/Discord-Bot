@@ -8,10 +8,52 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
-
+using System.Threading;
 
 namespace WhalesFargo
 {
+    /**
+    * Audio File
+    * Class that holds properties from the audio file.
+    * Add more when necessary, but the only thing we're using for it now is the title field.
+    */
+    public class AudioFile
+    {
+        private string m_FileName;
+        private string m_Title;
+        private string m_Author;
+        private bool m_IsNetwork;
+
+        public AudioFile()
+        {
+            m_FileName = "";
+            m_Title = "";
+            m_Author = "";
+            m_IsNetwork = true;
+        }
+        public string FileName
+        {
+            get { return m_FileName; }
+            set { m_FileName = value; }
+        }
+
+        public string Title
+        {
+            get { return m_Title; }
+            set { m_Title = value; }
+        }
+        public string Author
+        {
+            get { return m_Author; }
+            set { m_Author = value; }
+        }
+        public bool IsNetwork
+        {
+            get { return m_IsNetwork; }
+            set { m_IsNetwork = value; }
+        }
+    }
+
     /**
      * AudioService
      * Class that handles a single audio service.
@@ -98,7 +140,7 @@ namespace WhalesFargo
 
                 await Task.Delay(4000); // We should wait for ffmpeg to buffer some of the audio first.
 
-                m_IsPlaying = true;
+                m_IsPlaying = true; // Set this to true to start the loop properly.
 
                 // While true, we stream the audio in chunks.
                 while (true)
@@ -107,7 +149,7 @@ namespace WhalesFargo
                     if (m_Process.HasExited)
                         break;
 
-                    while (!m_IsPlaying) await Task.Delay(2000);
+                    while (!m_IsPlaying) await Task.Delay(2000); // We pause within this function while it's 'not playing'.
 
                     // Read the stream in chunks.
                     int blockSize = 3840;
@@ -123,7 +165,6 @@ namespace WhalesFargo
                     await m_Stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, m_Volume), 0, byteCount);
                 }
                 await m_Stream.FlushAsync();
-
 
                 // Reset values.
                 await Task.Delay(500);
@@ -197,6 +238,68 @@ namespace WhalesFargo
 
             // Update the volume
             m_Volume = volume;
+        }
+
+        /**
+         *  GetStreamData
+         *  Opens the stream data and fills an AudioFile with metadata information about the audio source.
+         *  @param url   string of the source path
+         */
+        public async Task<AudioFile> GetStreamData(string path)
+        {
+            TaskCompletionSource<AudioFile> taskSrc = new TaskCompletionSource<AudioFile>();
+
+            bool IsNetwork = VerifyNetworkPath(path);
+
+            // Local file.
+            if (!IsNetwork)
+            {
+                // stream data
+                AudioFile StreamData = new AudioFile();
+                StreamData.FileName = path;
+                StreamData.Title = path.Split('/').Last();
+                if (StreamData.Title.CompareTo("") == 0) StreamData.Title = path;
+                return StreamData;
+            }
+
+            // Network file.
+            new Thread(() => {
+
+                // stream data
+                AudioFile StreamData = new AudioFile();
+
+                // youtube-dl.exe
+                Process youtubedl;
+
+                // Get Video Title
+                ProcessStartInfo youtubedlMetaData = new ProcessStartInfo()
+                {
+                    FileName = "youtube-dl",
+                    Arguments = $"-s -e --get-duration {path}",// Add more flags for more options.
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false     //Linux?
+                };
+                youtubedl = Process.Start(youtubedlMetaData);
+                youtubedl.WaitForExit();
+
+                // Read the output of the simulation
+                string[] output = youtubedl.StandardOutput.ReadToEnd().Split('\n');
+
+                // Set the file name.
+                StreamData.FileName = path;
+
+                // Extract each line printed for it's corresponding data.
+                if (output.Length > 0)
+                    StreamData.Title = output[0];
+
+                taskSrc.SetResult(StreamData);
+            }).Start();
+
+            AudioFile result = await taskSrc.Task;
+            if (result == null)
+                throw new Exception("youtube-dl.exe failed to extract the data!");
+            return result;
         }
 
         /* Add more arguments here, but we'll just check based on http and assume a network link. */
