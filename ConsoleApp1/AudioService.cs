@@ -60,16 +60,16 @@ namespace WhalesFargo
      */
     public class AudioService
     {
-        // This makes the whole thing work, still figuring it out.5
+        // This makes the whole thing work, still figuring it out.
         private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
-        private IAudioClient m_Client;
+        private IAudioClient m_Client; // The main audio client.
 
         // Private variables.
         private Process m_Process; // Process that runs when playing.
-        private Stream m_Stream; // Steam output when playing.
+        private Stream m_Stream; // Stream output when playing.
 
-        private bool m_IsPlaying = false;
-        private float m_Volume = 1.0f;
+        private bool m_IsPlaying = false; // Flag to change to play or pause the audio.
+        private float m_Volume = 1.0f; // Volume value that's checked during playback. Reference: PlayAudioAsync.
 
         /**
          *  JoinAudio
@@ -125,6 +125,14 @@ namespace WhalesFargo
         {
             bool isNetwork = VerifyNetworkPath(path); // Check if network path.
 
+            // Stop the current audio source if one is already running, then give it time to finish it's process.
+            if (m_Process != null && m_Process.IsRunning())
+            {
+                Console.WriteLine("Another audio source is currently playing.");
+                StopAudio();
+                while (m_Process != null) await Task.Delay(1000); // We'll wait until it's null again.
+            }
+
             // Check if network or local path, if local file doesn't exist, return.
             if (!isNetwork && !File.Exists(path))
             {
@@ -132,13 +140,14 @@ namespace WhalesFargo
                 return;
             }
 
+            // Start the stream, this is the main part of 'play'
             if (m_ConnectedChannels.TryGetValue(guild.Id, out m_Client))
             {
                 // Start a new process and create an output stream.
                 m_Process = isNetwork ? CreateNetworkStream(path) : CreateLocalStream(path);
                 m_Stream = m_Client.CreatePCMStream(AudioApplication.Music);
 
-                await Task.Delay(4000); // We should wait for ffmpeg to buffer some of the audio first.
+                await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
                 m_IsPlaying = true; // Set this to true to start the loop properly.
 
@@ -149,7 +158,7 @@ namespace WhalesFargo
                     if (m_Process.HasExited)
                         break;
 
-                    while (!m_IsPlaying) await Task.Delay(2000); // We pause within this function while it's 'not playing'.
+                    while (!m_IsPlaying) await Task.Delay(1000); // We pause within this function while it's 'not playing'.
 
                     // Read the stream in chunks.
                     int blockSize = 3840;
@@ -275,7 +284,7 @@ namespace WhalesFargo
                 ProcessStartInfo youtubedlMetaData = new ProcessStartInfo()
                 {
                     FileName = "youtube-dl",
-                    Arguments = $"-s -e --get-duration {path}",// Add more flags for more options.
+                    Arguments = $"-s -e {path}",// Add more flags for more options.
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     UseShellExecute = false     //Linux?
@@ -322,7 +331,7 @@ namespace WhalesFargo
 
         /* Create a network stream.*/
         private Process CreateNetworkStream(string path)
-        {
+        { // TODO: Configure this to handle errors as well. A lot of links cannot be opened for some reason.
             return Process.Start(new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -332,6 +341,7 @@ namespace WhalesFargo
                 CreateNoWindow = true
             });
         }
+
 
     }
 }
