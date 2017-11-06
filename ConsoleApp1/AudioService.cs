@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Discord;
+using Discord.Audio;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Audio;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WhalesFargo
 {
@@ -81,7 +79,7 @@ namespace WhalesFargo
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)
         {
             // Delayed join if the client recently left a voice channel.
-            while (m_DelayJoin)
+            if (m_DelayJoin)
             {
                 Console.WriteLine("The client is currently disconnecting from a voice channel. Please try again later.");
                 return;
@@ -144,10 +142,11 @@ namespace WhalesFargo
          *  PlayAudioAsync
          *  Play the current audio by string in the voice channel of the target.
          *  Right now, playing by local file name.
-         *  TODO: Parse for youtube downloader and ffmpeg for different strings.
          *  @param guild
          *  @param channel
          *  @param path
+         *  
+         *  TODO: Parse for youtube downloader and ffmpeg for different strings.
          */
         public async Task PlayAudioAsync(IGuild guild, IMessageChannel channel, string path)
         {
@@ -292,7 +291,8 @@ namespace WhalesFargo
         /**
          *  GetStreamData
          *  Opens the stream data and fills an AudioFile with metadata information about the audio source.
-         *  @param url   string of the source path
+         *  @param path   string of the source path
+         *  
          *  TODO: Add more params and extract more data, when we need it.
          */
         public async Task<AudioFile> GetStreamData(string path)
@@ -352,13 +352,30 @@ namespace WhalesFargo
             return result;
         }
 
-        /* Add more arguments here, but we'll just check based on http and assume a network link. */
+        /* Returns the DelayJoin variable. */
+        public bool GetDelayJoin()
+        {
+            if (m_DelayJoin) Console.WriteLine("The client is currently delayed.");
+            return m_DelayJoin;
+        }
+
+        /**
+         *  VerifyNetworkPath
+         *  Verifies that the path is a network path and not a local path.
+         *  Add more arguments here, but we'll just check based on http and assume a network link.
+         *  @param path     The path to the file.
+         */
         private bool VerifyNetworkPath(string path)
         {
             return path.StartsWith("http");
         }
 
-        /* Create a local stream. */
+        /**
+         *  CreateLocalStream
+         *  Creates a local stream using the file path specified and ffmpeg to stream it directly.
+         *  The format Discord takes is 16-bit 48000Hz PCM
+         *  @param path     The path to the local file.
+         */
         private Process CreateLocalStream(string path)
         {
             Console.WriteLine("Creating Local Stream : " + path);
@@ -371,7 +388,12 @@ namespace WhalesFargo
             });
         }
 
-        /* Create a network stream.*/
+        /**
+         *  CreateNetworkStream
+         *  Creates a network stream using youtube-dl.exe, then piping it to ffmpeg to stream it directly.
+         *  The format Discord takes is 16-bit 48000Hz PCM
+         *  @param path     The path to the network file.
+         */
         private Process CreateNetworkStream(string path)
         { // TODO: Configure this to handle errors as well. A lot of links cannot be opened for some reason.
             Console.WriteLine("Creating Network Stream : " + path);

@@ -1,20 +1,15 @@
 ﻿//#define LIVE_TOKEN
 #define DEVELOPMENT_TOKEN
 
-using System;
-using System.Threading.Tasks;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.WebSocket;
 using Discord.Commands;
-using System.Threading;
-using System.ComponentModel;
-using System.Timers;
-using System.Linq;
-using Discord.Audio;
+using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace WhalesFargo
 {
@@ -60,7 +55,7 @@ namespace WhalesFargo
 #elif   (DEVELOPMENT_TOKEN)
             m_Token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
 #endif
-
+            
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();

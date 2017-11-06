@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
-using Discord.Audio;
 using Discord.WebSocket;
+using System.Threading.Tasks;
 
 namespace WhalesFargo
 {
-   
+
     /**
      * AudioModule
      * Class that handles the audio portion of the program.
@@ -37,6 +32,7 @@ namespace WhalesFargo
         [Command("join", RunMode = RunMode.Async)]
         public async Task JoinVoiceChannel()
         {
+            if (m_Service.GetDelayJoin()) return; // Stop multiple attempts to join too quickly.
             await m_Service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
         }
 
