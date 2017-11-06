@@ -27,8 +27,6 @@ namespace WhalesFargo
         public static int RTotal = 0; // can change because not const
         public static Boolean Debug = false; // Turn on for cmd printing
         public static int BotScan = 0;
-        public static int volume = 15;
-        //public static ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
         public static ConcurrentQueue<string> songQueue = new ConcurrentQueue<String>();
     }
 
@@ -110,25 +108,28 @@ namespace WhalesFargo
             // Before we install commands, we should check if everything was set up properly. Check if logged in.
             if (m_Client.LoginState != (LoginState.LoggedIn)) return;
 
+            // Hook the MessageReceived Event into our Command Handler
+            m_Client.MessageReceived += HandleCommand;
+
             // Add tasks to send Messages, and userJoined to appropriate places
             m_Client.Ready += SetBotStatus;
             m_Client.UserJoined += UserJoined;
             m_Client.UserLeft += UserLeft;
             m_Client.Log += Log;
-
-            // Hook the MessageReceived Event into our Command Handler
-            m_Client.MessageReceived += HandleCommand;
+            m_Client.Connected += Connected;
+            m_Client.Disconnected += Disconnected;
 
             // Discover all of the commands in this assembly and load them.
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-       /**
-        * HandleCommand
-        * Handles commands with prefixes '!' and mention prefix.
-        * Others get passed to TrolRogue and CheckSenpai
-        * @param messageParam   The command parsed as a SocketMessage.
-        */
+
+        /**
+         * HandleCommand
+         * Handles commands with prefixes '!' and mention prefix.
+         * Others get passed to TrolRogue and CheckSenpai
+         * @param messageParam   The command parsed as a SocketMessage.
+         */
         public async Task HandleCommand(SocketMessage messageParam)
         {
             // Don't process the command if it was a System Message
@@ -194,6 +195,27 @@ namespace WhalesFargo
         public Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
+        }
+
+        /** 
+        * Connected
+        * Once fully connected, prints out here.
+        */
+        private Task Connected()
+        {
+            Console.WriteLine("Status : Connected");
+            return Task.CompletedTask;
+        }
+
+        /** 
+        * Disconnected
+        * Handles if the bot is suddenly disconnected.
+        * @param arg   Exception thrown if disconnected for any reason.
+        */
+        private Task Disconnected(Exception arg)
+        {
+            Console.WriteLine("Status : Disconnected \n" + arg);
             return Task.CompletedTask;
         }
 
