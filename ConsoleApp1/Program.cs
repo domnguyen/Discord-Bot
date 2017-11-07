@@ -1,20 +1,15 @@
 ﻿//#define LIVE_TOKEN
 #define DEVELOPMENT_TOKEN
 
-using System;
-using System.Threading.Tasks;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Discord;
-using Discord.WebSocket;
 using Discord.Commands;
-using System.Threading;
-using System.ComponentModel;
-using System.Timers;
-using System.Linq;
-using Discord.Audio;
+using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace WhalesFargo
 {
@@ -26,6 +21,7 @@ namespace WhalesFargo
     {
         public static Boolean TrollUser = false;
         public static Boolean Debug = false; // Turn on for cmd printing
+       
         public static Boolean PhraseRespond = false;
 
     }
@@ -59,7 +55,7 @@ namespace WhalesFargo
 #elif   (DEVELOPMENT_TOKEN)
             m_Token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
 #endif
-
+            
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
@@ -107,25 +103,28 @@ namespace WhalesFargo
             // Before we install commands, we should check if everything was set up properly. Check if logged in.
             if (m_Client.LoginState != (LoginState.LoggedIn)) return;
 
+            // Hook the MessageReceived Event into our Command Handler
+            m_Client.MessageReceived += HandleCommand;
+
             // Add tasks to send Messages, and userJoined to appropriate places
             m_Client.Ready += SetBotStatus;
             m_Client.UserJoined += UserJoined;
             m_Client.UserLeft += UserLeft;
             m_Client.Log += Log;
-
-            // Hook the MessageReceived Event into our Command Handler
-            m_Client.MessageReceived += HandleCommand;
+            m_Client.Connected += Connected;
+            m_Client.Disconnected += Disconnected;
 
             // Discover all of the commands in this assembly and load them.
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-       /**
-        * HandleCommand
-        * Handles commands with prefixes '!' and mention prefix.
-        * Others get passed to TrolRogue and CheckSenpai
-        * @param messageParam   The command parsed as a SocketMessage.
-        */
+
+        /**
+         * HandleCommand
+         * Handles commands with prefixes '!' and mention prefix.
+         * Others get passed to TrolRogue and CheckSenpai
+         * @param messageParam   The command parsed as a SocketMessage.
+         */
         public async Task HandleCommand(SocketMessage messageParam)
         {
             // Don't process the command if it was a System Message
@@ -191,6 +190,27 @@ namespace WhalesFargo
         public Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
+        }
+
+        /** 
+        * Connected
+        * Once fully connected, prints out here.
+        */
+        private Task Connected()
+        {
+            Console.WriteLine("Status : Connected");
+            return Task.CompletedTask;
+        }
+
+        /** 
+        * Disconnected
+        * Handles if the bot is suddenly disconnected.
+        * @param arg   Exception thrown if disconnected for any reason.
+        */
+        private Task Disconnected(Exception arg)
+        {
+            Console.WriteLine("Status : Disconnected \n" + arg);
             return Task.CompletedTask;
         }
 
