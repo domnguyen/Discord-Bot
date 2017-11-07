@@ -16,6 +16,8 @@ namespace WhalesFargo
 
     public class Commands : ModuleBase
     {
+       
+
 
         public ConcurrentDictionary<ulong, string> GuildMuteRoles { get; }
 
@@ -904,31 +906,28 @@ namespace WhalesFargo
         }
 
         /* This activates a response detection commmand upon a certain user talking. The bot will respond with various sassy comments */
-        [Command("rogue")]
+        [Command("TrollUser")]
         [Summary("Will respond to a user everytime they speak")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
-        [Alias("rogue")]
+        [Alias("troll")]
         public async Task Rogue()
         {
-            var rogue = MyGlobals.RTotal;
+            
             var GuildUser = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (MyGlobals.Debug)
-            {
-                Console.WriteLine(rogue);
-            }
+           
             // Was 0 before, so off
-            if (rogue == 0)
+            if (!MyGlobals.TrollUser)
             {
-                MyGlobals.RTotal = 1;
+                MyGlobals.TrollUser = true;
                 await Task.Delay(1000);
-                await ReplyAsync("`" + Context.Message.Author.Mention + " Rogue has been activated.`");
+                await ReplyAsync("`" + Context.Message.Author.Mention + " TrollUser has been activated.`");
             }
             //It was on before, so now 0
-            if (rogue == 1)
+            else
             {
-                MyGlobals.RTotal = 0;
+                MyGlobals.TrollUser = false;
                 await Task.Delay(1000);
-                await ReplyAsync("`" + Context.Message.Author.Mention + " Rogue has been deactivated.`");
+                await ReplyAsync("`" + Context.Message.Author.Mention + " TrollUser has been deactivated.`");
             }
 
         }
@@ -940,30 +939,26 @@ namespace WhalesFargo
         [Alias("sass")]
         public async Task ChatRespond()
         {
-            var respond = MyGlobals.BotScan;
             var GuildUser = await Context.Guild.GetUserAsync(Context.User.Id);
-            if (MyGlobals.Debug)
+        
+          
+            if (!MyGlobals.PhraseRespond)
             {
-                Console.WriteLine(respond);
-            }
-            // Was 0 before, so off
-            if (respond == 0)
-            {
-                MyGlobals.BotScan = 1;
+                MyGlobals.PhraseRespond = true;
                 await Task.Delay(1000);
                 await ReplyAsync("`" + Context.Message.Author.Mention + " Bot Response has been activated.`");
             }
-            //It was on before, so now 0
-            if (respond == 1)
+            
+            else if (MyGlobals.PhraseRespond)
             {
-                MyGlobals.BotScan = 0;
+                MyGlobals.PhraseRespond = false;
                 await Task.Delay(1000);
                 await ReplyAsync("`" + Context.Message.Author.Mention + " Bot Response has been deactivated.`");
             }
 
         }
 
-
+        // Sets the bot's playing status to whatever we want.
         [Command("botStatus")]
         [Summary("Sets the bot's status")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
