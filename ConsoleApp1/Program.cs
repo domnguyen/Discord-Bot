@@ -63,6 +63,7 @@ namespace WhalesFargo
 
             // Startup the client.
             await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
+            
             await m_Client.StartAsync();
             await InstallCommands();
 
@@ -87,8 +88,9 @@ namespace WhalesFargo
             ServiceCollection services = new ServiceCollection();
 
             // Add all additional services here.
-            services.AddSingleton<AudioService>(); // AudioModule : AudioService
 
+            services.AddSingleton<AudioService>(); // AudioModule : AudioService
+            services.AddSingleton<ChatService>();
             // Return the service provider.
             return services.BuildServiceProvider();
         }
@@ -243,12 +245,12 @@ namespace WhalesFargo
             {
                 if (salt)
                 {
-                    Console.WriteLine("Salt activated");
+                    Console.WriteLine("Salt Response Activated");
                     await chnl.SendMessageAsync("https://imgur.com/1S9x2fH");
                 }
                 else if (fart)
                 {
-                    Console.WriteLine("fart activated");
+                    Console.WriteLine("fart Response Activated");
                     await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
                 }
                 else if (noob)
@@ -257,7 +259,7 @@ namespace WhalesFargo
                     int rannum = rnd.Next(1, 10);
                     if (rannum % 2 == 0)
                     {
-                        Console.WriteLine("noob activated");
+                        Console.WriteLine("noob Response Activated");
                         await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
                     }
                 }
@@ -267,7 +269,7 @@ namespace WhalesFargo
                     int rannum = rnd.Next(1, 10);
                     if (rannum % 2 == 0)
                     {
-                        Console.WriteLine("scam activated");
+                        Console.WriteLine("scam Response Activated");
                         await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
                     }
                 }
@@ -287,7 +289,7 @@ namespace WhalesFargo
                         await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
                     }
                 }
-                //await chnl.SendMessageAsync("Rogue, I think you're cute :D");
+                
             }
         }
 
