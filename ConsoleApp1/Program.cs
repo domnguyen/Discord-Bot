@@ -19,14 +19,14 @@ namespace WhalesFargo
      */
     public static class MyGlobals
     {
-        public static int RTotal = 0; // can change because not const
+        public static Boolean TrollUser = false;
         public static Boolean Debug = false; // Turn on for cmd printing
-        public static int BotScan = 0;
-        public static ConcurrentQueue<string> songQueue = new ConcurrentQueue<String>();
+       
+        public static Boolean PhraseRespond = false;
+
     }
 
    /**
-    * Program
     * Main program to run the discord bot.
     */
     class Program
@@ -63,6 +63,7 @@ namespace WhalesFargo
 
             // Startup the client.
             await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
+            
             await m_Client.StartAsync();
             await InstallCommands();
 
@@ -87,8 +88,9 @@ namespace WhalesFargo
             ServiceCollection services = new ServiceCollection();
 
             // Add all additional services here.
-            services.AddSingleton<AudioService>(); // AudioModule : AudioService
 
+            services.AddSingleton<AudioService>(); // AudioModule : AudioService
+            services.AddSingleton<ChatService>();
             // Return the service provider.
             return services.BuildServiceProvider();
         }
@@ -155,7 +157,7 @@ namespace WhalesFargo
          */
         public async Task SetBotStatus()
         {
-            await m_Client.SetGameAsync("With Rogue Tonight ;D");
+            await m_Client.SetGameAsync("Type !help for help!");
         }
 
         /**
@@ -239,16 +241,16 @@ namespace WhalesFargo
             bool op = str_message.IndexOf("op", StringComparison.OrdinalIgnoreCase) >= 0;
 
             // If the bot scan is on
-            if (MyGlobals.BotScan == 1)
+            if (MyGlobals.PhraseRespond)
             {
                 if (salt)
                 {
-                    Console.WriteLine("Salt activated");
+                    Console.WriteLine("Salt Response Activated");
                     await chnl.SendMessageAsync("https://imgur.com/1S9x2fH");
                 }
                 else if (fart)
                 {
-                    Console.WriteLine("fart activated");
+                    Console.WriteLine("fart Response Activated");
                     await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
                 }
                 else if (noob)
@@ -257,7 +259,7 @@ namespace WhalesFargo
                     int rannum = rnd.Next(1, 10);
                     if (rannum % 2 == 0)
                     {
-                        Console.WriteLine("noob activated");
+                        Console.WriteLine("noob Response Activated");
                         await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
                     }
                 }
@@ -267,7 +269,7 @@ namespace WhalesFargo
                     int rannum = rnd.Next(1, 10);
                     if (rannum % 2 == 0)
                     {
-                        Console.WriteLine("scam activated");
+                        Console.WriteLine("scam Response Activated");
                         await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
                     }
                 }
@@ -287,7 +289,7 @@ namespace WhalesFargo
                         await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
                     }
                 }
-                //await chnl.SendMessageAsync("Rogue, I think you're cute :D");
+                
             }
         }
 
@@ -298,7 +300,7 @@ namespace WhalesFargo
          */
         private async Task TrollRogue(SocketMessage arg)
         {
-            if (MyGlobals.RTotal == 1)
+            if (MyGlobals.TrollUser)
             {
                 // User to troll's ID
                 ulong userID = 339836073716744194;

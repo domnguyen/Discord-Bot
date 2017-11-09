@@ -119,8 +119,12 @@ namespace WhalesFargo
 
         public static TimeSpan CheckNextDay(TimeSpan current)
         {
+            // If the current - today is a negative time, add a day.
+            Console.WriteLine("Current time is : " + current);
+            Console.WriteLine("The zero time is : " + new TimeSpan(0, 0, 0));
             if (TimeSpan.Compare(current, new TimeSpan(0, 0, 0)) == -1)
             {
+                Console.WriteLine("We added an day");
                 TimeSpan toReturn = current.Add(new TimeSpan(1, 0, 0, 0));
                 return toReturn;
             }
