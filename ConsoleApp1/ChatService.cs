@@ -46,6 +46,9 @@ namespace WhalesFargo
             /* Get current time in UTC */
             DateTime currentETC = DateTime.UtcNow;
 
+            /* Daylight savings adjustment */
+
+            // currentETC = currentETC.AddHours(-1);
 
             /* Check which command was run */
             bool egg = String.Equals(event_name, "egg", StringComparison.Ordinal);
@@ -372,15 +375,26 @@ namespace WhalesFargo
                
                 emb.Color = new Color(250, 20, 20);
                 // from 2-4  and ON
-                if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
+                if (DateTime.Compare(currentETC, EP3) < 0)
+               
+                {
+                    System.TimeSpan diff = EP3.Subtract(currentETC);
+
+
+                    emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                   }
+
+
+                else if (DateTime.Compare(currentETC, EP3) > 0 & DateTime.Compare(currentETC, EP3_End) < 0)
                 {
                     System.TimeSpan diff = EP3_End.Subtract(currentETC);
 
 
                     emb.AddField("**Current : **Egg and Kesapasa (EP03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
-                    System.TimeSpan diff2 = EP3.Subtract(currentETC);
-                    diff2 = WhaleHelp.CheckNextDay(diff2);
+                    System.TimeSpan diff2 = KP1.Subtract(currentETC);
+                    //diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
 
@@ -519,8 +533,17 @@ namespace WhalesFargo
                 emb.WithTitle("**Upcoming Augment Quest:**");
                 
                 emb.Color = new Color(250, 20, 20);
+                 if (DateTime.Compare(currentETC, AUG1) < 0)
+                {
+                    System.TimeSpan diff = AUG1.Subtract(currentETC);
+
+
+                    emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
+
+                    
+                }
                 // between first aug
-                if (DateTime.Compare(currentETC, AUG1) > 0 & DateTime.Compare(currentETC, AUG1_End) < 0)
+                else if (DateTime.Compare(currentETC, AUG1) > 0 & DateTime.Compare(currentETC, AUG1_End) < 0)
                 {
                     System.TimeSpan diff = AUG1_End.Subtract(currentETC);
 
