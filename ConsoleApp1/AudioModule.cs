@@ -16,6 +16,7 @@ namespace WhalesFargo
         // Private variables
         private readonly AudioService m_Service;
 
+        // Dependencies are automatically injected via this constructor.
         // Remember to add an instance of the AudioService
         // to your IServiceCollection when you initialize your bot!
         public AudioModule(AudioService service)
@@ -25,9 +26,13 @@ namespace WhalesFargo
 
         // You *MUST* mark these commands with 'RunMode.Async'
         // otherwise the bot will not respond until the Task times out.
+        //
         // Remember to add preconditions to your commands,
         // this is merely the minimal amount necessary.
-        // Adding more commands of your own is also encouraged.
+        //
+        // 'Avoid using long-running code in your modules wherever possible. 
+        // You should not be implementing very much logic into your modules,
+        // instead, outsource to a service for that.'
 
         [Command("join", RunMode = RunMode.Async)]
         public async Task JoinVoiceChannel()
@@ -48,7 +53,7 @@ namespace WhalesFargo
             // Get the stream information and display necessary information.
             AudioFile info = await m_Service.GetStreamData(song);
             await (Context.Client as DiscordSocketClient).SetGameAsync(info.Title); // Set 'playing' as the song title.
-            await ReplyAsync("Now Playing : " + info.Title);
+            await ReplyAsync("Now Playing : " + info.Title); // Reply with a 'Now Playing' message.
 
             // Play the audio. This function is BLOCKING. Call this last!
             await m_Service.PlayAudioAsync(Context.Guild, Context.Channel, song);
