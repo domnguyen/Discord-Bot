@@ -93,6 +93,11 @@ namespace WhalesFargo
         public async Task AddVoiceChannel([Remainder] string song)
         {
             await m_Service.PlaylistAdd(song);
+
+            // Start autoplay on add if it's on.
+            bool autoplay = m_Service.GetAutoPlay();
+            if (autoplay && m_Service.SetAutoPlay(autoplay))
+                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }
 
         [Command("skip", RunMode = RunMode.Async)]
@@ -102,16 +107,19 @@ namespace WhalesFargo
             await Task.Delay(0);
         }
 
+        [Command("playlist", RunMode = RunMode.Async)]
+        public async Task PrintPlaylistVoiceChannel()
+        {
+            await ReplyAsync(m_Service.PlaylistString()); // Reply with a print out.
+        }
+
         [Command("autoplay", RunMode = RunMode.Async)]
         public async Task AutoPlayVoiceChannel([Remainder] bool enable)
         {
-            bool autoplay = m_Service.SetAutoPlay(enable);
-
             // Start autoplay only when it's toggled from off to on.
-            if (autoplay) await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+            if (m_Service.SetAutoPlay(enable))
+                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }
-
-        // Add more commands here.
 
     }
 }

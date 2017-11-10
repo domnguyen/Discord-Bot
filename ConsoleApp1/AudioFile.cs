@@ -32,6 +32,11 @@ namespace WhalesFargo
             m_IsDownloaded = false;
         }
 
+        public override string ToString()
+        {
+            return m_Title;
+        }
+
         public string FileName
         {
             get { return m_FileName; }

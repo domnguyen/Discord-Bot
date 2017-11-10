@@ -18,17 +18,27 @@ namespace WhalesFargo
     {
         // Concurrent dictionary for multithreaded environments.
         private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
-        private bool m_DelayJoin = false; // Temporary Semaphore to control leaving and joining too quickly.
 
         // Private variables.
         private Process m_Process; // Process that runs when playing.
         private Stream m_Stream; // Stream output when playing.
         private bool m_IsPlaying = false; // Flag to change to play or pause the audio.
         private float m_Volume = 1.0f; // Volume value that's checked during playback. Reference: PlayAudioAsync.
+        private bool m_DelayJoin = false; // Temporary Semaphore to control leaving and joining too quickly.
 
         // Playlist. TODO: Move to separate class later.
         private readonly ConcurrentQueue<AudioFile> m_Playlist = new ConcurrentQueue<AudioFile>();
         private bool m_AutoPlay = false;
+
+        /**
+         *  Log
+         *  Custom logger.
+         *  TODO: Write so that this is reflected in the discord chat.
+         */
+        public void Log(string s)
+        {
+            Console.WriteLine("AudioService -- " + s);
+        }
 
         /**
          *  JoinAudio
@@ -42,21 +52,21 @@ namespace WhalesFargo
             // Delayed join if the client recently left a voice channel.
             if (m_DelayJoin)
             {
-                Console.WriteLine("The client is currently disconnecting from a voice channel. Please try again later.");
+                Log("The client is currently disconnecting from a voice channel. Please try again later.");
                 return;
             }
 
             // Try to get the current audio client. If it's already there, we're already joined.
             if (m_ConnectedChannels.TryGetValue(guild.Id, out var connectedAudioClient))
             {
-                Console.WriteLine("The current voice channel is already connected.");
+                Log("The client is already connected to the current voice channel.");
                 return;
             }
 
             // If the target guild id doesn't match the guild id we want, return.
             if (target.Guild.Id != guild.Id)
             {
-                Console.WriteLine("Are you sure the current voice channel is correct?");
+                Log("Are you sure the current voice channel is correct?");
                 return;
             }
 
@@ -66,12 +76,12 @@ namespace WhalesFargo
             // Add it to the dictionary of connected channels.
             if (m_ConnectedChannels.TryAdd(guild.Id, audioClient))
             {
-                Console.WriteLine("Connected to the voice channel specified.");
+                Log("The client is now connected to the current voice channel.");
                 return;
             }
 
             // If we can't add it to the dictionary or connecting didn't work properly, error.
-            Console.WriteLine("Unable to join the channel specified.");
+            Log("Unable to join the current voice channel.");
         }
 
         /**
@@ -86,7 +96,7 @@ namespace WhalesFargo
             if (m_ConnectedChannels.TryRemove(guild.Id, out var audioClient))
             {
                 await audioClient.StopAsync();
-                Console.WriteLine("Left the voice channel.");
+                Log("The client is now disconnected from the current voice channel.");
 
                 m_DelayJoin = true; // Lock.
                 await Task.Delay(10000); // Delay to prevent error condition. TEMPORARY.
@@ -96,7 +106,7 @@ namespace WhalesFargo
             }
 
             // If we can't remove it from the dictionary, error.
-            Console.WriteLine("Unable to leave the voice channel. Are you sure that it is currently connected?");
+            Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
         }
 
         /**
@@ -105,7 +115,8 @@ namespace WhalesFargo
          */
         public bool GetDelayJoin()
         {
-            if (m_DelayJoin) Console.WriteLine("The client is currently delayed."); // Debug line when blocked.
+            if (m_DelayJoin)
+                Log("The client is currently disconnecting from a voice channel. Please try again later.");
             return m_DelayJoin;
         }
 
@@ -127,7 +138,7 @@ namespace WhalesFargo
          */
         private Process CreateLocalStream(string path)
         {
-            Console.WriteLine("Creating Local Stream : " + path);
+            Log("Creating Local Stream : " + path);
             return Process.Start(new ProcessStartInfo
             {
                 FileName = "ffmpeg.exe",
@@ -145,7 +156,7 @@ namespace WhalesFargo
          */
         private Process CreateNetworkStream(string path)
         { // TODO: Configure this to handle errors as well. A lot of links cannot be opened for some reason.
-            Console.WriteLine("Creating Network Stream : " + path);
+            Log("Creating Network Stream : " + path);
             return Process.Start(new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -173,14 +184,14 @@ namespace WhalesFargo
             // If there was an error with extracting the path, return.
             if (song == null)
             {
-                await channel.SendMessageAsync("Unable to open.");
+                Log("Cannot play the audio source specified : " + song);
                 return;
             }
 
             // Stop the current audio source if one is already running, then give it time to finish it's process.
             if (m_Process != null && m_Process.IsRunning())
             {
-                Console.WriteLine("Another audio source is currently playing.");
+                Log("Another audio source is currently playing.");
                 StopAudio();
                 while (m_IsPlaying) await Task.Delay(1000); // Important!! The last statement of the previous process.
             }
@@ -195,7 +206,7 @@ namespace WhalesFargo
             }
 
             // If we can't get it from the dictionary, we're probably not connected to it yet.
-            Console.WriteLine("Unable to play in the proper channel. Make sure the audio client is connected.");
+            Log("Unable to play in the proper channel. Make sure the audio client is connected.");
         }
 
         /**
@@ -228,10 +239,10 @@ namespace WhalesFargo
                     continue; // Is null or done with playback.
                 }
                 // If we can't get it from the dictionary, we're probably not connected to it yet.
-                Console.WriteLine("Unable to play in the proper channel. Make sure the audio client is connected.");
+                Log("Unable to play in the proper channel. Make sure the audio client is connected.");
                 break;
             }
-            m_AutoPlay = false; // Finish autoplay service.
+            //m_AutoPlay = false; // Finish autoplay service.
         }
 
         /**
@@ -260,7 +271,7 @@ namespace WhalesFargo
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Console.WriteLine("Now playing from : " + song.FileName);
+            Log("Audio is now playing from : " + song.FileName);
 
             // While true, we stream the audio in chunks.
             while (true)
@@ -304,13 +315,9 @@ namespace WhalesFargo
          */
         public void PauseAudio()
         {
-            if (m_Process == null)
-            {
-                Console.WriteLine("There's no audio currently playing.");
-                return;
-            }
+            if (m_Process == null) return;
             if (m_IsPlaying) m_IsPlaying = false;
-            Console.WriteLine("Pausing voice.");
+            Log("Pausing the current audio source.");
         }
 
         /**
@@ -320,13 +327,9 @@ namespace WhalesFargo
          */
         public void ResumeAudio()
         {
-            if (m_Process == null)
-            {
-                Console.WriteLine("There's no audio currently playing.");
-                return;
-            }
+            if (m_Process == null) return;
             if (!m_IsPlaying) m_IsPlaying = true;
-            Console.WriteLine("Resuming voice.");
+            Log("Resuming the current audio source.");
         }
 
         /**
@@ -336,15 +339,11 @@ namespace WhalesFargo
          */
         public void StopAudio()
         {
-            if (m_Process == null)
-            {
-                Console.WriteLine("There's no audio currently playing.");
-                return;
-            }
+            if (m_Process == null) return;
             m_Process.Kill(); // This basically stops the current loop by exiting the process.
             if (m_IsPlaying) m_IsPlaying = false; // Sets playing to false.
-            Console.WriteLine("Stopping voice.");
-            m_AutoPlay = false; // Stop autplay service as well to prevent reloading.
+            if (m_AutoPlay) m_AutoPlay = false; // Stop autoplay service as well to prevent reloading.
+            Log("Stopping the current audio source.");
         }
 
         /**
@@ -361,7 +360,38 @@ namespace WhalesFargo
                 volume = 1.0f;
             
             m_Volume = volume; // Update the volume
-            Console.WriteLine("Adjusting volume : " + volume);
+            Log("Adjusting volume : " + volume);
+        }
+
+        /**
+         *  PrintPlaylist
+         *  Prints out the playlist.
+         */
+        public string PlaylistString()
+        {
+            int count = m_Playlist.Count;
+            if (count == 0) return "There are currently no items in the playlist.";
+
+            // Count the number of total digits.
+            int countDigits = (int)(Math.Floor(Math.Log10(count) + 1));
+
+            string playlist = "";
+            for (int i = 0; i < count; i++)
+            {
+                // Prepend 0's so it matches in length.
+                string zeros = "";
+                int numDigits = (i == 0) ? 1 : (int)(Math.Floor(Math.Log10(i) + 1));
+                while (numDigits < countDigits)
+                {
+                    zeros += "0";
+                    ++numDigits;
+                }
+                // Print out the current audio file string.
+                AudioFile current = m_Playlist.ElementAt(i);
+                playlist += zeros + i +  " : " + current + "\n";
+            }
+            
+            return playlist;
         }
 
         /**
@@ -372,8 +402,11 @@ namespace WhalesFargo
         public async Task PlaylistAdd(string path)
         {
             AudioFile audio = await AudioService.ExtractAsync(path);
-            m_Playlist.Enqueue(audio);
-            Console.WriteLine("Added to playlist : " + path);
+            if (audio != null)
+            {
+                m_Playlist.Enqueue(audio); // Only add if there's no errors.
+                Log("Added to playlist : " + path);
+            }
         }
 
         /**
@@ -385,7 +418,9 @@ namespace WhalesFargo
             AudioFile nextSong = null;
             if (m_Playlist.TryDequeue(out nextSong))
                 return nextSong;
-            Console.WriteLine("Couldn't get the next song. It may not be ready yet or we're at the end.");
+
+            if (m_Playlist.Count <= 0) Log("We reached the end of the playlist.");
+            else Log("The next song could not be opened.");
             return nextSong;
         }
 
@@ -414,15 +449,14 @@ namespace WhalesFargo
         */
         public bool SetAutoPlay(bool enable)
         {
-            if (m_AutoPlay && enable)
-                Console.WriteLine("Autoplay service is already started");
-
             m_AutoPlay = enable;
-            Console.WriteLine("Setting autoplay : " + enable);
+            Log("Setting autoplay : " + enable);
 
             if (!m_IsPlaying && enable) return true; // Only return true if nothing is playing
             return false;
         }
+
+
 
         /**
         *  GetAutoPlay
