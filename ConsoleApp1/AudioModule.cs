@@ -50,13 +50,15 @@ namespace WhalesFargo
         [Command("play", RunMode = RunMode.Async)]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
-            // Get the stream information and display necessary information.
-            AudioFile info = await m_Service.GetStreamData(song);
-            await (Context.Client as DiscordSocketClient).SetGameAsync(info.Title); // Set 'playing' as the song title.
-            await ReplyAsync("Now Playing : " + info.Title); // Reply with a 'Now Playing' message.
+            // Extract the audio. Download here if necessary. TODO: Catch if youtube-dl can't read the header.
+            AudioFile audio = await m_Service.ExtractPathAsync(song);
+
+            // Display necessary information.
+            await (Context.Client as DiscordSocketClient).SetGameAsync(audio.Title); // Set 'playing' as the song title.
+            await ReplyAsync("Now Playing : " + audio.Title); // Reply with a 'Now Playing' message.
 
             // Play the audio. This function is BLOCKING. Call this last!
-            await m_Service.PlayAudioAsync(Context.Guild, Context.Channel, song);
+            await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
         }
 
         [Command("pause", RunMode = RunMode.Async)]
@@ -85,6 +87,28 @@ namespace WhalesFargo
         {
             m_Service.AdjustVolume(volume);
             await Task.Delay(0);
+        }
+
+        [Command("add", RunMode = RunMode.Async)]
+        public async Task AddVoiceChannel([Remainder] string song)
+        {
+            await m_Service.PlaylistAdd(song);
+        }
+
+        [Command("skip", RunMode = RunMode.Async)]
+        public async Task SkipVoiceChannel()
+        {
+            m_Service.PlaylistSkip();
+            await Task.Delay(0);
+        }
+
+        [Command("autoplay", RunMode = RunMode.Async)]
+        public async Task AutoPlayVoiceChannel([Remainder] bool enable)
+        {
+            bool autoplay = m_Service.SetAutoPlay(enable);
+
+            // Start autoplay only when it's toggled from off to on.
+            if (autoplay) await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }
 
         // Add more commands here.

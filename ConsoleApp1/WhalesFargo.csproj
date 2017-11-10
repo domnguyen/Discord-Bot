@@ -173,7 +173,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioFile.cs" />
-    <Compile Include="AudioHandler.cs" />
     <Compile Include="AudioModule.cs" />
     <Compile Include="AudioService.cs" />
     <Compile Include="ChatModule.cs" />

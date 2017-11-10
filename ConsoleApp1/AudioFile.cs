@@ -62,5 +62,20 @@ namespace WhalesFargo
             set { m_IsDownloaded = value; }
         }
 
+        /**
+        *  DownloadAsync
+        *  
+        */
+        public async Task DownloadAsync()
+        {
+            await Task.Delay(0); // TODO: Write the download function here.
+            string FileName = "temp";
+
+            // Update the filename with the local directory, set it to local and downloaded to true.
+            m_FileName = FileName;
+            m_IsNetwork = false;
+            m_IsDownloaded = true;
+        }
+
     }
 }
