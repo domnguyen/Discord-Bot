@@ -22,6 +22,19 @@ namespace WhalesFargo
         public AudioModule(AudioService service)
         {
             m_Service = service;
+            m_Service.SetParentModule(this);
+        }
+
+        // Reply will allow the AudioService to reply in the correct text channel.
+        public async Task ServiceReplyAsync(string s)
+        {
+            await ReplyAsync(s);
+        }
+
+        // Playing will allow the AudioService to set the current game.
+        public async Task ServicePlayingAsync(string s)
+        {
+            await (Context.Client as DiscordSocketClient).SetGameAsync(s);
         }
 
         // You *MUST* mark these commands with 'RunMode.Async'
@@ -52,13 +65,13 @@ namespace WhalesFargo
         {
             // Extract the audio. Download here if necessary. TODO: Catch if youtube-dl can't read the header.
             AudioFile audio = await m_Service.ExtractPathAsync(song);
-
-            // Display necessary information.
-            await (Context.Client as DiscordSocketClient).SetGameAsync(audio.Title); // Set 'playing' as the song title.
-            await ReplyAsync("Now Playing : " + audio.Title); // Reply with a 'Now Playing' message.
-
+            
             // Play the audio. This function is BLOCKING. Call this last!
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
+
+            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            bool autoplay = m_Service.GetAutoPlay();
+            if (autoplay) await AutoPlayVoiceChannel(autoplay); 
         }
 
         [Command("pause", RunMode = RunMode.Async)]
@@ -94,8 +107,8 @@ namespace WhalesFargo
         {
             await m_Service.PlaylistAdd(song);
 
-            // Start autoplay on add if it's on.
             bool autoplay = m_Service.GetAutoPlay();
+            // Start the autoplay service if already on, but not started. This function is BLOCKING.
             if (autoplay && m_Service.SetAutoPlay(autoplay))
                 await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }
@@ -110,13 +123,13 @@ namespace WhalesFargo
         [Command("playlist", RunMode = RunMode.Async)]
         public async Task PrintPlaylistVoiceChannel()
         {
-            await ReplyAsync(m_Service.PlaylistString()); // Reply with a print out.
+            await ServiceReplyAsync(m_Service.PlaylistString()); // Reply with a print out.
         }
 
         [Command("autoplay", RunMode = RunMode.Async)]
         public async Task AutoPlayVoiceChannel([Remainder] bool enable)
         {
-            // Start autoplay only when it's toggled from off to on.
+            // Start the autoplay service. This function is BLOCKING.
             if (m_Service.SetAutoPlay(enable))
                 await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }

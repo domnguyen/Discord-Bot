@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Audio;
+using Discord.WebSocket;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -30,14 +31,36 @@ namespace WhalesFargo
         private readonly ConcurrentQueue<AudioFile> m_Playlist = new ConcurrentQueue<AudioFile>();
         private bool m_AutoPlay = false;
 
+        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
+        private AudioModule m_ParentModule = null;
+
+        public void SetParentModule(AudioModule parent)
+        {
+            m_ParentModule = parent;
+        }
+
+        private async void DiscordReply(string s)
+        {
+            if (m_ParentModule == null) return;
+            await m_ParentModule.ServiceReplyAsync(s);
+        }
+
+        private async void DiscordPlaying(string s)
+        {
+            if (m_ParentModule == null) return;
+            await m_ParentModule.ServicePlayingAsync(s);
+        }
+
         /**
          *  Log
          *  Custom logger.
-         *  TODO: Write so that this is reflected in the discord chat.
+         *  TODO: Write so that it's an ENUM, where we can use | or &.
          */
-        public void Log(string s)
+        public void Log(string s, int output = 0)
         {
             Console.WriteLine("AudioService -- " + s);
+            if (output == 1) DiscordReply(s);
+            if (output == 2) DiscordPlaying(s);
         }
 
         /**
@@ -271,7 +294,8 @@ namespace WhalesFargo
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Log("Audio is now playing from : " + song.FileName);
+            Log("Now Playing: " + song.Title, 1);
+            Log(song.Title, 2);
 
             // While true, we stream the audio in chunks.
             while (true)
@@ -306,6 +330,7 @@ namespace WhalesFargo
             m_Process = null;
             m_Stream = null;
             m_IsPlaying = false; // We make sure this is last so we can exit properly.
+            Log("", 2);
         }
 
         /**
@@ -405,7 +430,7 @@ namespace WhalesFargo
             if (audio != null)
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
-                Log("Added to playlist : " + path);
+                Log("Added to playlist : " + audio.Title, 1);
             }
         }
 
@@ -455,8 +480,6 @@ namespace WhalesFargo
             if (!m_IsPlaying && enable) return true; // Only return true if nothing is playing
             return false;
         }
-
-
 
         /**
         *  GetAutoPlay
