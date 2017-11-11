@@ -1,12 +1,4 @@
-﻿using Discord;
-using Discord.Audio;
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace WhalesFargo
 {

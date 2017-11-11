@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Audio;
-using Discord.WebSocket;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -34,17 +33,29 @@ namespace WhalesFargo
         // We have a reference to the parent module to perform actions like replying and setting the current game properly.
         private AudioModule m_ParentModule = null;
 
+        /**
+         *  SetParentModule
+         *  Sets the parent module when we start the client in AudioModule.
+         */
         public void SetParentModule(AudioModule parent)
         {
             m_ParentModule = parent;
         }
 
+        /**
+         *  DiscordReply
+         *  Replies in the text channel using the parent module.
+         */
         private async void DiscordReply(string s)
         {
             if (m_ParentModule == null) return;
             await m_ParentModule.ServiceReplyAsync(s);
         }
 
+        /**
+         *  DiscordPlaying
+         *  Sets the playing string using the parent module.
+         */
         private async void DiscordPlaying(string s)
         {
             if (m_ParentModule == null) return;
@@ -54,6 +65,8 @@ namespace WhalesFargo
         /**
          *  Log
          *  Custom logger.
+         *  1 will use reply.
+         *  2 will use playing.
          *  TODO: Write so that it's an ENUM, where we can use | or &.
          */
         public void Log(string s, int output = 0)
@@ -258,7 +271,7 @@ namespace WhalesFargo
                 {
                     AudioFile song = PlaylistNext(); // If null, nothing in the playlist. We can wait in this loop until there is.
                     if (song != null) await AudioPlaybackAsync(audioClient, song);
-                    if (m_Playlist.IsEmpty) break; 
+                    if (m_Playlist.IsEmpty) break;
                     continue; // Is null or done with playback.
                 }
                 // If we can't get it from the dictionary, we're probably not connected to it yet.
@@ -316,8 +329,16 @@ namespace WhalesFargo
                 if (byteCount == 0)
                     break;
 
-                // Write out to the stream. Relies on m_Volume to adjust bytes accordingly.
-                await m_Stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, m_Volume), 0, byteCount);
+                try
+                {
+                    // Write out to the stream. Relies on m_Volume to adjust bytes accordingly.
+                    await m_Stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, m_Volume), 0, byteCount);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    break;
+                }
             }
             await m_Stream.FlushAsync();
             await Task.Delay(500);
@@ -383,7 +404,7 @@ namespace WhalesFargo
                 volume = 0.0f;
             else if (volume > 1.0f)
                 volume = 1.0f;
-            
+
             m_Volume = volume; // Update the volume
             Log("Adjusting volume : " + volume);
         }
@@ -413,9 +434,9 @@ namespace WhalesFargo
                 }
                 // Print out the current audio file string.
                 AudioFile current = m_Playlist.ElementAt(i);
-                playlist += zeros + i +  " : " + current + "\n";
+                playlist += zeros + i + " : " + current + "\n";
             }
-            
+
             return playlist;
         }
 
@@ -530,7 +551,8 @@ namespace WhalesFargo
             }
 
             // Network file.
-            new Thread(() => {
+            new Thread(() =>
+            {
 
                 // Stream data
                 AudioFile StreamData = new AudioFile();

@@ -69,9 +69,10 @@ namespace WhalesFargo
             // Play the audio. This function is BLOCKING. Call this last!
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
 
-            // Start the autoplay service if already on, but not started. This function is BLOCKING.
             bool autoplay = m_Service.GetAutoPlay();
-            if (autoplay) await AutoPlayVoiceChannel(autoplay); 
+            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            if (autoplay && m_Service.SetAutoPlay(autoplay))
+                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
         }
 
         [Command("pause", RunMode = RunMode.Async)]

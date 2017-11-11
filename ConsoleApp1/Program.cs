@@ -6,7 +6,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
