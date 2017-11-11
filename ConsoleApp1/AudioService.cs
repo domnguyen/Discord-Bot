@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿#define DEBUG_VERBOSE // Use this to print out all log messages to console. Comment out to disable.
+
+using Discord;
 using Discord.Audio;
 using System;
 using System.Collections.Concurrent;
@@ -10,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace WhalesFargo
 {
+
+    public enum E_LogOutput { Console, Reply, Playing }; // Enum to direct the string to output.
+
     /**
      * AudioService
      * Class that handles a single audio service.
@@ -69,11 +74,14 @@ namespace WhalesFargo
          *  2 will use playing.
          *  TODO: Write so that it's an ENUM, where we can use | or &.
          */
-        public void Log(string s, int output = 0)
+        public void Log(string s, int output = (int)E_LogOutput.Console)
         {
+#if (DEBUG_VERBOSE)
             Console.WriteLine("AudioService -- " + s);
-            if (output == 1) DiscordReply(s);
-            if (output == 2) DiscordPlaying(s);
+#endif
+            if (output == (int)E_LogOutput.Console) Console.WriteLine("AudioService -- " + s);
+            if (output == (int)E_LogOutput.Reply) DiscordReply(s);
+            if (output == (int)E_LogOutput.Playing) DiscordPlaying(s);
         }
 
         /**
@@ -307,8 +315,8 @@ namespace WhalesFargo
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Log("Now Playing: " + song.Title, 1);
-            Log(song.Title, 2);
+            Log("Now Playing: " + song.Title, (int)E_LogOutput.Reply); // Reply in the text channel.
+            Log(song.Title, (int)E_LogOutput.Playing); // Set playing.
 
             // While true, we stream the audio in chunks.
             while (true)
@@ -351,7 +359,7 @@ namespace WhalesFargo
             m_Process = null;
             m_Stream = null;
             m_IsPlaying = false; // We make sure this is last so we can exit properly.
-            Log("", 2);
+            Log("", (int)E_LogOutput.Playing); // Set playing off.
         }
 
         /**
@@ -411,7 +419,7 @@ namespace WhalesFargo
 
         /**
          *  PrintPlaylist
-         *  Prints out the playlist.
+         *  Returns a string with the playlist information.
          */
         public string PlaylistString()
         {
@@ -451,7 +459,7 @@ namespace WhalesFargo
             if (audio != null)
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
-                Log("Added to playlist : " + audio.Title, 1);
+                Log("Added to playlist : " + audio.Title, (int)E_LogOutput.Reply);
             }
         }
 
