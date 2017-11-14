@@ -827,8 +827,82 @@ namespace WhalesFargo
         }
 
 
+        public async Task clearMsg(IGuild guild, IMessageChannel channel, IUser user , int number){
 
+            
+            
+            
 
+            var GuildUser = await guild.GetUserAsync(user.Id);
+            if (!GuildUser.GetPermissions(channel as ITextChannel).ManageMessages)
+            {
+                await channel.SendMessageAsync("`You do not have enough permissions to manage messages`");
+                return;
+            }
+            if (number == 0) // Check if Delete is 0, int cannot be null.
+            {
+                await channel.SendMessageAsync("`You need to specify the amount | !clear (amount) | Replace (amount) with anything`");
+            }
+
+            int Amount = 0;
+            foreach (var Item in await channel.GetMessagesAsync(number).Flatten())
+            {
+
+                Amount++;
+                await Item.DeleteAsync();
+
+            }
+            await channel.SendMessageAsync($"`{user.Username} deleted {Amount} messages`");
+}
+
+        public async Task checkChatRespond(IMessageChannel channel)
+        {
+            if (!MyGlobals.PhraseRespond)
+            {
+                MyGlobals.PhraseRespond = true;
+                await Task.Delay(1000);
+                await channel.SendMessageAsync("Bot Response has been activated.`");
+            }
+
+            else if (MyGlobals.PhraseRespond)
+            {
+                MyGlobals.PhraseRespond = false;
+                await Task.Delay(1000);
+                await channel.SendMessageAsync("`Bot Response has been deactivated.`");
+            }
+        }
+
+        public async Task checkUserRespond(IMessageChannel channel)
+        {
+            if (!MyGlobals.TrollUser)
+            {
+                MyGlobals.TrollUser = true;
+                await Task.Delay(1000);
+                await channel.SendMessageAsync("`TrollUser has been activated.`");
+            }
+            else
+            {
+                MyGlobals.TrollUser = false;
+                await Task.Delay(1000);
+                await channel.SendMessageAsync("`TrollUser has been deactivated.`");
+            }
+        }
+
+        public async Task mute(IGuild guild, IUser user, IMessageChannel channel)
+        {
+
+            var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
+            await (user as IGuildUser).AddRoleAsync(role);
+            await channel.SendMessageAsync(user.Mention + " has been muted.");
+        }
+
+        public async Task unmute(IGuild guild, IUser user, IMessageChannel channel)
+        {
+
+            var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
+            await (user as IGuildUser).RemoveRoleAsync(role);
+            await channel.SendMessageAsync(user.Mention + " has been muted.");
+        }
     }
 
 }

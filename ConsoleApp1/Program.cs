@@ -45,7 +45,7 @@ namespace WhalesFargo
         public async Task MainAsync()
         {
             // Get the token from the application settings.
-            m_Token = Properties.Settings.Default.BOT_TOKEN;
+            m_Token = ConsoleApp1.Properties.Settings.Default.BOT_TOKEN;
             
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
