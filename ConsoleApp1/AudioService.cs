@@ -335,8 +335,8 @@ namespace WhalesFargo
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Log("Now Playing: " + song, (int)E_LogOutput.Reply); // Reply in the text channel.
-            Log(song, (int)E_LogOutput.Playing); // Set playing.
+            Log("Now Playing: " + song.Title, (int)E_LogOutput.Reply); // Reply in the text channel.
+            Log(song.Title, (int)E_LogOutput.Playing); // Set playing.
 
             // While true, we stream the audio in chunks.
             while (true)
