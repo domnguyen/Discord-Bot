@@ -263,5 +263,4 @@ __pycache__/
 # Settings
 **.settings
 **.Designer.cs
-ConsoleApp1\Properties\Settings.settings
-ConsoleApp1\Properties\Settings.Designer.cs
+﻿src/BotToken.txt
