@@ -263,4 +263,4 @@ __pycache__/
 # Settings
 **.settings
 **.Designer.cs
-﻿src/BotToken.txt
+src/BotToken.txt
