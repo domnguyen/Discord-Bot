@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhalesFargo", "ConsoleApp1\WhalesFargo.csproj", "{8CC867BF-9384-41B8-B7DC-17B82E790DC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhalesFargo", "src\WhalesFargo.csproj", "{8CC867BF-9384-41B8-B7DC-17B82E790DC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,8 +13,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CC867BF-9384-41B8-B7DC-17B82E790DC1}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

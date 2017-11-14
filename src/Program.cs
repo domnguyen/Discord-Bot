@@ -3,6 +3,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
@@ -45,7 +47,11 @@ namespace WhalesFargo
         public async Task MainAsync()
         {
             // Get the token from the application settings.
-            m_Token = ConsoleApp1.Properties.Settings.Default.BOT_TOKEN;
+            if (File.Exists("BotToken.txt"))
+            {
+                string token = File.ReadLines("BotToken.txt").First();
+                m_Token = token;
+            }
             
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();

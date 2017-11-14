@@ -1,4 +1,4 @@
-﻿#define DEBUG_VERBOSE // Use this to print out all log messages to console. Comment out to disable.
+﻿//#define DEBUG_VERBOSE // Use this to print out all log messages to console. Comment out to disable.
 
 using Discord;
 using Discord.Audio;
