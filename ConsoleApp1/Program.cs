@@ -1,7 +1,4 @@
-﻿//#define LIVE_TOKEN
-#define DEVELOPMENT_TOKEN
-
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,13 +44,8 @@ namespace WhalesFargo
         */
         public async Task MainAsync()
         {
-            /* Define at the top to choose between Live server and Development server. */
-            // TODO: Write to parse text or config file to keep this off the git repo.
-#if     (LIVE_TOKEN)
-            m_Token = "MzM3MzI2MDYyODcyNTU5NjI2.DJumYQ.BR29W3nS1qV8HFnV_N_CBsUkfCw";
-#elif   (DEVELOPMENT_TOKEN)
-            m_Token = "Mzc1MTgxMDM5OTAwOTUwNTI5.DNsGFw.lYU7hsurbo64wrB1qsHjs8eZjz4";
-#endif
+            // Get the token from the application settings.
+            m_Token = Properties.Settings.Default.BOT_TOKEN;
             
             /* Start to make the connection to the server */
             m_Client = new DiscordSocketClient();
@@ -118,7 +110,6 @@ namespace WhalesFargo
             // Discover all of the commands in this assembly and load them.
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
-
 
         /**
          * HandleCommand

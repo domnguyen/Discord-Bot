@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 
 namespace WhalesFargo
 {
-
-    public enum E_LogOutput { Console, Reply, Playing }; // Enum to direct the string to output.
+    // Enum to direct the string to output. Reference Log()
+    public enum E_LogOutput { Console, Reply, Playing }; 
 
     /**
      * AudioService
@@ -24,32 +24,37 @@ namespace WhalesFargo
         // Concurrent dictionary for multithreaded environments.
         private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
 
-        // Private variables.
-        private Process m_Process; // Process that runs when playing.
-        private Stream m_Stream; // Stream output when playing.
-        private bool m_IsPlaying = false; // Flag to change to play or pause the audio.
-        private float m_Volume = 1.0f; // Volume value that's checked during playback. Reference: PlayAudioAsync.
-        private bool m_DelayJoin = false; // Temporary Semaphore to control leaving and joining too quickly.
-
-        // Playlist. TODO: Move to separate class later.
+        // Playlist.
         private readonly ConcurrentQueue<AudioFile> m_Playlist = new ConcurrentQueue<AudioFile>();
-        private bool m_AutoPlay = false;
 
         // We have a reference to the parent module to perform actions like replying and setting the current game properly.
         private AudioModule m_ParentModule = null;
 
+        // Private variables.
+        private Process m_Process   = null;         // Process that runs when playing.
+        private Stream m_Stream     = null;         // Stream output when playing.
+        private bool m_IsPlaying    = false;        // Flag to change to play or pause the audio.
+        private float m_Volume      = 1.0f;         // Volume value that's checked during playback. Reference: PlayAudioAsync.
+        private bool m_DelayJoin    = false;        // Temporary Semaphore to control leaving and joining too quickly.
+        private bool m_AutoPlay     = false;        // Flag to check if autoplay is currently on or not.
+
+        private int m_BLOCK_SIZE    = 3840;         // Custom block size for playback, in bytes.
+
         /**
-         *  SetParentModule
-         *  Sets the parent module when we start the client in AudioModule.
-         */
-        public void SetParentModule(AudioModule parent)
-        {
-            m_ParentModule = parent;
-        }
+        *  SetParentModule
+        *  Sets the parent module when we start the client in AudioModule.
+        *  This should always be called in the module constructor to 
+        *  provide a direct reference to the parent module.
+        *  
+        *  @param parent - Parent AudioModule    
+        */
+        public void SetParentModule(AudioModule parent) { m_ParentModule = parent; }
 
         /**
          *  DiscordReply
          *  Replies in the text channel using the parent module.
+         *  
+         *  @param s - Message to reply in the channel
          */
         private async void DiscordReply(string s)
         {
@@ -60,6 +65,8 @@ namespace WhalesFargo
         /**
          *  DiscordPlaying
          *  Sets the playing string using the parent module.
+         *  
+         *  @param s - Message to set the playing message to.
          */
         private async void DiscordPlaying(string s)
         {
@@ -69,10 +76,13 @@ namespace WhalesFargo
 
         /**
          *  Log
-         *  Custom logger.
-         *  1 will use reply.
-         *  2 will use playing.
+         *  A Custom logger which can send messages to 
+         *  console, reply in module, or set to playing.
+         *  By default, we log everything to the console.
          *  TODO: Write so that it's an ENUM, where we can use | or &.
+         *  
+         *  @param s - Message to log
+         *  @param output - Output source
          */
         public void Log(string s, int output = (int)E_LogOutput.Console)
         {
@@ -88,6 +98,7 @@ namespace WhalesFargo
          *  JoinAudio
          *  Join the voice channel of the target.
          *  Adds a new client to the ConcurrentDictionary.
+         *  
          *  @param guild
          *  @param target
          */
@@ -132,6 +143,7 @@ namespace WhalesFargo
          *  LeaveAudio
          *  Leave the current voice channel.
          *  Removes the client from the ConcurrentDictionary.
+         *  
          *  @param guild
          */
         public async Task LeaveAudio(IGuild guild)
@@ -167,7 +179,8 @@ namespace WhalesFargo
         /**
         *  ExtractPathAsync
         *  Extracts from the path and fills an AudioFile with metadata information about the audio source.
-        *  @param path      string of the source path
+        *  
+        *  @param path - string of the source path
         */
         public async Task<AudioFile> ExtractPathAsync(string path)
         {
@@ -178,7 +191,9 @@ namespace WhalesFargo
          *  CreateLocalStream
          *  Creates a local stream using the file path specified and ffmpeg to stream it directly.
          *  The format Discord takes is 16-bit 48000Hz PCM
-         *  @param path     string of the source path (local)
+         *  TODO: Catch any errors that happen when creating PCM streams.
+         *  
+         *  @param path - string of the source path (local)
          */
         private Process CreateLocalStream(string path)
         {
@@ -196,7 +211,9 @@ namespace WhalesFargo
          *  CreateNetworkStream
          *  Creates a network stream using youtube-dl.exe, then piping it to ffmpeg to stream it directly.
          *  The format Discord takes is 16-bit 48000Hz PCM
-         *  @param path     string of the source path (network)
+         *  TODO: Catch any errors that happen when creating PCM streams.
+         *  
+         *  @param path - string of the source path (network)
          */
         private Process CreateNetworkStream(string path)
         { // TODO: Configure this to handle errors as well. A lot of links cannot be opened for some reason.
@@ -215,13 +232,14 @@ namespace WhalesFargo
          *  ForcePlayAudioAsync
          *  Force Play the current audio by string in the voice channel of the target.
          *  Right now, playing by local file name.
+         *  
          *  @param guild
          *  @param channel
          *  @param path
          *  
          *  TODO: Parse for youtube downloader and ffmpeg for different strings.
          *  TODO: Have a way to check if the file has been downloaded and play a local version instead.
-         *  TODO: Consider killing autoplay
+         *  TODO: Consider adding it to autoplay list if it is already playing.
          */
         public async Task ForcePlayAudioAsync(IGuild guild, IMessageChannel channel, AudioFile song)
         {
@@ -241,10 +259,9 @@ namespace WhalesFargo
             }
 
             // Start the stream, this is the main part of 'play'
-            // Moved to a separate function.
+            // Moved to a separate function called AudioPlaybackAsync()
             if (m_ConnectedChannels.TryGetValue(guild.Id, out var audioClient))
             {
-                // TODO: Write it so that we find it by playlist first.
                 await AudioPlaybackAsync(audioClient, song);
                 return;
             }
@@ -255,6 +272,8 @@ namespace WhalesFargo
 
         /**
          *  AutoPlayAudioAsync
+         *  This is for the autoplay function which waits after each playback and pulls from the playlist.
+         *  
          *  @param guild
          *  @param channel
          *  
@@ -286,7 +305,7 @@ namespace WhalesFargo
                 Log("Unable to play in the proper channel. Make sure the audio client is connected.");
                 break;
             }
-            //m_AutoPlay = false; // Finish autoplay service.
+            //m_AutoPlay = false; // TODO : Set an option for this. Right now, autoplay stays in autoplay.
         }
 
         /**
@@ -296,6 +315,7 @@ namespace WhalesFargo
          *  At the start, m_Process, m_Stream, amd m_IsPlaying is flushed.
          *  While it is playing, these will hold values of the current playback audio. It will depend on m_Volume for the volume.
          *  In the end, the three are flushed again.
+         *  
          *  @param client
          *  @param song
          */
@@ -315,8 +335,8 @@ namespace WhalesFargo
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Log("Now Playing: " + song.Title, (int)E_LogOutput.Reply); // Reply in the text channel.
-            Log(song.Title, (int)E_LogOutput.Playing); // Set playing.
+            Log("Now Playing: " + song, (int)E_LogOutput.Reply); // Reply in the text channel.
+            Log(song, (int)E_LogOutput.Playing); // Set playing.
 
             // While true, we stream the audio in chunks.
             while (true)
@@ -328,13 +348,13 @@ namespace WhalesFargo
                 while (!m_IsPlaying) await Task.Delay(1000); // We pause within this function while it's 'not playing'.
 
                 // Read the stream in chunks.
-                int blockSize = 3840;
+                int blockSize = m_BLOCK_SIZE; // Size of bytes to read per frame.
                 byte[] buffer = new byte[blockSize];
                 int byteCount;
                 byteCount = await m_Process.StandardOutput.BaseStream.ReadAsync(buffer, 0, blockSize);
 
                 // If the stream cannot be read or we reach the end of the file, we're finished.
-                if (byteCount == 0)
+                if (byteCount <= 0)
                     break;
 
                 try
@@ -351,7 +371,7 @@ namespace WhalesFargo
             await m_Stream.FlushAsync();
             await Task.Delay(500);
 
-            // Delete if it's still in the directory.
+            // Delete if it's still in the directory. Only if it's a downloaded network file.
             if (isNetwork && File.Exists(song.FileName))
                 File.Delete(song.FileName);
 
@@ -403,7 +423,8 @@ namespace WhalesFargo
         /**
          *  AdjustVolume
          *  Adjusts the current volume to the value passed. This affects the current AudioPlaybackAsync.
-         *  @param volume   A value from 0.0f - 1.0f.
+         *  
+         *  @param volume - A value from 0.0f - 1.0f.
          */
         public void AdjustVolume(float volume)
         {
@@ -415,6 +436,29 @@ namespace WhalesFargo
 
             m_Volume = volume; // Update the volume
             Log("Adjusting volume : " + volume);
+        }
+
+       /**
+        *  SetAutoPlay
+        *  Sets autplay to enable. Returns if the autoplay service should be started or not.
+        *  
+        *  @param enable - bool toggle for autoplay.
+        */
+        public bool SetAutoPlay(bool enable)
+        {
+            m_AutoPlay = enable;
+            Log("Setting autoplay : " + enable);
+
+            if (!m_IsPlaying && enable) return true; // Only return true if nothing is playing
+            return false;
+        }
+
+       /**
+        *  GetAutoPlay
+        */
+        public bool GetAutoPlay()
+        {
+            return m_AutoPlay;
         }
 
         /**
@@ -451,6 +495,7 @@ namespace WhalesFargo
         /**
          *  PlaylistAdd
          *  Adds a song to the playlist.
+         *  
          *  @param path   
          */
         public async Task PlaylistAdd(string path)
@@ -498,31 +543,11 @@ namespace WhalesFargo
         }
 
         /**
-        *  SetAutoPlay
-        *  Sets autplay to enable. Returns if the autoplay service should be started or not.
-        */
-        public bool SetAutoPlay(bool enable)
-        {
-            m_AutoPlay = enable;
-            Log("Setting autoplay : " + enable);
-
-            if (!m_IsPlaying && enable) return true; // Only return true if nothing is playing
-            return false;
-        }
-
-        /**
-        *  GetAutoPlay
-        */
-        public bool GetAutoPlay()
-        {
-            return m_AutoPlay;
-        }
-
-        /**
         *  VerifyNetworkPath
         *  Verifies that the path is a network path and not a local path. Checks here before extracting.
         *  Add more arguments here, but we'll just check based on http and assume a network link.
-        *  @param path     The path to the file.
+        *  
+        *  @param path - The path to the file.
         */
         public static bool VerifyNetworkPath(string path)
         {
@@ -530,11 +555,12 @@ namespace WhalesFargo
         }
 
         /**
-        *  Extract
+        *  ExtractAsync
         *  Extracts data from the current path, by finding it locally or on the network.
         *  Puts all the information into an AudioFile and returns it.
         *  Returns null if it can't be extracted through it's path.
-        *  @param path   string of the source path
+        *  
+        *  @param path - string of the source path
         */
         public static async Task<AudioFile> ExtractAsync(string path)
         {

@@ -61,7 +61,8 @@ namespace WhalesFargo
 
         /**
         *  DownloadAsync
-        *  
+        *  Downloads the file in the background and sets downloaded to true when done.
+        *  This can be used to optimize network audio sources.
         */
         public async Task DownloadAsync()
         {
@@ -73,6 +74,7 @@ namespace WhalesFargo
             m_IsNetwork = false;
             m_IsDownloaded = true;
         }
+
 
     }
 }
