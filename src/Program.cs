@@ -120,7 +120,7 @@ namespace WhalesFargo
         /**
          * HandleCommand
          * Handles commands with prefixes '!' and mention prefix.
-         * Others get passed to TrolRogue and CheckSenpai
+         * Others get passed to TrolRogue and CheckMessageContentForResponse
          * @param messageParam   The command parsed as a SocketMessage.
          */
         public async Task HandleCommand(SocketMessage messageParam)
@@ -134,8 +134,8 @@ namespace WhalesFargo
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
             {
                 // If it isn't a command, check to see if rogue sent it.
-                await TrollRogue(messageParam);
-                await CheckSenpai(messageParam);
+                await TrollUser(messageParam);
+                await CheckMessageContentForResponse(messageParam);
                 return;
             }
             // Create a Command Context
@@ -213,88 +213,30 @@ namespace WhalesFargo
         }
 
         /** 
-         * CheckSenpai
+         * CheckMessageContentForResponse
          * Check contents of various messages sent and execute accordingly.
          * @param arg   Message parsed as a SocketUserMessage.
          */
-        private async Task CheckSenpai(SocketMessage arg)
+        private async Task CheckMessageContentForResponse(SocketMessage arg)
         {
             var user = arg.Author;
             var chnl = arg.Channel as SocketTextChannel;
             var message = arg as SocketUserMessage;
             string str_message = message.ToString();
+            string msg = WhaleHelp.GetResponseMessage(str_message);
+            
+            await chnl.SendMessageAsync(msg);
 
-            // Done 
-            bool salt = str_message.IndexOf("salt", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool fart = str_message.IndexOf("swoosh", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool noob = str_message.IndexOf("noob", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool scam = str_message.IndexOf("scam", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool spawn = str_message.IndexOf("spawn", StringComparison.OrdinalIgnoreCase) >= 0;
 
-            // Todo
-            bool skumbag = str_message.IndexOf("skumbag", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool senpai = str_message.IndexOf("senpai", StringComparison.OrdinalIgnoreCase) >= 0;
-            bool op = str_message.IndexOf("op", StringComparison.OrdinalIgnoreCase) >= 0;
 
-            // If the bot scan is on
-            if (MyGlobals.PhraseRespond)
-            {
-                if (salt)
-                {
-                    Console.WriteLine("Salt Response Activated");
-                    await chnl.SendMessageAsync("https://imgur.com/1S9x2fH");
-                }
-                else if (fart)
-                {
-                    Console.WriteLine("fart Response Activated");
-                    await chnl.SendMessageAsync("https://imgur.com/1hr7CfK");
-                }
-                else if (noob)
-                {
-                    Random rnd = new Random();
-                    int rannum = rnd.Next(1, 10);
-                    if (rannum % 2 == 0)
-                    {
-                        Console.WriteLine("noob Response Activated");
-                        await chnl.SendMessageAsync("https://imgur.com/HxAkrS2");
-                    }
-                }
-                else if (scam)
-                {
-                    Random rnd = new Random();
-                    int rannum = rnd.Next(1, 10);
-                    if (rannum % 2 == 0)
-                    {
-                        Console.WriteLine("scam Response Activated");
-                        await chnl.SendMessageAsync("https://imgur.com/QnQCtoN");
-                    }
-                }
-                else if (spawn)
-                {
-                    Random rnd = new Random();
-                    int rannum = rnd.Next(1, 10);
-                    if (rannum == 1)
-                    {
-                        await chnl.SendMessageAsync("https://imgur.com/XoXcx1X");
-                        await chnl.SendMessageAsync("Are you sure you want to spawn??");
-
-                    }
-                    if (rannum == 2)
-                    {
-                        await chnl.SendMessageAsync("https://vignette2.wikia.nocookie.net/unisonleague/images/5/59/Gear-Behemoth_Icon.png");
-                        await chnl.SendMessageAsync("If you spawn, you could end up with a behemoth...");
-                    }
-                }
-                
-            }
         }
 
         /** 
-         * TrollRogue
+         * TrollUser
          * Check if the user id matches the troll id.
          * @param arg   Message parsed as a SocketUserMessage.
          */
-        private async Task TrollRogue(SocketMessage arg)
+        private async Task TrollUser(SocketMessage arg)
         {
             if (MyGlobals.TrollUser)
             {
@@ -350,12 +292,13 @@ namespace WhalesFargo
          */
         public async Task SendGb()
         {
-            // Gets the colo channel 
-            var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
+           // Gets the colo channel 
+           var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
             await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
         }
 
+       
         public DiscordSocketClient GetClient() { return m_Client; }
     }
 }
