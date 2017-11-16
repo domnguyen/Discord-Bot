@@ -7,7 +7,13 @@ This bot is built to be run on any .NET Framework compatible machine. It is mean
 
 This bot was built specifically for a single Mobile Game, Unison League, but is being expanded for a more general use.
 
-##### Note : Create a file called BotToken.txt in the /src directory with your bot token to get connected.
+## To Install:
+
+To install do the following:
+* Clone our repo
+* Create a file called BotToken.txt in the /src directory with your bot token to get connected.
+  * The file should contain only the token, nothing else.
+* Compile with Visual Studio, and it should be ready to go!
 
 ## Current Features:
 ### Chat Functions:
