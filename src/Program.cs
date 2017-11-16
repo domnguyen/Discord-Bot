@@ -269,7 +269,7 @@ namespace WhalesFargo
             bool colo = String.Equals(event_name, "colo", StringComparison.Ordinal);
             bool gb = String.Equals(event_name, "gb", StringComparison.Ordinal);
 
-            Console.WriteLine("Testing Elapsed section");
+            
             if (colo) await SendColo();
             else if (gb) await SendGb();
         }
