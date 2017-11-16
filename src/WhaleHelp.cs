@@ -25,7 +25,9 @@ namespace WhalesFargo
         public static string TimeIsReady()
         {
             DateTime currentUTC = DateTime.UtcNow;
-            currentUTC = currentUTC.AddHours(1);
+            /* Daylight savings adjustment */
+            currentUTC = currentUTC.AddHours(-1);
+
             // 0800-0900
             // 1500-1600
             // 1830-1930

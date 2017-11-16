@@ -45,11 +45,12 @@ namespace WhalesFargo
         {
             /* Get current time in UTC */
             DateTime currentUTC = DateTime.UtcNow;
-            currentUTC = currentUTC.AddHours(1);
-
             /* Daylight savings adjustment */
+            currentUTC = currentUTC.AddHours(-1);
 
-            // currentUTC = currentUTC.AddHours(-1);
+            
+
+          
 
             /* Check which command was run */
             bool egg = String.Equals(event_name, "egg", StringComparison.Ordinal);
