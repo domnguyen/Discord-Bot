@@ -3,10 +3,10 @@
 namespace WhalesFargo
 {
     /**
-    * AudioFile
-    * Class that holds properties from the audio file.
-    * Add more when necessary, but the only thing we're using for it now is the title field.
-    */
+     * AudioFile
+     * Class that holds properties from the audio file.
+     * Add more when necessary, but the only thing we're using for it now is the title field.
+     */
     public class AudioFile
     {
         private string m_FileName;
@@ -60,10 +60,10 @@ namespace WhalesFargo
         }
 
         /**
-        *  DownloadAsync
-        *  Downloads the file in the background and sets downloaded to true when done.
-        *  This can be used to optimize network audio sources.
-        */
+         *  DownloadAsync
+         *  Downloads the file in the background and sets downloaded to true when done.
+         *  This can be used to optimize network audio sources.
+         */
         public async Task DownloadAsync()
         {
             await Task.Delay(0); // TODO: Write the download function here.

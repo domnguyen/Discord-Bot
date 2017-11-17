@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace WhalesFargo
 {
     // Enum to direct the string to output. Reference Log()
-    public enum E_LogOutput { Console, Reply, Playing }; 
+    public enum E_LogOutput { Console, Reply, Playing };
 
     /**
      * AudioService
@@ -31,23 +31,23 @@ namespace WhalesFargo
         private AudioModule m_ParentModule = null;
 
         // Private variables.
-        private Process m_Process   = null;         // Process that runs when playing.
-        private Stream m_Stream     = null;         // Stream output when playing.
-        private bool m_IsPlaying    = false;        // Flag to change to play or pause the audio.
-        private float m_Volume      = 1.0f;         // Volume value that's checked during playback. Reference: PlayAudioAsync.
-        private bool m_DelayJoin    = false;        // Temporary Semaphore to control leaving and joining too quickly.
-        private bool m_AutoPlay     = false;        // Flag to check if autoplay is currently on or not.
+        private Process m_Process = null;           // Process that runs when playing.
+        private Stream m_Stream = null;             // Stream output when playing.
+        private bool m_IsPlaying = false;           // Flag to change to play or pause the audio.
+        private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
+        private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
+        private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
 
-        private int m_BLOCK_SIZE    = 3840;         // Custom block size for playback, in bytes.
+        private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
         /**
-        *  SetParentModule
-        *  Sets the parent module when we start the client in AudioModule.
-        *  This should always be called in the module constructor to 
-        *  provide a direct reference to the parent module.
-        *  
-        *  @param parent - Parent AudioModule    
-        */
+         *  SetParentModule
+         *  Sets the parent module when we start the client in AudioModule.
+         *  This should always be called in the module constructor to 
+         *  provide a direct reference to the parent module.
+         *  
+         *  @param parent - Parent AudioModule    
+         */
         public void SetParentModule(AudioModule parent) { m_ParentModule = parent; }
 
         /**
@@ -84,10 +84,10 @@ namespace WhalesFargo
          *  @param s - Message to log
          *  @param output - Output source
          */
-        public void Log(string s, int output = (int)E_LogOutput.Console)
+        private void Log(string s, int output = (int)E_LogOutput.Console)
         {
 #if (DEBUG_VERBOSE)
-            Console.WriteLine("AudioService -- " + s);
+            Console.WriteLine("AudioService [DEBUG] -- " + s);
 #endif
             if (output == (int)E_LogOutput.Console) Console.WriteLine("AudioService -- " + s);
             if (output == (int)E_LogOutput.Reply) DiscordReply(s);
@@ -177,14 +177,14 @@ namespace WhalesFargo
         }
 
         /**
-        *  ExtractPathAsync
-        *  Extracts from the path and fills an AudioFile with metadata information about the audio source.
-        *  
-        *  @param path - string of the source path
-        */
+         *  ExtractPathAsync
+         *  Extracts from the path and fills an AudioFile with metadata information about the audio source.
+         *  
+         *  @param path - string of the source path
+         */
         public async Task<AudioFile> ExtractPathAsync(string path)
         {
-            return await AudioService.ExtractAsync(path);
+            return await ExtractAsync(path);
         }
 
         /**
@@ -326,9 +326,10 @@ namespace WhalesFargo
             m_Stream = null;
             m_IsPlaying = false;
 
-            bool isNetwork = AudioService.VerifyNetworkPath(song.FileName); // Check if network path. This will change if it's an audiofile.
+            bool isNetwork = VerifyNetworkPath(song.FileName); // Check if network path. This will change if it's an audiofile.
 
             // Start a new process and create an output stream. Decide between network or local.
+            // TODO: Check if a network file is downloaded, to use local version.
             m_Process = isNetwork ? CreateNetworkStream(song.FileName) : CreateLocalStream(song.FileName);
             m_Stream = client.CreatePCMStream(AudioApplication.Music);
             m_IsPlaying = true; // Set this to true to start the loop properly.
@@ -360,7 +361,7 @@ namespace WhalesFargo
                 try
                 {
                     // Write out to the stream. Relies on m_Volume to adjust bytes accordingly.
-                    await m_Stream.WriteAsync(WhaleHelp.ScaleVolumeSafeAllocateBuffers(buffer, m_Volume), 0, byteCount);
+                    await m_Stream.WriteAsync(ScaleVolumeSafeAllocateBuffers(buffer, m_Volume), 0, byteCount);
                 }
                 catch (Exception exception)
                 {
@@ -438,12 +439,12 @@ namespace WhalesFargo
             Log("Adjusting volume : " + volume);
         }
 
-       /**
-        *  SetAutoPlay
-        *  Sets autplay to enable. Returns if the autoplay service should be started or not.
-        *  
-        *  @param enable - bool toggle for autoplay.
-        */
+        /**
+         *  SetAutoPlay
+         *  Sets autplay to enable. Returns if the autoplay service should be started or not.
+         *  
+         *  @param enable - bool toggle for autoplay.
+         */
         public bool SetAutoPlay(bool enable)
         {
             m_AutoPlay = enable;
@@ -453,9 +454,9 @@ namespace WhalesFargo
             return false;
         }
 
-       /**
-        *  GetAutoPlay
-        */
+        /**
+         *  GetAutoPlay
+         */
         public bool GetAutoPlay()
         {
             return m_AutoPlay;
@@ -500,7 +501,7 @@ namespace WhalesFargo
          */
         public async Task PlaylistAdd(string path)
         {
-            AudioFile audio = await AudioService.ExtractAsync(path);
+            AudioFile audio = await ExtractAsync(path);
             if (audio != null)
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
@@ -543,13 +544,49 @@ namespace WhalesFargo
         }
 
         /**
+         * ScaleVolumeSafeAllocateBuffers
+         * Adjusts the byte array by the volume, scaling it by a factor [0.0f,1.0f]
+         * 
+         * @param audioSamples - The source audio sample from the ffmpeg stream
+         * @param volume - The volume to adjust to, ranges [0.0f,1.0f]
+         */
+        private byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
+        {
+            if (audioSamples == null) return null;
+            if (audioSamples.Length % 2 != 0) return null;
+            if (volume < 0.0f || volume > 1.0f) return null;
+
+            var output = new byte[audioSamples.Length];
+            if (Math.Abs(volume - 1f) < 0.0001f)
+            {
+                Buffer.BlockCopy(audioSamples, 0, output, 0, audioSamples.Length);
+                return output;
+            }
+
+            // 16-bit precision for the multiplication
+            int volumeFixed = (int)Math.Round(volume * 65536d);
+
+            for (var i = 0; i < output.Length; i += 2)
+            {
+                // The cast to short is necessary to get a sign-extending conversion
+                int sample = (short)((audioSamples[i + 1] << 8) | audioSamples[i]);
+                int processed = (sample * volumeFixed) >> 16;
+
+                output[i] = (byte)processed;
+                output[i + 1] = (byte)(processed >> 8);
+            }
+
+            return output;
+        }
+
+        /**
         *  VerifyNetworkPath
         *  Verifies that the path is a network path and not a local path. Checks here before extracting.
         *  Add more arguments here, but we'll just check based on http and assume a network link.
         *  
-        *  @param path - The path to the file.
+        *  @param path - The path to the file
         */
-        public static bool VerifyNetworkPath(string path)
+        private bool VerifyNetworkPath(string path)
         {
             return path.StartsWith("http");
         }
@@ -562,7 +599,7 @@ namespace WhalesFargo
         *  
         *  @param path - string of the source path
         */
-        public static async Task<AudioFile> ExtractAsync(string path)
+        private async Task<AudioFile> ExtractAsync(string path)
         {
             TaskCompletionSource<AudioFile> taskSrc = new TaskCompletionSource<AudioFile>();
             bool verifyNetwork = VerifyNetworkPath(path);

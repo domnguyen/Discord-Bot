@@ -65,7 +65,7 @@ namespace WhalesFargo
         {
             // Extract the audio. Download here if necessary. TODO: Catch if youtube-dl can't read the header.
             AudioFile audio = await m_Service.ExtractPathAsync(song);
-            
+
             // Play the audio. This function is BLOCKING. Call this last!
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
 
