@@ -175,6 +175,7 @@
     <Compile Include="AudioService.cs" />
     <Compile Include="ChatModule.cs" />
     <Compile Include="ChatService.cs" />
+    <Compile Include="HelpModule.cs" />
     <Compile Include="WhaleHelp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
