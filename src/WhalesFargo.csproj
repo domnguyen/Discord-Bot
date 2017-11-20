@@ -170,36 +170,36 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioFile.cs" />
-    <Compile Include="AudioModule.cs" />
-    <Compile Include="AudioService.cs" />
-    <Compile Include="ChatModule.cs" />
-    <Compile Include="ChatService.cs" />
-    <Compile Include="HelpModule.cs" />
-    <Compile Include="WhaleHelp.cs" />
+    <Compile Include="Helpers\AudioFile.cs" />
+    <Compile Include="Modules\AudioModule.cs" />
+    <Compile Include="Services\AudioService.cs" />
+    <Compile Include="Modules\ChatModule.cs" />
+    <Compile Include="Services\ChatService.cs" />
+    <Compile Include="Modules\HelpModule.cs" />
+    <Compile Include="Helpers\WhaleHelp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ffmpeg.exe">
+    <Content Include="Externals\ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ffplay.exe">
+    <Content Include="Externals\ffplay.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ffprobe.exe">
+    <Content Include="Externals\ffprobe.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libsodium.dll">
+    <Content Include="Externals\libsodium.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="opus.dll">
+    <Content Include="Externals\opus.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libopus.dll">
+    <Content Include="Externals\libopus.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="youtube-dl.exe">
+    <Content Include="Externals\youtube-dl.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="BotToken.txt">
