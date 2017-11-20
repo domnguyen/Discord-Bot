@@ -52,7 +52,10 @@ namespace WhalesFargo
                 emb.AddField(module.Name, module.Summary);
             }
 
-            await ReplyAsync("", false, emb);
+            if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
+                await ReplyAsync("Module information cannot be found, please try again later.");
+            else
+                await ReplyAsync("", false, emb);
         }
 
         [Command("help2", RunMode = RunMode.Async)]
@@ -65,7 +68,7 @@ namespace WhalesFargo
             // If null, we chose a bad module.
             if (module == null)
             {
-                await ReplyAsync($"The module `{moduleName}` does not exist.");
+                await ReplyAsync($"The module `{moduleName}` does not exist. Are you sure you typed the right module?");
                 return;
             }
 
@@ -75,7 +78,7 @@ namespace WhalesFargo
             // If none of them have summaries or don't exist, return.
             if (commands.Count() == 0)
             {
-                await ReplyAsync($"The module `{module.Name}` has no available commands :(");
+                await ReplyAsync($"The module `{module.Name}` has no available commands.");
                 return;
             }
 
@@ -90,7 +93,10 @@ namespace WhalesFargo
                     emb.AddField(command.Aliases.First(), command.Summary);
             }
 
-            await ReplyAsync("", false, emb);
+            if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
+                await ReplyAsync("Command information cannot be found, please try again later.");
+            else
+                await ReplyAsync("", false, emb);
         }
 
     }
