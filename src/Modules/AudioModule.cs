@@ -11,7 +11,8 @@ namespace WhalesFargo
      * Class that handles the audio portion of the program.
      * An audio module is created here with commands that interact with an AudioService.
      */
-    [Summary("Audio class to interact with voice chat. Currently, used to playback audio in a stream.")]
+    [Name("Audio")]
+    [Summary("Audio module to interact with voice chat. Currently, used to playback audio in a stream.")]
     public class AudioModule : ModuleBase
     {
         // Private variables

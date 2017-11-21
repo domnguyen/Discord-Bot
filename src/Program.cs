@@ -32,8 +32,8 @@ namespace WhalesFargo
         // Private variables.
         private DiscordSocketClient m_Client; // Discord client.
         private CommandService m_Commands;
-        private IServiceProvider m_Services; // TODO: Probably need to change this to include more services.
-        private string m_Token = ""; // Bot Token. Do not share with other people
+        private IServiceProvider m_Services;
+        private string m_Token = ""; // Bot Token. Do not share with other people if you plan to hardcode it here. Otherwise create a BotToken.txt file.
 
         /**
          * Main
@@ -52,16 +52,19 @@ namespace WhalesFargo
                 string token = File.ReadLines("BotToken.txt").First();
                 m_Token = token;
             }
-            
-            /* Start to make the connection to the server */
+            // Token was not properly set up. Do not run. Throws error!!!
+            if (m_Token == "") return;
+
+            // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
             m_Services = InstallServices(); // We install services by adding it to a service collection.
 
             // Startup the client.
             await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
-            
             await m_Client.StartAsync();
+
+            // Install commands once the client has logged in.
             await InstallCommands();
 
             // Important for the publishing of GVG announcements!
@@ -85,9 +88,9 @@ namespace WhalesFargo
             ServiceCollection services = new ServiceCollection();
 
             // Add all additional services here.
-
             services.AddSingleton<AudioService>(); // AudioModule : AudioService
-            services.AddSingleton<ChatService>();
+            services.AddSingleton<ChatService>(); // ChatModule : ChatService
+
             // Return the service provider.
             return services.BuildServiceProvider();
         }
@@ -226,9 +229,6 @@ namespace WhalesFargo
             string msg = WhaleHelp.GetResponseMessage(str_message);
             
             await chnl.SendMessageAsync(msg);
-
-
-
         }
 
         /** 
@@ -297,8 +297,5 @@ namespace WhalesFargo
             /* You can add references to any channel you wish */
             await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
         }
-
-       
-        public DiscordSocketClient GetClient() { return m_Client; }
     }
 }

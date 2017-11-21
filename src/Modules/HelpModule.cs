@@ -32,6 +32,7 @@ namespace WhalesFargo
 
             // Create an embed builder.
             var emb = new EmbedBuilder();
+            emb.WithTitle("Here is the list of modules.");
 
             // For each module...
             foreach (var module in modules)
@@ -69,6 +70,7 @@ namespace WhalesFargo
             if (module == null)
             {
                 await ReplyAsync($"The module `{moduleName}` does not exist. Are you sure you typed the right module?");
+                await HelpAsync(); // Show the list of modules again.
                 return;
             }
 
