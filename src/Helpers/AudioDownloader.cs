@@ -13,8 +13,10 @@ namespace WhalesFargo
     */
     class AudioDownloader
     {
-        // ConcurrentQueue to keep track of the current downloads order.
+        // Concurrent Libraries to keep track of the current downloads order and duplicates.
         private readonly ConcurrentQueue<AudioFile> m_DownloadQueue = new ConcurrentQueue<AudioFile>();
+        private readonly ConcurrentDictionary<string, int> m_DownloadDuplicates = new ConcurrentDictionary<string, int>();
+
 
         private string m_FolderPath = "tmp";            // Default folder path.
         private bool m_IsRunning = false;               // Flag to check if it's in the middle of downloading already.
@@ -25,9 +27,10 @@ namespace WhalesFargo
          * 
          * @param song - song to be downloaded in the future.
          */
-        public void Add(AudioFile song)
+        public async Task AddAsync(AudioFile song)
         {
             m_DownloadQueue.Enqueue(song); // Only add if there's no errors.
+            await Task.Delay(0);
         }
 
         /**
@@ -47,6 +50,8 @@ namespace WhalesFargo
          */
         public async Task StartDownloadAsync()
         {
+            if (m_IsRunning) return; // Download is already running.
+
             m_IsRunning = true;
             while (m_DownloadQueue.Count > 0)
             {
@@ -122,14 +127,21 @@ namespace WhalesFargo
         private string GetProperFilename(string title)
         {
             string filename = "";
-            int count = 0;
-            do
+            filename = Path.Combine(m_FolderPath, title + ".mp3");
+
+            // It already exists, so we update it's value.
+            if (m_DownloadDuplicates.TryRemove(filename, out var count))
             {
-                if (count == 0)
-                    filename = Path.Combine(m_FolderPath, title + ".mp3");
-                else
-                    filename = Path.Combine(m_FolderPath, title + (++count) + ".mp3");
-            } while (File.Exists(filename));
+                m_DownloadDuplicates.TryAdd(filename, ++count);
+                filename = Path.Combine(m_FolderPath, title + "_" + (count) + ".mp3");
+            }
+
+            // This is the first time seeing it, so we add it for the first time.
+            else
+            {
+                m_DownloadDuplicates.TryAdd(filename, 0);
+            }
+
             return filename;
         }
     }

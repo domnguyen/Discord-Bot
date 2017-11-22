@@ -40,6 +40,7 @@ namespace WhalesFargo
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
+        private bool m_AutoDownload = true;         // Flag to auto download network items.
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
@@ -510,8 +511,12 @@ namespace WhalesFargo
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
                 Log("Added to playlist : " + audio.Title, (int)E_LogOutput.Reply);
 
-                if (audio.IsNetwork) m_AudioDownloader.Add(audio); // Auto download while in playlist.
-                if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync();
+                // If the downloader is set to true, we start the autodownload helper.
+                if (m_AutoDownload)
+                {
+                    if (audio.IsNetwork) await m_AudioDownloader.AddAsync(audio); // Auto download while in playlist.
+                    if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync();
+                }
             }
         }
 
