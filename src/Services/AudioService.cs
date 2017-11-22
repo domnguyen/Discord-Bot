@@ -188,6 +188,17 @@ namespace WhalesFargo
         }
 
         /**
+        *  DownloadPathAsync
+        *  Downloads the audio file and makes it a local file.
+        *  
+        *  @param file - source file
+        */
+        public async Task DownloadPathAsync(AudioFile file)
+        {
+            await file.DownloadAsync();
+        }
+
+        /**
          *  CreateLocalStream
          *  Creates a local stream using the file path specified and ffmpeg to stream it directly.
          *  The format Discord takes is 16-bit 48000Hz PCM
@@ -373,7 +384,7 @@ namespace WhalesFargo
             await Task.Delay(500);
 
             // Delete if it's still in the directory. Only if it's a downloaded network file.
-            if (isNetwork && File.Exists(song.FileName))
+            if (song.IsDownloaded && File.Exists(song.FileName))
                 File.Delete(song.FileName);
 
             // Reset values. Basically clearing out values again (Flush).
@@ -499,6 +510,7 @@ namespace WhalesFargo
          *  
          *  @param path   
          */
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")] // Suppresses 'await', so we can silently download in the background.
         public async Task PlaylistAdd(string path)
         {
             AudioFile audio = await ExtractAsync(path);
@@ -506,6 +518,8 @@ namespace WhalesFargo
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
                 Log("Added to playlist : " + audio.Title, (int)E_LogOutput.Reply);
+
+                if (audio.IsNetwork) DownloadPathAsync(audio); // Auto download while in playlist.
             }
         }
 
@@ -638,7 +652,7 @@ namespace WhalesFargo
                     Arguments = $"-s -e {path}",// Add more flags for more options.
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    UseShellExecute = false     //Linux?
+                    UseShellExecute = false
                 };
                 youtubedl = Process.Start(youtubedlMetaData);
                 youtubedl.WaitForExit();
