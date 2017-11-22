@@ -31,8 +31,8 @@ namespace WhalesFargo
     {
         // Private variables.
         private DiscordSocketClient m_Client; // Discord client.
-        private CommandService m_Commands;
-        private IServiceProvider m_Services;
+        private CommandService m_Commands; // Command service to link modules.
+        private IServiceProvider m_Services; // Service provider to add services to these modules.
         private string m_Token = ""; // Bot Token. Do not share with other people if you plan to hardcode it here. Otherwise create a BotToken.txt file.
 
         /**
@@ -47,13 +47,7 @@ namespace WhalesFargo
         public async Task MainAsync()
         {
             // Get the token from the application settings.
-            if (File.Exists("BotToken.txt"))
-            {
-                string token = File.ReadLines("BotToken.txt").First();
-                m_Token = token;
-            }
-            // Token was not properly set up. Do not run. Throws error!!!
-            if (m_Token == "") return;
+            m_Token = GetBotToken();
 
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
@@ -80,8 +74,22 @@ namespace WhalesFargo
         }
 
         /**
+         * GetBotToken
+         * Attempt to get the bot token from BotToken.txt
+         * If it doesn't exist, we can't return anything.
+         */
+        private string GetBotToken()
+        {
+            string token = "";
+            if (File.Exists("BotToken.txt"))
+                token = File.ReadLines("BotToken.txt").First();
+            return token;
+        }
+
+        /**
          * InstallServices
          * This is where you install all necessary services for our bot.
+         * TODO: Make sure to add additional services here!!
          */
         private IServiceProvider InstallServices()
         {
@@ -100,7 +108,7 @@ namespace WhalesFargo
          * This is where you install all possible commands for our bot.
          * Essentially, it will take the Messages Received and send it into our Handler 
          */
-        public async Task InstallCommands()
+        private async Task InstallCommands()
         {
             // Before we install commands, we should check if everything was set up properly. Check if logged in.
             if (m_Client.LoginState != (LoginState.LoggedIn)) return;
@@ -109,7 +117,7 @@ namespace WhalesFargo
             m_Client.MessageReceived += HandleCommand;
 
             // Add tasks to send Messages, and userJoined to appropriate places
-            m_Client.Ready += SetBotStatus;
+            m_Client.Ready += DefaultBotStatus;
             m_Client.UserJoined += UserJoined;
             m_Client.UserLeft += UserLeft;
             m_Client.Log += Log;
@@ -126,7 +134,7 @@ namespace WhalesFargo
          * Others get passed to TrolRogue and CheckMessageContentForResponse
          * @param messageParam   The command parsed as a SocketMessage.
          */
-        public async Task HandleCommand(SocketMessage messageParam)
+        private async Task HandleCommand(SocketMessage messageParam)
         {
             // Don't process the command if it was a System Message
             var message = messageParam as SocketUserMessage;
@@ -154,7 +162,7 @@ namespace WhalesFargo
          * SetBotStatus
          * This sets the bots status as default. Can easily be changed. 
          */
-        public async Task SetBotStatus()
+        private async Task DefaultBotStatus()
         {
             await m_Client.SetGameAsync("Type !help for help!");
         }
@@ -162,33 +170,34 @@ namespace WhalesFargo
         /**
          * UserJoined
          * This message is sent once a user joins the server.
-         * @param user  A single user.
+         * 
+         * @param user - A single user.
          */
-        public async Task UserJoined(SocketGuildUser user)
+        private async Task UserJoined(SocketGuildUser user)
         {
-            var channel = user.Guild.DefaultChannel;
-            /* You can add references to any channel you wish */
+            var channel = user.Guild.DefaultChannel;  // You can add references to any channel you wish
             await channel.SendMessageAsync("Welcome to the Discord server" + user.Mention + "! Feel free to ask around if you need help!");
         }
 
         /**
          * UserLeft
          * This message is sent once a user joins the server. 
-         * @param user  A single user.
+         * 
+         * @param user - A single user.
          */
-        public async Task UserLeft(SocketGuildUser user)
+        private async Task UserLeft(SocketGuildUser user)
         {
-            var channel = user.Guild.DefaultChannel;
-            /* You can add references to any channel you wish */
+            var channel = user.Guild.DefaultChannel; // You can add references to any channel you wish
             await channel.SendMessageAsync(user.Mention + " has left the Discord server.");
         }
 
         /**
          * Log
          * Bot will log to Console 
-         * @param msg    Message to write out to Console.
+         * 
+         * @param msg - Message to write out to Console.
          */
-        public Task Log(LogMessage msg)
+        private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
@@ -207,7 +216,8 @@ namespace WhalesFargo
         /** 
         * Disconnected
         * Handles if the bot is suddenly disconnected.
-        * @param arg   Exception thrown if disconnected for any reason.
+        * 
+        * @param arg - Exception thrown if disconnected for any reason.
         */
         private Task Disconnected(Exception arg)
         {
@@ -297,5 +307,7 @@ namespace WhalesFargo
             /* You can add references to any channel you wish */
             await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
         }
+
+
     }
 }

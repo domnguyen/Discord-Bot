@@ -181,30 +181,38 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Externals\ffmpeg.exe">
+    <ContentWithTargetPath Include="Externals\ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\ffplay.exe">
+      <TargetPath>ffmpeg.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\ffplay.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\ffprobe.exe">
+      <TargetPath>ffplay.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\ffprobe.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\libsodium.dll">
+      <TargetPath>ffprobe.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\libsodium.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\opus.dll">
+      <TargetPath>libsodium.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\opus.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\libopus.dll">
+      <TargetPath>opus.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\libopus.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Externals\youtube-dl.exe">
+      <TargetPath>libopus.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Externals\youtube-dl.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="BotToken.txt">
+      <TargetPath>youtube-dl.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="BotToken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+      <TargetPath>BotToken.txt</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

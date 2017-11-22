@@ -23,7 +23,7 @@ namespace WhalesFargo
             m_Provider = provider;
         }
 
-        [Command("help2", RunMode = RunMode.Async)]
+        [Command("help2", RunMode = RunMode.Async)] // TODO: Change this once all summaries are added.
         [Summary("Finds all the modules and prints out it's summary tag.")]
         public async Task HelpAsync()
         {
@@ -59,7 +59,7 @@ namespace WhalesFargo
                 await ReplyAsync("", false, emb);
         }
 
-        [Command("help2", RunMode = RunMode.Async)]
+        [Command("help2", RunMode = RunMode.Async)] // TODO: Change this once all summaries are added.
         [Summary("Finds all the commands from a specific module and prints out it's summary tag.")]
         public async Task HelpAsync(string moduleName)
         {
