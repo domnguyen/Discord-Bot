@@ -11,13 +11,13 @@ namespace WhalesFargo
     *  Helper class to download files in the background.
     *  This can be used to optimize network audio sources.
     */
-    class AudioDownloader
+    public class AudioDownloader
     {
         // Concurrent Libraries to keep track of the current downloads order and duplicates.
         private readonly ConcurrentQueue<AudioFile> m_DownloadQueue = new ConcurrentQueue<AudioFile>();
         private readonly ConcurrentDictionary<string, int> m_DownloadDuplicates = new ConcurrentDictionary<string, int>();
 
-
+        // Private variables.
         private string m_FolderPath = "tmp";            // Default folder path.
         private bool m_IsRunning = false;               // Flag to check if it's in the middle of downloading already.
 
@@ -50,7 +50,7 @@ namespace WhalesFargo
          */
         public async Task StartDownloadAsync()
         {
-            if (m_IsRunning) return; // Download is already running.
+            if (m_IsRunning) return; // Download is already running, stop to avoid conflicts/race conditions.
 
             m_IsRunning = true;
             while (m_DownloadQueue.Count > 0)
@@ -74,6 +74,10 @@ namespace WhalesFargo
          *  DownloadAsync
          *  Downloads the file in the background and sets downloaded to true when done.
          *  This can be used to optimize network audio sources.
+         *  
+         *  @param song - AudioFile from the concurrentqueue
+         *  
+         *  TODO: Catch any errors if the file cannot be downloaded or opened?
          */
         public async Task DownloadAsync(AudioFile song)
         {
@@ -123,6 +127,8 @@ namespace WhalesFargo
         /**
          * GetProperFilename
          * Returns the proper filename by searching the path for an existing file.
+         * 
+         * @param title - The song title we're searching for, or if there's an existing filename.
          */
         private string GetProperFilename(string title)
         {

@@ -1,9 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace WhalesFargo
+﻿namespace WhalesFargo
 {
     /**
      * AudioFile

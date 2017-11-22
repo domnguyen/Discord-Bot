@@ -99,6 +99,20 @@ namespace WhalesFargo
         }
 
         /**
+         * DelayAction
+         * Using the flag, we pass in a function to lock in between the semaphore. Added for better practice.
+         * 
+         * @param f - Function called in between the semaphore.
+         */
+        private async Task DelayAction(Action f)
+        {
+            m_DelayJoin = true; // Lock.
+            f();
+            await Task.Delay(10000); // Delay to prevent error condition. TEMPORARY.
+            m_DelayJoin = false; // Unlock.
+        }
+
+        /**
          *  JoinAudio
          *  Join the voice channel of the target.
          *  Adds a new client to the ConcurrentDictionary.
@@ -155,13 +169,9 @@ namespace WhalesFargo
             // Attempt to remove from the current dictionary, and if removed, stop it.
             if (m_ConnectedChannels.TryRemove(guild.Id, out var audioClient))
             {
-                await audioClient.StopAsync();
+                //await audioClient.StopAsync();
                 Log("The client is now disconnected from the current voice channel.");
-
-                m_DelayJoin = true; // Lock.
-                await Task.Delay(10000); // Delay to prevent error condition. TEMPORARY.
-                m_DelayJoin = false; // Unlock.
-
+                await DelayAction(() => audioClient.StopAsync()); // Can change once this error is resolved.
                 return;
             }
 
@@ -515,7 +525,7 @@ namespace WhalesFargo
                 if (m_AutoDownload)
                 {
                     if (audio.IsNetwork) await m_AudioDownloader.AddAsync(audio); // Auto download while in playlist.
-                    if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync();
+                    if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync(); // Start the downloader if it's off.
                 }
             }
         }
