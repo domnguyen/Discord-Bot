@@ -21,14 +21,17 @@ namespace WhalesFargo
      */
     public class AudioService
     {
+        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
+        private AudioModule m_ParentModule = null;
+
         // Concurrent dictionary for multithreaded environments.
         private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
 
         // Playlist.
         private readonly ConcurrentQueue<AudioFile> m_Playlist = new ConcurrentQueue<AudioFile>();
 
-        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
-        private AudioModule m_ParentModule = null;
+        // Downloader.
+        private readonly AudioDownloader m_AudioDownloader = new AudioDownloader(); // Only downloaded on playlist add.
 
         // Private variables.
         private Process m_Process = null;           // Process that runs when playing.
@@ -185,17 +188,6 @@ namespace WhalesFargo
         public async Task<AudioFile> ExtractPathAsync(string path)
         {
             return await ExtractAsync(path);
-        }
-
-        /**
-        *  DownloadPathAsync
-        *  Downloads the audio file and makes it a local file.
-        *  
-        *  @param file - source file
-        */
-        public async Task DownloadPathAsync(AudioFile file)
-        {
-            await file.DownloadAsync();
         }
 
         /**
@@ -510,7 +502,6 @@ namespace WhalesFargo
          *  
          *  @param path   
          */
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")] // Suppresses 'await', so we can silently download in the background.
         public async Task PlaylistAdd(string path)
         {
             AudioFile audio = await ExtractAsync(path);
@@ -519,7 +510,8 @@ namespace WhalesFargo
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
                 Log("Added to playlist : " + audio.Title, (int)E_LogOutput.Reply);
 
-                if (audio.IsNetwork) DownloadPathAsync(audio); // Auto download while in playlist.
+                if (audio.IsNetwork) m_AudioDownloader.Add(audio); // Auto download while in playlist.
+                if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync();
             }
         }
 

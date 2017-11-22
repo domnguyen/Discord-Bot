@@ -170,6 +170,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\AudioDownloader.cs" />
     <Compile Include="Helpers\AudioFile.cs" />
     <Compile Include="Modules\AudioModule.cs" />
     <Compile Include="Services\AudioService.cs" />
