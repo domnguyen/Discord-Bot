@@ -46,7 +46,7 @@ namespace WhalesFargo
             /* Get current time in UTC */
             DateTime currentUTC = DateTime.UtcNow;
             /* Daylight savings adjustment */
-            currentUTC = currentUTC.AddHours(-1);
+            
 
             
 

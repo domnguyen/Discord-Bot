@@ -56,7 +56,7 @@ namespace WhalesFargo
             DateTime GuildBattle_C_End = GuildBattle_C.AddMinutes(5);
 
             // Disable Colo for now
-           /* if (DateTime.Compare(currentUTC, Colo1) > 0 & DateTime.Compare(currentUTC, Colo1_End) < 0)
+            if (DateTime.Compare(currentUTC, Colo1) > 0 & DateTime.Compare(currentUTC, Colo1_End) < 0)
             {
                 return "colo";
             }
@@ -71,7 +71,7 @@ namespace WhalesFargo
             else if (DateTime.Compare(currentUTC, Colo4) > 0 & DateTime.Compare(currentUTC, Colo4_End) < 0)
             {
                 return "colo";
-            } */
+            } 
 
             if (DateTime.Compare(currentUTC, GuildBattle_A) > 0 & DateTime.Compare(currentUTC, GuildBattle_A_End) < 0)
             {

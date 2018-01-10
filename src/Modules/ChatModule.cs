@@ -23,8 +23,8 @@ namespace WhalesFargo
             m_Service = service;
         }
         /* Returns all commands that the bot has */
-        [Command("help")]
-        [Alias("help", "h")]
+        [Command("help2")]
+        [Alias("help2", "h")]
         public async Task HelpCommand()
         {
             /* Delete Last Message */
