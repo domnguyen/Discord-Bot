@@ -33,6 +33,8 @@ namespace WhalesFargo
             // 1830-1930
             // 2300-2400
             // Check 5 mintues before.
+
+            /*
             DateTime Colo1 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 2, 55, 0);
             DateTime Colo1_End = Colo1.AddMinutes(5);
 
@@ -44,6 +46,18 @@ namespace WhalesFargo
 
             DateTime Colo4 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 22, 25, 0);
             DateTime Colo4_End = Colo4.AddMinutes(5);
+            */
+
+
+            DateTime GuildBattleC_A = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 16, 55, 0);
+            DateTime GuildBattleC_A_End = GuildBattleC_A.AddMinutes(5);
+
+            DateTime GuildBattleC_B = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 21, 55, 0);
+            DateTime GuildBattleC_B_End = GuildBattleC_B.AddMinutes(5);
+
+            DateTime GuildBattleC_C = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 0, 55, 0);
+            DateTime GuildBattleC_C_End = GuildBattleC_C.AddMinutes(5);
+
 
 
             DateTime GuildBattle_A = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 17, 55, 0);
@@ -55,7 +69,7 @@ namespace WhalesFargo
             DateTime GuildBattle_C = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 1, 55, 0);
             DateTime GuildBattle_C_End = GuildBattle_C.AddMinutes(5);
 
-            // Disable Colo for now
+            /* // Disable Colo for now
             if (DateTime.Compare(currentUTC, Colo1) > 0 & DateTime.Compare(currentUTC, Colo1_End) < 0)
             {
                 return "colo";
@@ -71,19 +85,32 @@ namespace WhalesFargo
             else if (DateTime.Compare(currentUTC, Colo4) > 0 & DateTime.Compare(currentUTC, Colo4_End) < 0)
             {
                 return "colo";
-            } 
+            } */
 
-            if (DateTime.Compare(currentUTC, GuildBattle_A) > 0 & DateTime.Compare(currentUTC, GuildBattle_A_End) < 0)
+            if (DateTime.Compare(currentUTC, GuildBattleC_A) > 0 & DateTime.Compare(currentUTC, GuildBattleC_A_End) < 0)
             {
-                return "gb";
+                return "gbc";
+            }
+            else if (DateTime.Compare(currentUTC, GuildBattleC_B) > 0 & DateTime.Compare(currentUTC, GuildBattleC_B_End) < 0)
+            {
+                return "gbc";
+            }
+            else if (DateTime.Compare(currentUTC, GuildBattleC_C) > 0 & DateTime.Compare(currentUTC, GuildBattleC_C_End) < 0)
+            {
+                return "gbc";
+            }
+        
+            else if (DateTime.Compare(currentUTC, GuildBattle_A) > 0 & DateTime.Compare(currentUTC, GuildBattle_A_End) < 0)
+            {
+                return "gba";
             }
             else if (DateTime.Compare(currentUTC, GuildBattle_B) > 0 & DateTime.Compare(currentUTC, GuildBattle_B_End) < 0)
             {
-                return "gb";
+                return "gba";
             }
             else if (DateTime.Compare(currentUTC, GuildBattle_C) > 0 & DateTime.Compare(currentUTC, GuildBattle_C_End) < 0)
             {
-                return "gb";
+                return "gba";
             }
             else
             {

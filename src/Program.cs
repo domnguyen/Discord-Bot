@@ -277,11 +277,13 @@ namespace WhalesFargo
         {
             string event_name = WhaleHelp.TimeIsReady();
             bool colo = String.Equals(event_name, "colo", StringComparison.Ordinal);
-            bool gb = String.Equals(event_name, "gb", StringComparison.Ordinal);
+            bool gba = String.Equals(event_name, "gba", StringComparison.Ordinal);
+            bool gbc = String.Equals(event_name, "gbc", StringComparison.Ordinal);
 
-            
+
             if (colo) await SendColo();
-            else if (gb) await SendGb();
+            else if (gba) await SendGba();
+            else if (gbc) await SendGbc();
         }
 
         /** 
@@ -300,12 +302,20 @@ namespace WhalesFargo
          * SendGb
          * Sends the Guild Battle Notification 
          */
-        public async Task SendGb()
+        public async Task SendGba()
         {
            // Gets the colo channel 
            var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
-            await colochannel.SendMessageAsync("@everyone, Guild Battle/Guild Raid will begin shortly.");
+            await colochannel.SendMessageAsync("@TeamA @TeamB , Guild Battle/Guild Raid will begin shortly.");
+        }
+
+        public async Task SendGbc()
+        {
+            // Gets the colo channel 
+            var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
+            /* You can add references to any channel you wish */
+            await colochannel.SendMessageAsync("@TeamC, Guild Battle/Guild Raid will begin shortly.");
         }
 
 
