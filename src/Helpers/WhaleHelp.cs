@@ -1,8 +1,5 @@
-﻿using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Threading.Tasks;
 
 namespace WhalesFargo
 {
@@ -48,6 +45,22 @@ namespace WhalesFargo
             DateTime Colo4_End = Colo4.AddMinutes(5);
             */
 
+            // 4 AM 
+            DateTime Mobius1 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 10, 55, 0);
+            DateTime Mobius1_End = Mobius1.AddMinutes(5);
+            
+            // 11 AM PST
+            DateTime Mobius2 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 17, 55, 0);
+            DateTime Mobius2_End = Mobius2.AddMinutes(5);
+
+            // 2:30 PST
+            DateTime Mobius3 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 21, 25, 0);
+            DateTime Mobius3_End = Mobius3.AddMinutes(5);
+
+            // 7 PM
+            DateTime Mobius4 = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 1, 55, 0);
+            DateTime Mobius4_End = Mobius4.AddMinutes(5);
+
 
             DateTime GuildBattleC_A = new DateTime(currentUTC.Year, currentUTC.Month, currentUTC.Day, 16, 55, 0);
             DateTime GuildBattleC_A_End = GuildBattleC_A.AddMinutes(5);
@@ -86,6 +99,24 @@ namespace WhalesFargo
             {
                 return "colo";
             } */
+
+            
+            if (DateTime.Compare(currentUTC, Mobius1) > 0 & DateTime.Compare(currentUTC, Mobius1_End) < 0)
+            {
+                return "mobius";
+            }
+            else if (DateTime.Compare(currentUTC, Mobius2) > 0 & DateTime.Compare(currentUTC, Mobius2_End) < 0)
+            {
+                return "mobius";
+            }
+            else if (DateTime.Compare(currentUTC, Mobius3) > 0 & DateTime.Compare(currentUTC, Mobius3_End) < 0)
+            {
+                return "mobius";
+            }
+            else if (DateTime.Compare(currentUTC, Mobius4) > 0 & DateTime.Compare(currentUTC, Mobius4_End) < 0)
+            {
+                return "mobius";
+            } 
 
             if (DateTime.Compare(currentUTC, GuildBattleC_A) > 0 & DateTime.Compare(currentUTC, GuildBattleC_A_End) < 0)
             {

@@ -276,14 +276,13 @@ namespace WhalesFargo
         public async void CheckForTime_ElapsedAsync(object sender, ElapsedEventArgs e)
         {
             string event_name = WhaleHelp.TimeIsReady();
-            bool colo = String.Equals(event_name, "colo", StringComparison.Ordinal);
-            bool gba = String.Equals(event_name, "gba", StringComparison.Ordinal);
-            bool gbc = String.Equals(event_name, "gbc", StringComparison.Ordinal);
 
 
-            if (colo) await SendColo();
-            else if (gba) await SendGba();
-            else if (gbc) await SendGbc();
+
+            if (String.Equals(event_name, "colo", StringComparison.Ordinal)) await SendColo();
+            else if (String.Equals(event_name, "gba", StringComparison.Ordinal)) await SendGba();
+            else if (String.Equals(event_name, "gbc", StringComparison.Ordinal)) await SendGbc();
+            else if (String.Equals(event_name, "mobius", StringComparison.Ordinal)) await SendMobius();
         }
 
         /** 
@@ -298,16 +297,24 @@ namespace WhalesFargo
             await colochannel.SendMessageAsync("@everyone, Coliseum will begin shortly.");
         }
 
+        public async Task SendMobius()
+        {
+            // Gets the colo channel 
+            var colochannel = m_Client.GetChannel(408703204247863307) as SocketTextChannel;
+            /* You can add references to any channel you wish */
+            await colochannel.SendMessageAsync("@everyone, Mobius will begin shortly.");
+        }
+
         /**
          * SendGb
          * Sends the Guild Battle Notification 
          */
         public async Task SendGba()
         {
-           // Gets the colo channel 
-           var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
+            // Gets the colo channel 
+            var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
-            await colochannel.SendMessageAsync("@TeamA @TeamB , Guild Battle/Guild Raid will begin shortly.");
+            await colochannel.SendMessageAsync("<@&330052175973842946> <@&330052209440194581> , Guild Battle/Guild Raid will begin shortly.");
         }
 
         public async Task SendGbc()
@@ -315,7 +322,7 @@ namespace WhalesFargo
             // Gets the colo channel 
             var colochannel = m_Client.GetChannel(223181247902515210) as SocketTextChannel;
             /* You can add references to any channel you wish */
-            await colochannel.SendMessageAsync("@TeamC, Guild Battle/Guild Raid will begin shortly.");
+            await colochannel.SendMessageAsync("<@&405854488478613515> , Guild Battle/Guild Raid will begin shortly.");
         }
 
 
