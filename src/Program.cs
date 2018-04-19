@@ -19,9 +19,7 @@ namespace WhalesFargo
     {
         public static Boolean TrollUser = false;
         public static Boolean Debug = false; // Turn on for cmd printing
-       
         public static Boolean PhraseRespond = false;
-
     }
 
    /**
@@ -46,16 +44,26 @@ namespace WhalesFargo
         */
         public async Task MainAsync()
         {
-            // Get the token from the application settings.
-            m_Token = GetBotToken();
-
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
             m_Services = InstallServices(); // We install services by adding it to a service collection.
 
+            // Verify that the token is there.
+            m_Token = GetBotToken(); // Get the token from the application settings.
+            if (m_Token.Equals(""))
+            {
+                return;
+            }
+
+            // Attempt to connect.
+            await m_Client.LoginAsync(TokenType.Bot, m_Token);
+            if (m_Client.LoginState == LoginState.LoggingOut | m_Client.LoginState == LoginState.LoggedOut)
+            {
+                return;
+            }
+
             // Startup the client.
-            await m_Client.LoginAsync(TokenType.Bot, m_Token); // Login using our defined token.
             await m_Client.StartAsync();
 
             // Install commands once the client has logged in.
@@ -111,7 +119,7 @@ namespace WhalesFargo
         private async Task InstallCommands()
         {
             // Before we install commands, we should check if everything was set up properly. Check if logged in.
-            if (m_Client.LoginState != (LoginState.LoggedIn)) return;
+            if (m_Client.LoginState != LoginState.LoggedIn) return;
 
             // Hook the MessageReceived Event into our Command Handler
             m_Client.MessageReceived += HandleCommand;
@@ -276,8 +284,6 @@ namespace WhalesFargo
         public async void CheckForTime_ElapsedAsync(object sender, ElapsedEventArgs e)
         {
             string event_name = WhaleHelp.TimeIsReady();
-
-
 
             if (String.Equals(event_name, "colo", StringComparison.Ordinal)) await SendColo();
             else if (String.Equals(event_name, "gba", StringComparison.Ordinal)) await SendGba();

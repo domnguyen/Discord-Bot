@@ -24,7 +24,7 @@ namespace WhalesFargo
         public AudioModule(AudioService service)
         {
             m_Service = service;
-            m_Service.SetParentModule(this);
+            m_Service.SetParentModule(this); // Reference to this from the service.
         }
 
         // Reply will allow the AudioService to reply in the correct text channel.
@@ -50,6 +50,7 @@ namespace WhalesFargo
         // instead, outsource to a service for that.'
 
         [Command("join", RunMode = RunMode.Async)]
+        [Remarks("!join")]
         [Summary("Joins the user's voice channel.")]
         public async Task JoinVoiceChannel()
         {
@@ -58,6 +59,7 @@ namespace WhalesFargo
         }
 
         [Command("leave", RunMode = RunMode.Async)]
+        [Remarks("!leave")]
         [Summary("Leaves the current voice channel.")]
         public async Task LeaveVoiceChannel()
         {
@@ -65,6 +67,7 @@ namespace WhalesFargo
         }
 
         [Command("play", RunMode = RunMode.Async)]
+        [Remarks("!play [url]")]
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
@@ -81,6 +84,7 @@ namespace WhalesFargo
         }
 
         [Command("pause", RunMode = RunMode.Async)]
+        [Remarks("!pause")]
         [Summary("Pauses the current song, if playing.")]
         public async Task PauseVoiceChannel()
         {
@@ -89,6 +93,7 @@ namespace WhalesFargo
         }
 
         [Command("resume", RunMode = RunMode.Async)]
+        [Remarks("!resume")]
         [Summary("Pauses the current song, if paused.")]
         public async Task ResumeVoiceChannel()
         {
@@ -97,6 +102,7 @@ namespace WhalesFargo
         }
 
         [Command("stop", RunMode = RunMode.Async)]
+        [Remarks("!stop")]
         [Summary("Stops the current song, if playing or paused.")]
         public async Task StopVoiceChannel()
         {
@@ -105,6 +111,7 @@ namespace WhalesFargo
         }
 
         [Command("volume")]
+        [Remarks("!volume [num]")]
         [Summary("Changes the volume to [0.0, 1.0].")]
         public async Task VolumeVoiceChannel([Remainder] float volume)
         {
@@ -113,6 +120,7 @@ namespace WhalesFargo
         }
 
         [Command("add", RunMode = RunMode.Async)]
+        [Remarks("!add [url]")]
         [Summary("Adds a song by url or local path to the playlist.")]
         public async Task AddVoiceChannel([Remainder] string song)
         {
@@ -125,6 +133,7 @@ namespace WhalesFargo
         }
 
         [Command("skip", RunMode = RunMode.Async)]
+        [Remarks("!skip")]
         [Summary("Skips the current song, if playing from the playlist.")]
         public async Task SkipVoiceChannel()
         {
@@ -133,6 +142,7 @@ namespace WhalesFargo
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
+        [Remarks("!playlist")]
         [Summary("Shows what's currently in the playlist.")]
         public async Task PrintPlaylistVoiceChannel()
         {
@@ -140,6 +150,7 @@ namespace WhalesFargo
         }
 
         [Command("autoplay", RunMode = RunMode.Async)]
+        [Remarks("!autoplay")]
         [Summary("Starts the autoplay service on the current playlist.")]
         public async Task AutoPlayVoiceChannel([Remainder] bool enable)
         {

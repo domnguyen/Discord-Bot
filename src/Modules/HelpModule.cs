@@ -23,7 +23,8 @@ namespace WhalesFargo
             m_Provider = provider;
         }
 
-        [Command("help", RunMode = RunMode.Async)] // TODO: Change this once all summaries are added.
+        [Command("help", RunMode = RunMode.Async)]
+        [Alias("help", "h")]
         [Summary("Finds all the modules and prints out it's summary tag.")]
         public async Task HelpAsync()
         {
@@ -60,6 +61,7 @@ namespace WhalesFargo
         }
 
         [Command("help", RunMode = RunMode.Async)] // TODO: Change this once all summaries are added.
+        [Alias("help", "h")]
         [Summary("Finds all the commands from a specific module and prints out it's summary tag.")]
         public async Task HelpAsync(string moduleName)
         {
@@ -92,7 +94,7 @@ namespace WhalesFargo
             {
                 var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                 if (result.IsSuccess)
-                    emb.AddField(command.Aliases.First(), command.Summary);
+                    emb.AddField(command.Remarks, command.Summary);
             }
 
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.

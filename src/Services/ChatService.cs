@@ -15,8 +15,6 @@ namespace WhalesFargo
     */
     public class ChatService
     {
-       
-
         /* Returns the various commands built into the bot */
         public async Task getHelp(IGuild guild, IMessageChannel channel)
         {
@@ -41,16 +39,11 @@ namespace WhalesFargo
             await channel.SendMessageAsync("", false, emb);
         }
 
-		public async Task getEnhance(IGuild guild, IMessageChannel channel,  string event_name)
+		public async Task GetEnhance(IGuild guild, IMessageChannel channel,  string event_name)
         {
             /* Get current time in UTC */
             DateTime currentUTC = DateTime.UtcNow;
             /* Daylight savings adjustment */
-            
-
-            
-
-          
 
             /* Check which command was run */
             bool egg = String.Equals(event_name, "egg", StringComparison.Ordinal);
@@ -121,8 +114,6 @@ namespace WhalesFargo
                 NextMon = currentUTC;
             }
 
-
-
             DateTime SA1 = new DateTime(NextSat.Year, NextSat.Month, NextSat.Day, 13, 0, 0);
             DateTime SA1_End = SA1.AddMinutes(20);
             DateTime SA2 = new DateTime(NextSun.Year, NextSun.Month, NextSun.Day, 1, 0, 0);
@@ -142,14 +133,11 @@ namespace WhalesFargo
             DateTime SG4_End = SG4.AddMinutes(20);
 
             /* Create Embeded Text Discord builder */
-
             var emb = new EmbedBuilder();
 
             /* Now we check which command was called */
             if (egg)
             {
-
-
                 emb.WithTitle("**Upcoming Egg Quest:**");
                 
                 emb.Color = new Color(250, 20, 20);
@@ -167,7 +155,6 @@ namespace WhalesFargo
 
                     emb.AddField("**Next Egg (EP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 2-4 and ON
                 else if (DateTime.Compare(currentUTC, EP3) > 0 & DateTime.Compare(currentUTC, EP3_End) < 0)
                 {
@@ -178,14 +165,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Egg (EK01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 4:00:00 - 8:00:00 and OFF
                 else if (DateTime.Compare(currentUTC, EP3_End) > 0 & DateTime.Compare(currentUTC, EK1) < 0)
                 {
                     System.TimeSpan diff = EK1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // 8:00:00 - 10:00:00 and ON
                 else if (DateTime.Compare(currentUTC, EK1) > 0 & DateTime.Compare(currentUTC, EK1_End) < 0)
                 {
@@ -231,25 +216,17 @@ namespace WhalesFargo
                     System.TimeSpan diff2 = EK3.Subtract(currentUTC);
                     diff2 = WhaleHelp.CheckNextDay(diff2);
 
-
-
-
                     emb.AddField("**Next Egg (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 20:00:00 - 0:00:00 and OFF
                 else if (DateTime.Compare(currentUTC, EP2_End) > 0 & DateTime.Compare(currentUTC, EK3) < 0)
                 {
                     System.TimeSpan diff = EK3.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Egg starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
                 }
-
-
             } // End of Egg 
             else if (keymin)
             {
-
-
                 emb.WithTitle("**Upcoming Keymin Quest:**");
                
                 emb.Color = new Color(250, 20, 20);
@@ -266,14 +243,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Keymin (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 2-4 and OFF
                 else if (DateTime.Compare(currentUTC, EK3_End) > 0 & DateTime.Compare(currentUTC, KP1) < 0)
                 {
                     System.TimeSpan diff = KP1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // 4:00:00 - 6:00:00 and ON
                 else if (DateTime.Compare(currentUTC, KP1) > 0 & DateTime.Compare(currentUTC, KP1_End) < 0)
                 {
@@ -284,15 +259,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // 6-8 and OFF
                 else if (DateTime.Compare(currentUTC, KP1_End) > 0 & DateTime.Compare(currentUTC, EK1) < 0)
                 {
                     System.TimeSpan diff = EK1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
                 // 8:00:00 - 10:00:00 and ON
                 else if (DateTime.Compare(currentUTC, EK1) > 0 & DateTime.Compare(currentUTC, EK1_End) < 0)
                 {
@@ -309,7 +281,6 @@ namespace WhalesFargo
                     System.TimeSpan diff = KP2.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // 12-14 and ON
                 else if (DateTime.Compare(currentUTC, KP2) > 0 & DateTime.Compare(currentUTC, KP2_End) < 0)
                 {
@@ -320,8 +291,6 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField(" **Next Egg (EK02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
-
                 // 14:00:00 - 16:00:00 and OFF
                 else if (DateTime.Compare(currentUTC, KP2_End) > 0 & DateTime.Compare(currentUTC, EK2) < 0)
                 {
@@ -338,15 +307,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Keymin (KP03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
-
                 // 18:00:00 - 20:00:00 and OFF
                 else if (DateTime.Compare(currentUTC, EK2_End) > 0 & DateTime.Compare(currentUTC, KP3) < 0)
                 {
                     System.TimeSpan diff = KP3.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
                 }
-
                 // 20:00:00 - 22:00:00 and ON
                 else if (DateTime.Compare(currentUTC, KP3) > 0 & DateTime.Compare(currentUTC, KP3_End) < 0)
                 {
@@ -357,49 +323,33 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Keymin (EK03):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 22:00:00 - 0:00:00 and OFF
                 else if (DateTime.Compare(currentUTC, KP3_End) > 0 & DateTime.Compare(currentUTC, EK3) < 0)
                 {
                     System.TimeSpan diff = EK3.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Keymin starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).");
                 }
-
-
-
-
             }
             else if (kesapasa)
             {
-
-
                 emb.WithTitle("**Upcoming Kesapasa Quest:**");
                
                 emb.Color = new Color(250, 20, 20);
                 // from 2-4  and ON
                 if (DateTime.Compare(currentUTC, EP3) < 0)
-               
                 {
                     System.TimeSpan diff = EP3.Subtract(currentUTC);
-
-
                     emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                   }
-
-
+                }
                 else if (DateTime.Compare(currentUTC, EP3) > 0 & DateTime.Compare(currentUTC, EP3_End) < 0)
                 {
                     System.TimeSpan diff = EP3_End.Subtract(currentUTC);
-
-
                     emb.AddField("**Current : **Egg and Kesapasa (EP03)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
                     System.TimeSpan diff2 = KP1.Subtract(currentUTC);
                     //diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (KP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 4-6
                 else if (DateTime.Compare(currentUTC, KP1) > 0 & DateTime.Compare(currentUTC, KP1_End) < 0)
                 {
@@ -424,14 +374,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (EP01):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 8-10 and OFF
                 else if (DateTime.Compare(currentUTC, GP1_End) > 0 & DateTime.Compare(currentUTC, EP1) < 0)
                 {
                     System.TimeSpan diff = EP1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // from 10-12  and ON
                 else if (DateTime.Compare(currentUTC, EP1) > 0 & DateTime.Compare(currentUTC, EP1_End) < 0)
                 {
@@ -444,8 +392,6 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (KP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
-
                 // from 12-14  and ON
                 else if (DateTime.Compare(currentUTC, KP2) > 0 & DateTime.Compare(currentUTC, KP2_End) < 0)
                 {
@@ -458,7 +404,6 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (GP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // from 14-16  and ON
                 else if (DateTime.Compare(currentUTC, GP2) > 0 & DateTime.Compare(currentUTC, GP2_End) < 0)
                 {
@@ -471,14 +416,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (EP02):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 16-18 and OFF
                 else if (DateTime.Compare(currentUTC, GP2_End) > 0 & DateTime.Compare(currentUTC, EP2) < 0)
                 {
                     System.TimeSpan diff = EP2.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
                 // from 18-20  and ON
                 else if (DateTime.Compare(currentUTC, EP2) > 0 & DateTime.Compare(currentUTC, EP2_End) < 0)
                 {
@@ -491,7 +434,6 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (KP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // from 20-22  and ON
                 else if (DateTime.Compare(currentUTC, KP3) > 0 & DateTime.Compare(currentUTC, KP3_End) < 0)
                 {
@@ -504,12 +446,10 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (GP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // from 22-0  and ON
                 else if (DateTime.Compare(currentUTC, GP3) > 0 & DateTime.Compare(currentUTC, GP3_End) < 0)
                 {
                     System.TimeSpan diff = GP3_End.Subtract(currentUTC);
-
 
                     emb.AddField("**Current : **Glorious Kesapasa (GP3)  ", "**Remaining Time :** " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
 
@@ -517,32 +457,22 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Pasa (EP3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // 0-2 and OFF
                 else if (DateTime.Compare(currentUTC, GP3_End) > 0 & DateTime.Compare(currentUTC, EP3) < 0)
                 {
                     System.TimeSpan diff = EP3.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Kesapasa starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
-
             }
             else if (augment)
             {
-
-
                 emb.WithTitle("**Upcoming Augment Quest:**");
                 
                 emb.Color = new Color(250, 20, 20);
                  if (DateTime.Compare(currentUTC, AUG1) < 0)
                 {
                     System.TimeSpan diff = AUG1.Subtract(currentUTC);
-
-
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
-
-                    
                 }
                 // between first aug
                 else if (DateTime.Compare(currentUTC, AUG1) > 0 & DateTime.Compare(currentUTC, AUG1_End) < 0)
@@ -556,15 +486,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG2):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // Off between 1st
                 else if (DateTime.Compare(currentUTC, AUG1_End) > 0 & DateTime.Compare(currentUTC, AUG2) < 0)
                 {
                     System.TimeSpan diff = AUG2.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
                 else if (DateTime.Compare(currentUTC, AUG2) > 0 & DateTime.Compare(currentUTC, AUG2_End) < 0)
                 {
                     System.TimeSpan diff = AUG2_End.Subtract(currentUTC);
@@ -576,16 +503,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG3):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
-
                 // Off between 1st
                 else if (DateTime.Compare(currentUTC, AUG2_End) > 0 & DateTime.Compare(currentUTC, AUG3) < 0)
                 {
                     System.TimeSpan diff = AUG3.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
                 else if (DateTime.Compare(currentUTC, AUG3) > 0 & DateTime.Compare(currentUTC, AUG3_End) < 0)
                 {
                     System.TimeSpan diff = AUG3_End.Subtract(currentUTC);
@@ -597,15 +520,12 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG4):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // Off between 1st
                 else if (DateTime.Compare(currentUTC, AUG3_End) > 0 & DateTime.Compare(currentUTC, AUG4) < 0)
                 {
                     System.TimeSpan diff = AUG4.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
                 else if (DateTime.Compare(currentUTC, AUG4) > 0 & DateTime.Compare(currentUTC, AUG4_End) < 0)
                 {
                     System.TimeSpan diff = AUG4_End.Subtract(currentUTC);
@@ -617,7 +537,6 @@ namespace WhalesFargo
                     diff2 = WhaleHelp.CheckNextDay(diff2);
                     emb.AddField("**Next Augment (AUG1):** ", "**Starts in : **" + diff2.ToString(@"hh") + " hour(s) " + "and " + diff2.ToString(@"mm") + " minute(s).");
                 }
-
                 // Off between 1st
                 else if (DateTime.Compare(currentUTC, AUG4_End) > 0 & DateTime.Compare(currentUTC, AUG1) < 0)
                 {
@@ -625,12 +544,9 @@ namespace WhalesFargo
                     emb.AddField("None are going on right now.", "**Next Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
                 emb.AddField("Super Augment", "If you are looking for super augment, do !next super", true);
-
             }
             else if (gold)
             {
-
-
                 emb.WithTitle("**Upcoming Gold Quest:**");
                 
                 emb.Color = new Color(250, 250, 20);
@@ -715,14 +631,9 @@ namespace WhalesFargo
                     System.TimeSpan diff = SG1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Gold starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
-
             }
             else if (super)
             {
-
-
                 emb.WithTitle("**Upcoming Super Augment Quest:**");
                 
                 emb.Color = new Color(250, 250, 20);
@@ -808,33 +719,20 @@ namespace WhalesFargo
                     System.TimeSpan diff = SA1.Subtract(currentUTC);
                     emb.AddField("None are going on right now.", "**Next Super Augment starts in** : " + diff.ToString(@"hh") + " hour(s) " + "and " + diff.ToString(@"mm") + " minute(s).", true);
                 }
-
-
             }
             else if (!egg && !keymin && !augment && !gold && !super)
             {
-
-
                 emb.WithTitle("*Error:**");
-                
                 emb.Color = new Color(250, 20, 20);
                 emb.AddField("Error. Invalid argument.", "Please type !help for assistance.", true);
-
-
             }
 
             /* Then we send the information  */
-
             await channel.SendMessageAsync("", false, emb);
         }
 
-
-        public async Task clearMsg(IGuild guild, IMessageChannel channel, IUser user , int number){
-
-            
-            
-            
-
+        public async Task ClearMsg(IGuild guild, IMessageChannel channel, IUser user , int number)
+        {
             var GuildUser = await guild.GetUserAsync(user.Id);
             if (!GuildUser.GetPermissions(channel as ITextChannel).ManageMessages)
             {
@@ -849,15 +747,13 @@ namespace WhalesFargo
             int Amount = 0;
             foreach (var Item in await channel.GetMessagesAsync(number).Flatten())
             {
-
                 Amount++;
                 await Item.DeleteAsync();
-
             }
             await channel.SendMessageAsync($"`{user.Username} deleted {Amount} messages`");
-}
+        }
 
-        public async Task checkChatRespond(IMessageChannel channel)
+        public async Task CheckChatRespond(IMessageChannel channel)
         {
             if (!MyGlobals.PhraseRespond)
             {
@@ -874,7 +770,7 @@ namespace WhalesFargo
             }
         }
 
-        public async Task checkUserRespond(IMessageChannel channel)
+        public async Task CheckUserRespond(IMessageChannel channel)
         {
             if (!MyGlobals.TrollUser)
             {
@@ -890,7 +786,7 @@ namespace WhalesFargo
             }
         }
 
-        public async Task mute(IGuild guild, IUser user, IMessageChannel channel)
+        public async Task Mute(IGuild guild, IUser user, IMessageChannel channel)
         {
 
             var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
@@ -898,12 +794,12 @@ namespace WhalesFargo
             await channel.SendMessageAsync(user.Mention + " has been muted.");
         }
 
-        public async Task unmute(IGuild guild, IUser user, IMessageChannel channel)
+        public async Task Unmute(IGuild guild, IUser user, IMessageChannel channel)
         {
 
             var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
             await (user as IGuildUser).RemoveRoleAsync(role);
-            await channel.SendMessageAsync(user.Mention + " has been muted.");
+            await channel.SendMessageAsync(user.Mention + " has been unmuted.");
         }
     }
 
