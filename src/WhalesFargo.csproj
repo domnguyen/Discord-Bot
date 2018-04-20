@@ -172,12 +172,12 @@
   <ItemGroup>
     <Compile Include="Helpers\AudioDownloader.cs" />
     <Compile Include="Helpers\AudioFile.cs" />
+    <Compile Include="Helpers\Tools.cs" />
     <Compile Include="Modules\AudioModule.cs" />
     <Compile Include="Services\AudioService.cs" />
     <Compile Include="Modules\ChatModule.cs" />
     <Compile Include="Services\ChatService.cs" />
     <Compile Include="Modules\HelpModule.cs" />
-    <Compile Include="Helpers\WhaleHelp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
