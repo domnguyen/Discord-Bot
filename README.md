@@ -1,11 +1,9 @@
 # Discord-Bot
 A Discord C#/.NET Bot 
 
-This Discord bot is a chat and voice coded in C#. This bot currently is still in development, and will be sourced for public use towards the beginning of January 2018.
+This Discord bot is a chat and voice coded in C#. This bot currently is still in development, further changes to come.
 
-This bot is built to be run on any .NET Framework compatible machine. It is meant for single server usage due to the heavy amount of resouces the voice part consumes.
-
-This bot was built specifically for a single Mobile Game, Unison League, but is being expanded for a more general use.
+This bot is built to be run on any .NET Framework compatible machine. It is meant for single server usage due to the heavy amount of resources the voice part consumes.
 
 ## To Install:
 
@@ -16,48 +14,39 @@ To install do the following:
 * Compile with Visual Studio, and it should be ready to go!
 
 ## Current Features:
+
 ### Chat Functions:
-!say [msg] ( Makes the bot say something)
 
-!clear [num] (Clears num amount of messages from current channel)
+!botstatus [status](Allows admins to set the bot's current game to [status])
 
-!mute [user] (Mutes the user)
+!say [msg](The bot will respond in the same channel with the message said.)
 
-!unmute [user] (Unmutes the user)
+!clear [num](Allows admins to clear [num] amount of messages from current channel)
 
-!troll (Bot will respond to user's messages)
+!mute [user](This allows admins to mute users.)
 
-!sass (Bot will respond to messages containing a certain message)
-
-!botstatus [status] (Sets the bot's playing to [status])
-
-!help (Pulls the help command)
-
-
-### Unison League Function
-!next (egg/aug/augment/keymin/kesa/pasa/super/gold) (Responds with the next time the certain quest will appear in game)
+!unmute [user](This allows admins to unmute users.)
 
 ### Music Function
-!join (Bot will join user's voice channel)
 
-!leave (Bot will leave user's voice channel)
+!join (Joins the user's voice channel.)
 
-!play [url] (Bot will start playing url)
+!leave (Leaves the current voice channel.)
 
-!pause (Bot will pause)
+!play [url] (Plays a song by url or local path.)
 
-!resume (Bot will resume playing)
+!pause (Pauses the current song, if playing.)
 
-!stop (Bot will stop playing song)
+!resume (Pauses the current song, if paused.)
 
-!volume [num] (0.0-1.0 is volume range)
+!stop (Stops the current song, if playing or paused.)
 
-!add [url] (Add's the song to the playlist
+!volume [num] (Changes the volume to [0.0, 1.0].)
 
-!skip (Skips the current song in playlist)
+!add [url] (Adds a song by url or local path to the playlist.)
 
-!autoplay (Will autoplay the playlist)
+!skip (Skips the current song, if playing from the playlist.)
 
-!playlist (Prints the playlist)
+!playlist (Shows what's currently in the playlist.)
 
-
+!autoplay [enable](Starts the autoplay service on the current playlist.)
