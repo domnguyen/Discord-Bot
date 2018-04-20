@@ -40,7 +40,7 @@ namespace WhalesFargo
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
-        private bool m_AutoDownload = true;         // Flag to auto download network items.
+        private bool m_AutoDownload = false;         // Flag to auto download network items.
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
@@ -574,14 +574,24 @@ namespace WhalesFargo
         private byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
         {
             if (audioSamples == null) return null;
+            if (audioSamples.Length == 0) return null;
             if (audioSamples.Length % 2 != 0) return null;
             if (volume < 0.0f || volume > 1.0f) return null;
 
+            // Adjust the output for the volume.
             var output = new byte[audioSamples.Length];
             if (Math.Abs(volume - 1f) < 0.0001f)
             {
-                Buffer.BlockCopy(audioSamples, 0, output, 0, audioSamples.Length);
-                return output;
+                try
+                {
+                    Buffer.BlockCopy(audioSamples, 0, output, 0, audioSamples.Length);
+                    return output;
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    return null;
+                }
             }
 
             // 16-bit precision for the multiplication
@@ -622,6 +632,8 @@ namespace WhalesFargo
         */
         private async Task<AudioFile> ExtractAsync(string path)
         {
+            Log("Extracting Meta Data for - " + path);
+
             TaskCompletionSource<AudioFile> taskSrc = new TaskCompletionSource<AudioFile>();
             bool verifyNetwork = VerifyNetworkPath(path);
 
@@ -645,7 +657,6 @@ namespace WhalesFargo
             // Network file.
             new Thread(() =>
             {
-
                 // Stream data
                 AudioFile StreamData = new AudioFile();
 
@@ -681,8 +692,9 @@ namespace WhalesFargo
             }).Start();
 
             AudioFile result = await taskSrc.Task;
-            if (result == null)
+            if (result == null) // TODO: We might not need to throw an exception.
                 throw new Exception("youtube-dl.exe failed to extract the data!");
+
             return result;
         }
 

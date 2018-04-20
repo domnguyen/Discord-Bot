@@ -150,7 +150,7 @@ namespace WhalesFargo
         }
 
         [Command("autoplay", RunMode = RunMode.Async)]
-        [Remarks("!autoplay")]
+        [Remarks("!autoplay [enable]")]
         [Summary("Starts the autoplay service on the current playlist.")]
         public async Task AutoPlayVoiceChannel([Remainder] bool enable)
         {
