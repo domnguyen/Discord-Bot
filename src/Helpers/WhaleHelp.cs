@@ -196,7 +196,7 @@ namespace WhalesFargo
 
 
             // If the bot scan is on
-            if (MyGlobals.PhraseRespond)
+            if (false)
             {
                 if (salt)
                 {

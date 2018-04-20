@@ -18,7 +18,7 @@ namespace WhalesFargo
         private readonly ConcurrentDictionary<string, int> m_DownloadDuplicates = new ConcurrentDictionary<string, int>();
 
         // Private variables.
-        private string m_FolderPath = "tmp";            // Default folder path.
+        private string m_FolderPath = "tmp";            // Default folder path. This is relative to the running directory of the bot.
         private bool m_IsRunning = false;               // Flag to check if it's in the middle of downloading already.
 
         /**

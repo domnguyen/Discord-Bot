@@ -11,11 +11,13 @@ namespace WhalesFargo
      * Class that handles the help functionality of the program.
      * This searches for all modules and prints out it's 'summary' tag.
      * If you search by module, it will print out all it's commands by it's 'summary' tag.
+     * If you want it to show usage, use the "Remarks".
      */
     public class HelpModule : ModuleBase
     {
         private readonly CommandService m_Commands;
         private readonly IServiceProvider m_Provider;
+        private bool m_UseRemarks = true; // Set this to true to use Remarks instead.
 
         public HelpModule(CommandService commands, IServiceProvider provider)
         {
@@ -94,7 +96,12 @@ namespace WhalesFargo
             {
                 var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                 if (result.IsSuccess)
-                    emb.AddField(command.Remarks, command.Summary);
+                {
+                    if (m_UseRemarks)
+                        emb.AddField(command.Remarks, command.Summary);
+                    else
+                        emb.AddField(command.Aliases.First(), command.Summary);
+                }
             }
 
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
