@@ -23,15 +23,49 @@ namespace WhalesFargo
         public void SetParentModule(ChatModule parent) { m_ParentModule = parent; }
 
         /**
+         *  DiscordReply
+         *  Replies in the text channel using the parent module.
+         *  
+         *  @param s - Message to reply in the channel
+         */
+        private async void DiscordReply(string s)
+        {
+            if (m_ParentModule == null) return;
+            await m_ParentModule.ServiceReplyAsync(s);
+        }
+
+        /**
+         *  DiscordPlaying
+         *  Sets the playing string using the parent module.
+         *  
+         *  @param s - Message to set the playing message to.
+         */
+        private async void DiscordPlaying(string s)
+        {
+            if (m_ParentModule == null) return;
+            await m_ParentModule.ServicePlayingAsync(s);
+        }
+
+        /**
          *  SayMessage
          *  Replies in the text channel using the parent module.
          *  
          *  @param s - Message to reply in the channel
          */
-        public async Task SayMessage(string s)
+        public void SayMessage(string s)
         {
-            if (m_ParentModule == null) return;
-            await m_ParentModule.ServiceReplyAsync(s);
+            DiscordReply(s);
+        }
+
+        /**
+         *  SetStatus
+         *  Sets the bot playikng status.
+         *  
+         *  @param s - Message to set the playing message to.
+         */
+        public void SetStatus(string s)
+        {
+            DiscordPlaying(s);
         }
 
         /**

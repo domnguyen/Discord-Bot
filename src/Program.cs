@@ -30,9 +30,9 @@ namespace WhalesFargo
             {
                 new Program().RunAsync().GetAwaiter().GetResult();
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Exception thrown");
+                Console.WriteLine("Failed to run : " + e);
             }
         }
 
@@ -42,20 +42,28 @@ namespace WhalesFargo
          */
         private async Task RunAsync()
         {
+            // Verify that the token is there.
+            string token = GetBotToken(); // Get the token from the application settings.
+            if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
+
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
             m_Services = InstallServices(); // We install services by adding it to a service collection.
 
-            // Verify that the token is there.
-            string token = GetBotToken(); // Get the token from the application settings.
-            if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
-
             // Attempt to connect.
-            await m_Client.LoginAsync(TokenType.Bot, m_Token);
+            try
+            {
+                // Login using the bot token.
+                await m_Client.LoginAsync(TokenType.Bot, m_Token);
 
-            // Startup the client.
-            await m_Client.StartAsync();
+                // Startup the client.
+                await m_Client.StartAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Failed to connect : " + e);
+            }
 
             // Install commands once the client has logged in.
             await InstallCommands();

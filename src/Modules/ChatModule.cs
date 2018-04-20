@@ -32,6 +32,12 @@ namespace WhalesFargo
             await ReplyAsync(s);
         }
 
+        // Playing will allow the AudioService to set the current game.
+        public async Task ServicePlayingAsync(string s)
+        {
+            await (Context.Client as DiscordSocketClient).SetGameAsync(s);
+        }
+
         [Command("botStatus")]
         [Alias("botstatus")]
         [Remarks("!botstatus [status]")]
@@ -39,7 +45,8 @@ namespace WhalesFargo
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task SetBotStatus([Remainder] string botStatus)
         {
-            await (Context.Client as DiscordSocketClient).SetGameAsync(botStatus);
+            m_Service.SetStatus(botStatus);
+            await Task.Delay(0);
         }
 
         [Command("say")]
@@ -48,7 +55,8 @@ namespace WhalesFargo
         [Summary("The bot will respond in the same channel with the message said.")]
         public async Task Say([Remainder] string usr_msg = "")
         {
-            await m_Service.SayMessage(usr_msg);
+            m_Service.SayMessage(usr_msg);
+            await Task.Delay(0);
         }
 
         [Command("Clear")]
