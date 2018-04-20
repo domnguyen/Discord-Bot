@@ -133,6 +133,7 @@ namespace WhalesFargo
         }
 
         [Command("skip", RunMode = RunMode.Async)]
+        [Alias("skip", "next")]
         [Remarks("!skip")]
         [Summary("Skips the current song, if playing from the playlist.")]
         public async Task SkipVoiceChannel()

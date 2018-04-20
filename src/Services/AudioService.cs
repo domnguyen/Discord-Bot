@@ -40,7 +40,7 @@ namespace WhalesFargo
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
-        private bool m_AutoDownload = false;         // Flag to auto download network items.
+        private bool m_AutoDownload = true;         // Flag to auto download network items.
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
@@ -166,6 +166,20 @@ namespace WhalesFargo
          */
         public async Task LeaveAudio(IGuild guild)
         {
+            // To avoid any issues, we stop the player before leaving the channel.
+            if (m_IsPlaying)
+            {
+                StopAudio();
+
+                // Wait for it to be stopped.
+                bool stopped = false;
+                await DelayAction(() => stopped = true);
+                while (!stopped)
+                {
+                    if (!m_IsPlaying) stopped = true;
+                }
+            }
+
             // Attempt to remove from the current dictionary, and if removed, stop it.
             if (m_ConnectedChannels.TryRemove(guild.Id, out var audioClient))
             {
@@ -430,7 +444,7 @@ namespace WhalesFargo
         {
             if (m_Process == null) return;
             m_Process.Kill(); // This basically stops the current loop by exiting the process.
-            if (m_IsPlaying) m_IsPlaying = false; // Sets playing to false.
+            //if (m_IsPlaying) m_IsPlaying = false; // Sets playing to false.
             if (m_AutoPlay) m_AutoPlay = false; // Stop autoplay service as well to prevent reloading.
             Log("Stopping the current audio source.");
         }
@@ -474,6 +488,14 @@ namespace WhalesFargo
         public bool GetAutoPlay()
         {
             return m_AutoPlay;
+        }
+
+        /**
+         *  GetIsPlaying
+         */
+        public bool GetIsPlaying()
+        {
+            return m_IsPlaying;
         }
 
         /**
@@ -632,7 +654,7 @@ namespace WhalesFargo
         */
         private async Task<AudioFile> ExtractAsync(string path)
         {
-            Log("Extracting Meta Data for - " + path);
+            Log("Extracting Meta Data for : " + path);
 
             TaskCompletionSource<AudioFile> taskSrc = new TaskCompletionSource<AudioFile>();
             bool verifyNetwork = VerifyNetworkPath(path);
