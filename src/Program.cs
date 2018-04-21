@@ -32,7 +32,7 @@ namespace WhalesFargo
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to run : " + e);
+                Console.WriteLine("Failed to run.");
             }
         }
 
@@ -42,27 +42,34 @@ namespace WhalesFargo
          */
         private async Task RunAsync()
         {
-            // Verify that the token is there.
-            string token = GetBotToken(); // Get the token from the application settings.
-            if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
-
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
             m_Services = InstallServices(); // We install services by adding it to a service collection.
 
-            // Attempt to connect.
-            try
+            // The bot will automatically reconnect once the initial connection is established. 
+            // To keep trying, we put it in a loop.
+            while (true)
             {
-                // Login using the bot token.
-                await m_Client.LoginAsync(TokenType.Bot, m_Token);
+                // Attempt to connect.
+                try
+                {
+                    // Get the token from the application settings.
+                    string token = GetBotToken("BotToken.txt"); 
+                    if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
 
-                // Startup the client.
-                await m_Client.StartAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Failed to connect : " + e);
+                    // Login using the bot token.
+                    await m_Client.LoginAsync(TokenType.Bot, m_Token);
+
+                    // Startup the client.
+                    await m_Client.StartAsync();
+
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed to connect.");
+                }
             }
 
             // Install commands once the client has logged in.
@@ -77,11 +84,13 @@ namespace WhalesFargo
          * Attempt to get the bot token from BotToken.txt
          * If it doesn't exist, we can't return anything.
          */
-        private string GetBotToken()
+        private string GetBotToken(string filename)
         {
             string token = "";
-            if (File.Exists("BotToken.txt"))
+            if (File.Exists(filename))
+            {
                 token = File.ReadLines("BotToken.txt").First();
+            }
             return token;
         }
 

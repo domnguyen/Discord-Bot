@@ -40,7 +40,7 @@ namespace WhalesFargo
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
-        private bool m_AutoDownload = true;         // Flag to auto download network items.
+        private bool m_AutoDownload = true;         // Flag to auto download network items in the playlist.
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
