@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace WhalesFargo
+namespace WhalesFargo.Helpers
 {
     public static class Tools
     {

@@ -1,8 +1,9 @@
-using Discord;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
+using WhalesFargo.Modules;
 
-namespace WhalesFargo
+namespace WhalesFargo.Services
 {
     /**
     * Chat Services

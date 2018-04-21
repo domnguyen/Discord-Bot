@@ -1,10 +1,10 @@
-﻿using Discord;
-using Discord.Commands;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
 
-namespace WhalesFargo
+namespace WhalesFargo.Modules
 {
     /**
      * HelpModule
@@ -82,7 +82,7 @@ namespace WhalesFargo
             var commands = module.Commands.Where(x => !string.IsNullOrWhiteSpace(x.Summary)).GroupBy(x => x.Name).Select(x => x.First());
 
             // If none of them have summaries or don't exist, return.
-            if (commands.Count() == 0)
+            if (!commands.Any())
             {
                 await ReplyAsync($"The module `{module.Name}` has no available commands.");
                 return;
@@ -97,10 +97,8 @@ namespace WhalesFargo
                 var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                 if (result.IsSuccess)
                 {
-                    if (m_UseRemarks)
-                        emb.AddField(command.Remarks, command.Summary);
-                    else
-                        emb.AddField(command.Aliases.First(), command.Summary);
+                    var title = (m_UseRemarks) ? command.Remarks : command.Aliases.First();
+                    emb.AddField(title, command.Summary);
                 }
             }
 

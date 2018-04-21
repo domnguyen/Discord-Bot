@@ -1,16 +1,16 @@
-﻿//#define DEBUG_VERBOSE // Use this to print out all log messages to console. Comment out to disable.
-
-using Discord;
-using Discord.Audio;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Audio;
+using WhalesFargo.Helpers;
+using WhalesFargo.Modules;
 
-namespace WhalesFargo
+namespace WhalesFargo.Services
 {
     // Enum to direct the string to output. Reference Log()
     public enum E_LogOutput { Console, Reply, Playing };

@@ -1,4 +1,4 @@
-﻿namespace WhalesFargo
+﻿namespace WhalesFargo.Helpers
 {
     /**
      * AudioFile

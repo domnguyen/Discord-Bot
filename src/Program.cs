@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿#define DEBUG_VERBOSE // Use this to print out all log messages to console. Comment out to disable.
+
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using WhalesFargo.Services;
 
 namespace WhalesFargo
 {
@@ -30,7 +33,7 @@ namespace WhalesFargo
             {
                 new Program().RunAsync().GetAwaiter().GetResult();
             }
-            catch (Exception e)
+            catch
             {
                 Console.WriteLine("Failed to run.");
             }
@@ -66,7 +69,7 @@ namespace WhalesFargo
 
                     break;
                 }
-                catch (Exception e)
+                catch
                 {
                     Console.WriteLine("Failed to connect.");
                 }
