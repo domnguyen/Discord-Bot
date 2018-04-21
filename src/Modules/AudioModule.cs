@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using WhalesFargo.Helpers;
 using WhalesFargo.Services;
 
@@ -15,7 +14,7 @@ namespace WhalesFargo.Modules
      */
     [Name("Audio")]
     [Summary("Audio module to interact with voice chat. Currently, used to playback audio in a stream.")]
-    public class AudioModule : ModuleBase
+    public class AudioModule : CustomModule
     {
         // Private variables
         private readonly AudioService m_Service;
@@ -27,18 +26,6 @@ namespace WhalesFargo.Modules
         {
             m_Service = service;
             m_Service.SetParentModule(this); // Reference to this from the service.
-        }
-
-        // Reply will allow the AudioService to reply in the correct text channel.
-        public async Task ServiceReplyAsync(string s)
-        {
-            await ReplyAsync(s);
-        }
-
-        // Playing will allow the AudioService to set the current game.
-        public async Task ServicePlayingAsync(string s)
-        {
-            await (Context.Client as DiscordSocketClient).SetGameAsync(s);
         }
 
         // You *MUST* mark these commands with 'RunMode.Async'

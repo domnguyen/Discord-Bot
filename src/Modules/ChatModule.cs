@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
@@ -14,7 +13,7 @@ namespace WhalesFargo.Modules
      */
     [Name("Chat")]
     [Summary("Chat module to interact with text chat.")]
-    public class ChatModule : ModuleBase
+    public class ChatModule : CustomModule
     {
         // Private variables
         private readonly ChatService m_Service;
@@ -25,18 +24,6 @@ namespace WhalesFargo.Modules
         {
             m_Service = service;
             m_Service.SetParentModule(this); // Reference to this from the service.
-        }
-
-        // Reply will allow the AudioService to reply in the correct text channel.
-        public async Task ServiceReplyAsync(string s)
-        {
-            await ReplyAsync(s);
-        }
-
-        // Playing will allow the AudioService to set the current game.
-        public async Task ServicePlayingAsync(string s)
-        {
-            await (Context.Client as DiscordSocketClient).SetGameAsync(s);
         }
 
         [Command("botStatus")]
