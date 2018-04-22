@@ -42,12 +42,21 @@ namespace WhalesFargo.Modules
         }
 
         [Command("kick")]
-        [Remarks("!kick [user]")]
-        [Summary("This allows admins to kick.")]
+        [Remarks("!kick [user] [reason]")]
+        [Summary("This allows admins to kick users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task KickUser(IGuildUser user, [Remainder] string reason = null)
         {
             await m_Service.KickUser(Context.Guild, user, reason);
+        }
+
+        [Command("ban")]
+        [Remarks("!ban [user] [reason]")]
+        [Summary("This allows admins to ban users.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task BanUser(IGuildUser user, [Remainder] string reason = null)
+        {
+            await m_Service.BanUser(Context.Guild, user, reason);
         }
 
         [Command("addrole")]

@@ -96,6 +96,26 @@ namespace WhalesFargo.Services
             }
         }
 
+        /**
+         *  BanUser
+         *  bans the specific user.
+         *  
+         *  @param guild
+         *  @param user
+         *  @param reason
+         */
+        public async Task BanUser(IGuild guild, IUser user, string reason = null)
+        {
+            try
+            {
+                await guild.AddBanAsync(user, 0, reason);
+            }
+            catch
+            {
+                Console.WriteLine("Error while trying to ban " + user);
+            }
+        }
+
         private IRole FindRole(IGuild guild, string name)
         {
             var roles = guild.Roles;
@@ -109,8 +129,7 @@ namespace WhalesFargo.Services
 
         private async Task CreateRole(IGuild guild, string name)
         {
-            // Let's see if the role exists, if so we can just update it with the muted permissions.
-            // Otherwise, we just create one with the proper permissions.
+            // Let's see if the role exists.
             var role = FindRole(guild, name);
             if (role == null)
                 role = await guild.CreateRoleAsync(name, GuildPermissions.All);
