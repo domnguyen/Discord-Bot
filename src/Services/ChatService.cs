@@ -101,37 +101,6 @@ namespace WhalesFargo.Services
             // Reply with status.
             await channel.SendMessageAsync($"`{user.Username} deleted {num} messages`");
         }
-
-        /**
-         *  MuteUser
-         *  Mutes the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param channel
-         */
-        public async Task MuteUser(IGuild guild, IUser user, IMessageChannel channel)
-        {
-            var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
-            await (user as IGuildUser).AddRoleAsync(role);
-            await channel.SendMessageAsync(user.Mention + " has been muted.");
-        }
-
-        /**
-         *  UnmuteUser
-         *  Unmutes the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param channel
-         */
-        public async Task UnmuteUser(IGuild guild, IUser user, IMessageChannel channel)
-        {
-
-            var role = guild.Roles.FirstOrDefault(x => x.Name == "mute");
-            await (user as IGuildUser).RemoveRoleAsync(role);
-            await channel.SendMessageAsync(user.Mention + " has been unmuted.");
-        }
     }
 
 }

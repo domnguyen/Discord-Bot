@@ -92,6 +92,7 @@ namespace WhalesFargo
             ServiceCollection services = new ServiceCollection();
 
             // Add all additional services here.
+            services.AddSingleton<AdminService>(); // AdminModule : AdminService
             services.AddSingleton<AudioService>(); // AudioModule : AudioService
             services.AddSingleton<ChatService>(); // ChatModule : ChatService
 

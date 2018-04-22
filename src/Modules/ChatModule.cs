@@ -56,26 +56,6 @@ namespace WhalesFargo.Modules
             await m_Service.ClearMessages(Context.Guild, Context.Channel, Context.User, num);
         }
 
-        [Command("mute")]
-        [Remarks("!mute [user]")]
-        [Summary("This allows admins to mute users.")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
-        [RequireUserPermission(GuildPermission.MuteMembers)]
-        public async Task MuteUser([Remainder] IGuildUser user = null)
-        {
-            await m_Service.MuteUser(Context.Guild, Context.User, Context.Channel);      
-        }
-
-        [Command("unmute")]   
-        [Remarks("!unmute [user]")]
-        [Summary("This allows admins to unmute users.")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
-        [RequireUserPermission(GuildPermission.MuteMembers)]
-        public async Task UnmuteUser([Remainder] IGuildUser user = null)
-        {
-            await m_Service.UnmuteUser(Context.Guild, Context.User, Context.Channel);
-        }
-
     }
 }
 
