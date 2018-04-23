@@ -43,8 +43,11 @@ namespace WhalesFargo.Modules
         [Summary("Joins the user's voice channel.")]
         public async Task JoinVoiceChannel()
         {
-            if (m_Service.GetDelayJoin()) return; // Stop multiple attempts to join too quickly.
-            await m_Service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+            if (m_Service.GetDelayAction()) return; // Stop multiple attempts to join too quickly.
+            await m_Service.JoinAudioAsync(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+
+            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("leave", RunMode = RunMode.Async)]
@@ -52,7 +55,7 @@ namespace WhalesFargo.Modules
         [Summary("Leaves the current voice channel.")]
         public async Task LeaveVoiceChannel()
         {
-            await m_Service.LeaveAudio(Context.Guild);
+            await m_Service.LeaveAudioAsync(Context.Guild);
         }
 
         [Command("play", RunMode = RunMode.Async)]
@@ -63,13 +66,12 @@ namespace WhalesFargo.Modules
             // Extract the audio. Download here if necessary. TODO: Catch if youtube-dl can't read the header.
             AudioFile audio = await m_Service.ExtractPathAsync(song);
 
-            // Play the audio. This function is BLOCKING. Call this last!
+            // Play the audio. This function is BLOCKING.
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
 
-            bool autoplay = m_Service.GetAutoPlay();
             // Start the autoplay service if already on, but not started. This function is BLOCKING.
-            if (autoplay && m_Service.SetAutoPlay(autoplay))
-                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+            // If the force play, played a song, we can resume autoplay here.
+            await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("play", RunMode = RunMode.Async)]
@@ -119,12 +121,10 @@ namespace WhalesFargo.Modules
         [Summary("Adds a song by url or local path to the playlist.")]
         public async Task AddVoiceChannel([Remainder] string song)
         {
-            await m_Service.PlaylistAdd(song);
+            await m_Service.PlaylistAddAsync(song);
 
-            bool autoplay = m_Service.GetAutoPlay();
             // Start the autoplay service if already on, but not started. This function is BLOCKING.
-            if (autoplay && m_Service.SetAutoPlay(autoplay))
-                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+            await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("add", RunMode = RunMode.Async)]
@@ -156,9 +156,10 @@ namespace WhalesFargo.Modules
         [Summary("Starts the autoplay service on the current playlist.")]
         public async Task AutoPlayVoiceChannel([Remainder] bool enable)
         {
-            // Start the autoplay service. This function is BLOCKING.
-            if (m_Service.SetAutoPlay(enable))
-                await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+            m_Service.SetAutoPlay(enable);
+
+            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("songs", RunMode = RunMode.Async)]
@@ -174,7 +175,7 @@ namespace WhalesFargo.Modules
         [Summary("Cleans the local folder of duplicate files.")]
         public async Task CleanSongDirectory()
         {
-            await m_Service.RemoveDuplicateSongs();
+            await m_Service.RemoveDuplicateSongsAsync();
         }
 
     }

@@ -1,39 +1,13 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Threading.Tasks;
-using WhalesFargo.Modules;
-using Discord;
 
 namespace WhalesFargo.Services
 {
-    public class AdminService
+    public class AdminService : CustomService
     {
-        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
-        private AdminModule m_ParentModule = null;
-
         // Private variables.
       
-        /**
-         *  SetParentModule
-         *  Sets the parent module when we start the client in AudioModule.
-         *  This should always be called in the module constructor to 
-         *  provide a direct reference to the parent module.
-         *  
-         *  @param parent - Parent AudioModule    
-         */
-        public void SetParentModule(AdminModule parent) { m_ParentModule = parent; }
-
-        /**
-         *  DiscordReply
-         *  Replies in the text channel using the parent module.
-         *  
-         *  @param s - Message to reply in the channel
-         */
-        private async void DiscordReply(string s)
-        {
-            if (m_ParentModule == null) return;
-            await m_ParentModule.ServiceReplyAsync(s);
-        }
-
         /**
          *  MuteUser
          *  Mutes the specific user.
@@ -47,11 +21,11 @@ namespace WhalesFargo.Services
             try
             {
                 await (user as IGuildUser).ModifyAsync(x => x.Mute = true);
-                DiscordReply(user.Mention + " has been unmuted.");
+                Log($"{user.Mention} has been muted.", (int)E_LogOutput.Reply);
             }
             catch
             {
-                Console.WriteLine("Error while trying to mute " + user);
+                Log($"Error while trying to mute {user}.");
             }
         }
 
@@ -68,11 +42,11 @@ namespace WhalesFargo.Services
             try
             {
                 await (user as IGuildUser).ModifyAsync(x => x.Mute = false);
-                DiscordReply(user.Mention + " has been muted.");
+                Log($"{user.Mention} has been unmuted.", (int)E_LogOutput.Reply);
             }
             catch
             {
-                Console.WriteLine("Error while trying to mute " + user);
+                Log($"Error while trying to unmute {user}." );
             }
         }
 
@@ -92,7 +66,7 @@ namespace WhalesFargo.Services
             }
             catch
             {
-                Console.WriteLine("Error while trying to kick " + user);
+                Log($"Error while trying to kick {user}.");
             }
         }
 
@@ -112,7 +86,7 @@ namespace WhalesFargo.Services
             }
             catch
             {
-                Console.WriteLine("Error while trying to ban " + user);
+                Log($"Error while trying to ban {user}.");
             }
         }
 
@@ -144,7 +118,7 @@ namespace WhalesFargo.Services
             }
             catch
             {
-                Console.WriteLine("Error while trying to add the role " + name + " to " + user);
+                Log($"Error while trying to add the role {name} to {user}.");
             }
         }
 
@@ -157,7 +131,7 @@ namespace WhalesFargo.Services
             }
             catch
             {
-                Console.WriteLine("Error while trying to remove the role " + name + " to " + user);
+                Log($"Error while trying to remove the role {name} to {user}.");
             }
         }
 

@@ -53,7 +53,7 @@ namespace WhalesFargo.Modules
         [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task ClearMessages([Remainder] int num = 0)
         {
-            await m_Service.ClearMessages(Context.Guild, Context.Channel, Context.User, num);
+            await m_Service.ClearMessagesAsync(Context.Guild, Context.Channel, Context.User, num);
         }
 
     }

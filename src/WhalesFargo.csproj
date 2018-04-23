@@ -194,6 +194,7 @@
     <Compile Include="Modules\HelpModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\CustomService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="Externals\ffmpeg.exe">

@@ -1,28 +1,21 @@
-﻿using System;
+﻿using Discord;
+using Discord.Audio;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Audio;
 using WhalesFargo.Helpers;
-using WhalesFargo.Modules;
 
 namespace WhalesFargo.Services
 {
-    // Enum to direct the string to output. Reference Log()
-    public enum E_LogOutput { Console, Reply, Playing };
-
     /**
      * AudioService
      * Class that handles a single audio service.
      */
-    public class AudioService
+    public class AudioService : CustomService
     {
-        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
-        private AudioModule m_ParentModule = null;
-
         // Concurrent dictionary for multithreaded environments.
         private readonly ConcurrentDictionary<ulong, IAudioClient> m_ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
 
@@ -37,68 +30,15 @@ namespace WhalesFargo.Services
         private Stream m_Stream = null;             // Stream output when playing.
         private bool m_IsPlaying = false;           // Flag to change to play or pause the audio.
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
-        private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
+        private bool m_DelayAction = false;         // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
 
         private bool m_AutoDownload = true;         // Flag to auto download network items in the playlist.
         private bool m_AutoDelete = false;          // Flag to delete downloaded network items when stopped.
         private bool m_AllowNetwork = false;         // Flag to allow network streaming capability.
+        private bool m_AutoStop = false;
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
-
-        /**
-         *  SetParentModule
-         *  Sets the parent module when we start the client in AudioModule.
-         *  This should always be called in the module constructor to 
-         *  provide a direct reference to the parent module.
-         *  
-         *  @param parent - Parent AudioModule    
-         */
-        public void SetParentModule(AudioModule parent) { m_ParentModule = parent; }
-
-        /**
-         *  DiscordReply
-         *  Replies in the text channel using the parent module.
-         *  
-         *  @param s - Message to reply in the channel
-         */
-        private async void DiscordReply(string s)
-        {
-            if (m_ParentModule == null) return;
-            await m_ParentModule.ServiceReplyAsync(s);
-        }
-
-        /**
-         *  DiscordPlaying
-         *  Sets the playing string using the parent module.
-         *  
-         *  @param s - Message to set the playing message to.
-         */
-        private async void DiscordPlaying(string s)
-        {
-            if (m_ParentModule == null) return;
-            await m_ParentModule.ServicePlayingAsync(s);
-        }
-
-        /**
-         *  Log
-         *  A Custom logger which can send messages to 
-         *  console, reply in module, or set to playing.
-         *  By default, we log everything to the console.
-         *  TODO: Write so that it's an ENUM, where we can use | or &.
-         *  
-         *  @param s - Message to log
-         *  @param output - Output source
-         */
-        private void Log(string s, int output = (int)E_LogOutput.Console)
-        {
-#if (DEBUG_VERBOSE)
-            Console.WriteLine("AudioService [DEBUG] -- " + s);
-#endif
-            if (output == (int)E_LogOutput.Console) Console.WriteLine("AudioService -- " + s);
-            if (output == (int)E_LogOutput.Reply) DiscordReply(s);
-            if (output == (int)E_LogOutput.Playing) DiscordPlaying(s);
-        }
 
         /**
          * DelayAction
@@ -108,10 +48,21 @@ namespace WhalesFargo.Services
          */
         private async Task DelayAction(Action f)
         {
-            m_DelayJoin = true; // Lock.
+            m_DelayAction = true; // Lock.
             f();
             await Task.Delay(10000); // Delay to prevent error condition. TEMPORARY.
-            m_DelayJoin = false; // Unlock.
+            m_DelayAction = false; // Unlock.
+        }
+
+        /**
+         *  GetDelayAction
+         *  Gets m_DelayAction, this is a temporary semaphore to prevent joining too quickly after leaving a channel.
+         */
+        public bool GetDelayAction()
+        {
+            if (m_DelayAction)
+                Log("The client is currently disconnecting from a voice channel. Please try again later.");
+            return m_DelayAction;
         }
 
         /**
@@ -122,10 +73,10 @@ namespace WhalesFargo.Services
          *  @param guild
          *  @param target
          */
-        public async Task JoinAudio(IGuild guild, IVoiceChannel target)
+        public async Task JoinAudioAsync(IGuild guild, IVoiceChannel target)
         {
             // Delayed join if the client recently left a voice channel.
-            if (m_DelayJoin)
+            if (m_DelayAction)
             {
                 Log("The client is currently disconnecting from a voice channel. Please try again later.");
                 return;
@@ -166,7 +117,7 @@ namespace WhalesFargo.Services
          *  
          *  @param guild
          */
-        public async Task LeaveAudio(IGuild guild)
+        public async Task LeaveAudioAsync(IGuild guild)
         {
             // To avoid any issues, we stop the player before leaving the channel.
             if (m_IsPlaying)
@@ -193,17 +144,6 @@ namespace WhalesFargo.Services
 
             // If we can't remove it from the dictionary, error.
             Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
-        }
-
-        /**
-         *  GetDelayJoin
-         *  Gets m_DelayJoin, this is a temporary semaphore to prevent joining too quickly after leaving a channel.
-         */
-        public bool GetDelayJoin()
-        {
-            if (m_DelayJoin)
-                Log("The client is currently disconnecting from a voice channel. Please try again later.");
-            return m_DelayJoin;
         }
 
         /**
@@ -234,7 +174,7 @@ namespace WhalesFargo.Services
          */
         private Process CreateLocalStream(string path)
         {
-            Log("Creating Local Stream : " + path);
+            Log($"Creating Local Stream : {path}");
             return Process.Start(new ProcessStartInfo
             {
                 FileName = "ffmpeg.exe",
@@ -255,7 +195,7 @@ namespace WhalesFargo.Services
          */
         private Process CreateNetworkStream(string path)
         { // TODO: Configure this to handle errors as well. A lot of links cannot be opened for some reason.
-            Log("Creating Network Stream : " + path);
+            Log($"Creating Network Stream : {path}");
             return Process.Start(new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -281,10 +221,12 @@ namespace WhalesFargo.Services
          */
         public async Task ForcePlayAudioAsync(IGuild guild, IMessageChannel channel, AudioFile song)
         {
+            bool autoplay = m_AutoPlay; // Store the old autoplay option.
+
             // If there was an error with extracting the path, return.
             if (song == null)
             {
-                Log("Cannot play the audio source specified : " + song);
+                Log($"Cannot play the audio source specified : {song}");
                 return;
             }
 
@@ -292,6 +234,7 @@ namespace WhalesFargo.Services
             if (m_Process != null && m_Process.IsRunning())
             {
                 Log("Another audio source is currently playing.");
+                if (autoplay) Log("Pausing autoplay service.", (int)E_LogOutput.Reply);
                 StopAudio();
                 while (m_IsPlaying) await Task.Delay(1000); // Important!! The last statement of the previous process.
             }
@@ -301,6 +244,8 @@ namespace WhalesFargo.Services
             if (m_ConnectedChannels.TryGetValue(guild.Id, out var audioClient))
             {
                 await AudioPlaybackAsync(audioClient, song);
+                // We update autoplay since it's reset in StopAudio.
+                if (m_AutoPlay = autoplay) Log("Resuming autoplay service.", (int)E_LogOutput.Reply); 
                 return;
             }
 
@@ -343,7 +288,10 @@ namespace WhalesFargo.Services
                 Log("Unable to play in the proper channel. Make sure the audio client is connected.");
                 break;
             }
-            //m_AutoPlay = false; // TODO : Set an option for this. Right now, autoplay stays in autoplay.
+
+            // Stops autoplay once we're done with it.
+            if (m_AutoStop)
+                m_AutoPlay = false;
         }
 
         /**
@@ -385,7 +333,7 @@ namespace WhalesFargo.Services
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.
 
-            Log("Now Playing: " + song.Title, (int)E_LogOutput.Reply); // Reply in the text channel.
+            Log($"Now Playing: {song.Title}", (int)E_LogOutput.Reply); // Reply in the text channel.
             Log(song.Title, (int)E_LogOutput.Playing); // Set playing.
 
             // While true, we stream the audio in chunks.
@@ -425,7 +373,7 @@ namespace WhalesFargo.Services
             // Delete if it's still in the directory. Only if it's a downloaded network file.
             if (song.IsDownloaded && File.Exists(song.FileName) && m_AutoDelete)
             {
-                Log("Deleted " + song.FileName);
+                Log($"Deleted {song.FileName}");
                 File.Delete(song.FileName);
             }
 
@@ -468,9 +416,8 @@ namespace WhalesFargo.Services
         public void StopAudio()
         {
             if (m_Process == null) return;
-            m_Process.Kill(); // This basically stops the current loop by exiting the process.
-            //if (m_IsPlaying) m_IsPlaying = false; // Sets playing to false.
             if (m_AutoPlay) m_AutoPlay = false; // Stop autoplay service as well to prevent reloading.
+            m_Process.Kill(); // This basically stops the current loop by exiting the process.
             Log("Stopping the current audio source.");
         }
 
@@ -493,18 +440,28 @@ namespace WhalesFargo.Services
         }
 
         /**
+         *  CheckAutoPlayAsync
+         *  Checks if autoplay is true, but not started yet. If not started, we start autoplay.
+         *  
+         *  @param guild
+         *  @param channel
+         */
+        public async Task CheckAutoPlayAsync(IGuild guild, IMessageChannel channel)
+        {
+            if (m_AutoPlay && !m_IsPlaying)
+                await AutoPlayAudioAsync(guild, channel);
+        }
+
+        /**
          *  SetAutoPlay
          *  Sets autplay to enable. Returns if the autoplay service should be started or not.
          *  
          *  @param enable - bool toggle for autoplay.
          */
-        public bool SetAutoPlay(bool enable)
+        public void SetAutoPlay(bool enable)
         {
             m_AutoPlay = enable;
-            Log("Setting autoplay : " + enable);
-
-            if (!m_IsPlaying && enable) return true; // Only return true if nothing is playing
-            return false;
+            Log($"Setting autoplay : {enable}");
         }
 
         /**
@@ -560,13 +517,13 @@ namespace WhalesFargo.Services
          *  
          *  @param path   
          */
-        public async Task PlaylistAdd(string path)
+        public async Task PlaylistAddAsync(string path)
         {
             AudioFile audio = await m_AudioDownloader.GetAudioFileInfo(path);
             if (audio != null)
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
-                Log("Added to playlist : " + audio.Title, (int)E_LogOutput.Reply);
+                Log($"Added to playlist : {audio.Title}", (int)E_LogOutput.Reply);
 
                 // If the downloader is set to true, we start the autodownload helper.
                 if (m_AutoDownload)
@@ -583,8 +540,7 @@ namespace WhalesFargo.Services
          */
         private AudioFile PlaylistNext()
         {
-            AudioFile nextSong = null;
-            if (m_Playlist.TryDequeue(out nextSong))
+            if (m_Playlist.TryDequeue(out AudioFile nextSong))
                 return nextSong;
 
             if (m_Playlist.Count <= 0) Log("We reached the end of the playlist.");
@@ -629,7 +585,7 @@ namespace WhalesFargo.Services
             return m_AudioDownloader.GetItem(index);
         }
 
-        public async Task RemoveDuplicateSongs()
+        public async Task RemoveDuplicateSongsAsync()
         {
             m_AudioDownloader.RemoveDuplicateItems();
             await Task.Delay(0);
