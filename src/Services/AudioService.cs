@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
@@ -40,7 +39,10 @@ namespace WhalesFargo.Services
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private bool m_DelayJoin = false;           // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
+
         private bool m_AutoDownload = true;         // Flag to auto download network items in the playlist.
+        private bool m_AutoDelete = false;          // Flag to delete downloaded network items when stopped.
+        private bool m_AllowNetwork = false;         // Flag to allow network streaming capability.
 
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
@@ -212,7 +214,14 @@ namespace WhalesFargo.Services
          */
         public async Task<AudioFile> ExtractPathAsync(string path)
         {
-            return await ExtractAsync(path);
+            try // We put this in a try catch block.
+            {
+                return await m_AudioDownloader.GetAudioFileInfo(path);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /**
@@ -231,7 +240,8 @@ namespace WhalesFargo.Services
                 FileName = "ffmpeg.exe",
                 Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
             });
         }
 
@@ -354,11 +364,22 @@ namespace WhalesFargo.Services
             m_Stream = null;
             m_IsPlaying = false;
 
-            bool isNetwork = VerifyNetworkPath(song.FileName); // Check if network path. This will change if it's an audiofile.
+            // Check if network path. This will change if it's an audiofile.
+            bool? isNetwork = m_AudioDownloader.VerifyNetworkPath(song.FileName);
+            if (isNetwork == null)
+            {
+                Log("Path invalid.");
+                return;
+            }
+            if (isNetwork == true && !m_AllowNetwork)
+            {
+                Log("Network not allowed.");
+                return;
+            }
 
             // Start a new process and create an output stream. Decide between network or local.
-            // TODO: Check if a network file is downloaded, to use local version.
-            m_Process = isNetwork ? CreateNetworkStream(song.FileName) : CreateLocalStream(song.FileName);
+            // Check if a network file is downloaded, to use local version. Upon download finished, the downloader sets network to false.
+            m_Process = (bool)isNetwork ? CreateNetworkStream(song.FileName) : CreateLocalStream(song.FileName);
             m_Stream = client.CreatePCMStream(AudioApplication.Music);
             m_IsPlaying = true; // Set this to true to start the loop properly.
 
@@ -397,12 +418,16 @@ namespace WhalesFargo.Services
                     break;
                 }
             }
-            await m_Stream.FlushAsync();
-            await Task.Delay(500);
+
+            // Flush the stream and wait until it's fully done before continuing.
+            m_Stream.FlushAsync().Wait();
 
             // Delete if it's still in the directory. Only if it's a downloaded network file.
-            if (song.IsDownloaded && File.Exists(song.FileName))
+            if (song.IsDownloaded && File.Exists(song.FileName) && m_AutoDelete)
+            {
+                Log("Deleted " + song.FileName);
                 File.Delete(song.FileName);
+            }
 
             // Reset values. Basically clearing out values again (Flush).
             m_Process = null;
@@ -537,7 +562,7 @@ namespace WhalesFargo.Services
          */
         public async Task PlaylistAdd(string path)
         {
-            AudioFile audio = await ExtractAsync(path);
+            AudioFile audio = await m_AudioDownloader.GetAudioFileInfo(path);
             if (audio != null)
             {
                 m_Playlist.Enqueue(audio); // Only add if there's no errors.
@@ -546,8 +571,8 @@ namespace WhalesFargo.Services
                 // If the downloader is set to true, we start the autodownload helper.
                 if (m_AutoDownload)
                 {
-                    if (audio.IsNetwork) await m_AudioDownloader.AddAsync(audio); // Auto download while in playlist.
-                    if (!m_AudioDownloader.IsRunning()) await m_AudioDownloader.StartDownloadAsync(); // Start the downloader if it's off.
+                    if (audio.IsNetwork) m_AudioDownloader.Add(audio); // Auto download while in playlist.
+                    await m_AudioDownloader.StartDownloadAsync(); // Start the downloader if it's off.
                 }
             }
         }
@@ -587,6 +612,30 @@ namespace WhalesFargo.Services
         }
 
         /**
+         *  GetLocalSongs
+         *  Returns a string with the downloaded songs information.
+         */
+        public string GetLocalSongs()
+        {
+            return m_AudioDownloader.GetAllItems();
+        }
+
+        /**
+          *  GetLocalSongs
+          *  Returns a string with the specified song by index.
+          */
+        public string GetLocalSong(int index)
+        {
+            return m_AudioDownloader.GetItem(index);
+        }
+
+        public async Task RemoveDuplicateSongs()
+        {
+            m_AudioDownloader.RemoveDuplicateItems();
+            await Task.Delay(0);
+        }
+
+        /**
          * ScaleVolumeSafeAllocateBuffers
          * Adjusts the byte array by the volume, scaling it by a factor [0.0f,1.0f]
          * 
@@ -596,7 +645,6 @@ namespace WhalesFargo.Services
         private byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
         {
             if (audioSamples == null) return null;
-            if (audioSamples.Length == 0) return null;
             if (audioSamples.Length % 2 != 0) return null;
             if (volume < 0.0f || volume > 1.0f) return null;
 
@@ -632,93 +680,6 @@ namespace WhalesFargo.Services
             return output;
         }
 
-        /**
-        *  VerifyNetworkPath
-        *  Verifies that the path is a network path and not a local path. Checks here before extracting.
-        *  Add more arguments here, but we'll just check based on http and assume a network link.
-        *  
-        *  @param path - The path to the file
-        */
-        private bool VerifyNetworkPath(string path)
-        {
-            return path.StartsWith("http");
-        }
-
-        /**
-        *  ExtractAsync
-        *  Extracts data from the current path, by finding it locally or on the network.
-        *  Puts all the information into an AudioFile and returns it.
-        *  Returns null if it can't be extracted through it's path.
-        *  
-        *  @param path - string of the source path
-        */
-        private async Task<AudioFile> ExtractAsync(string path)
-        {
-            Log("Extracting Meta Data for : " + path);
-
-            TaskCompletionSource<AudioFile> taskSrc = new TaskCompletionSource<AudioFile>();
-            bool verifyNetwork = VerifyNetworkPath(path);
-
-            // Local file.
-            if (!verifyNetwork)
-            {
-                if (!File.Exists(path))
-                {
-                    Console.WriteLine("File does not exist.");
-                    return null;
-                }
-                // stream data
-                AudioFile StreamData = new AudioFile();
-                StreamData.FileName = path;
-                StreamData.Title = path.Split('/').Last();
-                if (StreamData.Title.CompareTo("") == 0) StreamData.Title = path;
-                StreamData.IsNetwork = verifyNetwork;
-                return StreamData;
-            }
-
-            // Network file.
-            new Thread(() =>
-            {
-                // Stream data
-                AudioFile StreamData = new AudioFile();
-
-                // youtube-dl.exe
-                Process youtubedl;
-
-                // Get Video Title
-                ProcessStartInfo youtubedlMetaData = new ProcessStartInfo()
-                {
-                    FileName = "youtube-dl",
-                    Arguments = $"-s -e {path}",// Add more flags for more options.
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false
-                };
-                youtubedl = Process.Start(youtubedlMetaData);
-                youtubedl.WaitForExit();
-
-                // Read the output of the simulation
-                string[] output = youtubedl.StandardOutput.ReadToEnd().Split('\n');
-
-                // Set the file name.
-                StreamData.FileName = path;
-
-                // Extract each line printed for it's corresponding data.
-                if (output.Length > 0)
-                    StreamData.Title = output[0];
-
-                // Set other properties as follows.
-                StreamData.IsNetwork = verifyNetwork;
-
-                taskSrc.SetResult(StreamData);
-            }).Start();
-
-            AudioFile result = await taskSrc.Task;
-            if (result == null) // TODO: We might not need to throw an exception.
-                throw new Exception("youtube-dl.exe failed to extract the data!");
-
-            return result;
-        }
 
     }
 }

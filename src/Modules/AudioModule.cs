@@ -56,7 +56,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        [Remarks("!play [url]")]
+        [Remarks("!play [url/index]")]
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
@@ -70,6 +70,12 @@ namespace WhalesFargo.Modules
             // Start the autoplay service if already on, but not started. This function is BLOCKING.
             if (autoplay && m_Service.SetAutoPlay(autoplay))
                 await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+        }
+
+        [Command("play", RunMode = RunMode.Async)]
+        public async Task PlayVoiceChannelByIndex([Remainder] int index)
+        {
+            await PlayVoiceChannel(m_Service.GetLocalSong(index));
         }
 
         [Command("pause", RunMode = RunMode.Async)]
@@ -109,7 +115,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("add", RunMode = RunMode.Async)]
-        [Remarks("!add [url]")]
+        [Remarks("!add [url/index]")]
         [Summary("Adds a song by url or local path to the playlist.")]
         public async Task AddVoiceChannel([Remainder] string song)
         {
@@ -119,6 +125,12 @@ namespace WhalesFargo.Modules
             // Start the autoplay service if already on, but not started. This function is BLOCKING.
             if (autoplay && m_Service.SetAutoPlay(autoplay))
                 await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+        }
+
+        [Command("add", RunMode = RunMode.Async)]
+        public async Task AddVoiceChannelByIndex([Remainder] int index)
+        {
+            await AddVoiceChannel(m_Service.GetLocalSong(index));
         }
 
         [Command("skip", RunMode = RunMode.Async)]
@@ -147,6 +159,22 @@ namespace WhalesFargo.Modules
             // Start the autoplay service. This function is BLOCKING.
             if (m_Service.SetAutoPlay(enable))
                 await m_Service.AutoPlayAudioAsync(Context.Guild, Context.Channel);
+        }
+
+        [Command("songs", RunMode = RunMode.Async)]
+        [Remarks("!songs")]
+        [Summary("Shows what's currently in our local folder.")]
+        public async Task PrintSongDirectory()
+        {
+            await ServiceReplyAsync(m_Service.GetLocalSongs()); // Reply with a print out.
+        }
+
+        [Command("cleanupsongs", RunMode = RunMode.Async)]
+        [Remarks("!cleanupsongs")]
+        [Summary("Cleans the local folder of duplicate files.")]
+        public async Task CleanSongDirectory()
+        {
+            await m_Service.RemoveDuplicateSongs();
         }
 
     }
