@@ -122,6 +122,7 @@ namespace WhalesFargo.Services
             // To avoid any issues, we stop the player before leaving the channel.
             if (m_IsPlaying)
             {
+                // Before we leave, we stopped the audio.
                 StopAudio();
 
                 // Wait for it to be stopped.
@@ -245,7 +246,7 @@ namespace WhalesFargo.Services
             {
                 await AudioPlaybackAsync(audioClient, song);
                 // We update autoplay since it's reset in StopAudio.
-                if (m_AutoPlay = autoplay) Log("Resuming autoplay service.", (int)E_LogOutput.Reply); 
+                m_AutoPlay = autoplay;
                 return;
             }
 
@@ -265,6 +266,7 @@ namespace WhalesFargo.Services
          */
         public async Task AutoPlayAudioAsync(IGuild guild, IMessageChannel channel)
         {
+            if (m_AutoPlay) Log("Starting autoplay service.", (int)E_LogOutput.Reply);
             while (m_AutoPlay)
             {
                 // Wait for any previous songs.
@@ -585,6 +587,29 @@ namespace WhalesFargo.Services
             return m_AudioDownloader.GetItem(index);
         }
 
+        /**
+         *  DownloadSongAsync
+         *  Adds a song to the download queue.
+         *  
+         *  @param path
+         */
+        public async Task DownloadSongAsync(string path)
+        {
+            AudioFile audio = await m_AudioDownloader.GetAudioFileInfo(path);
+            if (audio != null)
+            {
+                Log($"Added to the download queue : {audio.Title}", (int)E_LogOutput.Reply);
+
+                // If the downloader is set to true, we start the autodownload helper.
+                if (audio.IsNetwork) m_AudioDownloader.Add(audio); // Auto download while in playlist.
+                await m_AudioDownloader.StartDownloadAsync(); // Start the downloader if it's off.
+            }
+        }
+
+        /**
+         *  RemoveDuplicateSongsAsync
+         *  Removes any duplicates in our download folder.
+         */
         public async Task RemoveDuplicateSongsAsync()
         {
             m_AudioDownloader.RemoveDuplicateItems();

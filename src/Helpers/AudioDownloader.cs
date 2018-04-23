@@ -229,7 +229,7 @@ namespace WhalesFargo.Helpers
             { // Start downloading.
                 // Set it as our currently downloading item.
                 m_CurrentlyDownloading = filename;
-                Console.WriteLine("Currently downloading " + song.Title);
+                Console.WriteLine("Currently downloading : " + song.Title);
 
                 // youtube-dl.exe
                 Process youtubedl;

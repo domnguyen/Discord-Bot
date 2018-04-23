@@ -162,6 +162,14 @@ namespace WhalesFargo.Modules
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
+        [Command("download", RunMode = RunMode.Async)]
+        [Remarks("!download")]
+        [Summary("Download songs into our local folder.")]
+        public async Task DownloadSong([Remainder] string path)
+        {
+            await m_Service.DownloadSongAsync(path);
+        }
+
         [Command("songs", RunMode = RunMode.Async)]
         [Remarks("!songs")]
         [Summary("Shows what's currently in our local folder.")]
