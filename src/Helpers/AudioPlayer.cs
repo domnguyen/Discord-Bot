@@ -101,14 +101,14 @@ namespace WhalesFargo.Helpers
             // We stream the audio in chunks.
             while (true)
             {
-                // We pause within this function while it's 'not playing'.
-                while (!m_IsPlaying) await Task.Delay(1000);
-
                 // If the process is already over, we're finished. If something else kills this process, we stop.
                 if (m_Process == null || m_Process.HasExited) break;
 
                 // If the stream is broken, we exit.
                 if (m_Stream == null) break;
+
+                // We pause within this function while it's 'not playing'.
+                if (!m_IsPlaying) continue;
 
                 // Read the stream in chunks.
                 int blockSize = m_BLOCK_SIZE; // Size of bytes to read per frame.
