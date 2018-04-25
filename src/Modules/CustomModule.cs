@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -18,6 +19,11 @@ namespace WhalesFargo.Modules
             await ReplyAsync(s);
         }
 
+        public async Task ServiceReplyAsync(string title, EmbedBuilder emb)
+        {
+            await ReplyAsync(title, false, emb);
+        }
+
         // Playing will allow the AudioService to set the current game.
         public async Task ServicePlayingAsync(string s)
         {
@@ -30,6 +36,7 @@ namespace WhalesFargo.Modules
                 Console.WriteLine(e);
             }
         }
+
 
     }
 }

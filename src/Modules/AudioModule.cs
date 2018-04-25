@@ -63,8 +63,8 @@ namespace WhalesFargo.Modules
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
-            // Extract the audio. Download here if necessary. TODO: Catch if youtube-dl can't read the header.
-            AudioFile audio = await m_Service.ExtractPathAsync(song);
+            // Extract the audio. Download here if necessary.
+            AudioFile audio = await m_Service.ExtractPathAsync(m_Service.GetLocalSong(song));
 
             // Play the audio. This function is BLOCKING.
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
@@ -148,7 +148,8 @@ namespace WhalesFargo.Modules
         [Summary("Shows what's currently in the playlist.")]
         public async Task PrintPlaylistVoiceChannel()
         {
-            await ServiceReplyAsync(m_Service.PlaylistString()); // Reply with a print out.
+            m_Service.PrintPlaylist();
+            await Task.Delay(0);
         }
 
         [Command("autoplay", RunMode = RunMode.Async)]
@@ -163,7 +164,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("download", RunMode = RunMode.Async)]
-        [Remarks("!download")]
+        [Remarks("!download [http]")]
         [Summary("Download songs into our local folder.")]
         public async Task DownloadSong([Remainder] string path)
         {
@@ -171,11 +172,12 @@ namespace WhalesFargo.Modules
         }
 
         [Command("songs", RunMode = RunMode.Async)]
-        [Remarks("!songs")]
+        [Remarks("!songs [page]")]
         [Summary("Shows what's currently in our local folder.")]
-        public async Task PrintSongDirectory()
+        public async Task PrintSongDirectory(int page = 0)
         {
-            await ServiceReplyAsync(m_Service.GetLocalSongs()); // Reply with a print out.
+            m_Service.PrintLocalSongs(page);
+            await Task.Delay(0);
         }
 
         [Command("cleanupsongs", RunMode = RunMode.Async)]

@@ -1,4 +1,5 @@
 ﻿using System;
+using Discord;
 using WhalesFargo.Modules;
 
 namespace WhalesFargo.Services
@@ -35,6 +36,11 @@ namespace WhalesFargo.Services
         {
             if (m_ParentModule == null) return;
             await m_ParentModule.ServiceReplyAsync(s);
+        }
+
+        protected async void DiscordReply(string title, EmbedBuilder emb)
+        {
+            await m_ParentModule.ServiceReplyAsync(title, emb);
         }
 
         /**

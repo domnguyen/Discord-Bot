@@ -45,37 +45,13 @@ namespace WhalesFargo.Helpers
          *  GetAllItems
          *  Returns a string with downloaded song names.
          */
-        public string GetAllItems()
+        public string[] GetAllItems()
         {
-            // Populate items with the files in the folder.
-            string items = "";
-
             // Check the files in the directory.
             string[] itemEntries = Directory.GetFiles(m_DownloadPath);
             int itemCount = itemEntries.Length;
-            if (itemCount == 0) return "There are currently no items downloaded.";
-
-            // Count the number of total digits.
-            int countDigits = (int)(Math.Floor(Math.Log10(itemCount) + 1));
-
-            // For each file, we add it to the list.
-            for (int i = 0; i < itemCount; i++)
-            {
-                // Prepend 0's so it matches in length. This will be the 'index'.
-                string zeros = "";
-                int numDigits = (i == 0) ? 1 : (int)(Math.Floor(Math.Log10(i) + 1));
-                while (numDigits < countDigits)
-                {
-                    zeros += "0";
-                    ++numDigits;
-                }
-
-                // Print out the current file string.
-                string file = itemEntries[i].Split(Path.DirectorySeparatorChar).Last(); // Get just the file name.
-                items += zeros + i + " : " + file + "\n";
-            }
-
-            return items;
+            if (itemCount == 0) return new string[] { "There are currently no items downloaded." };
+            return itemEntries;
         }
 
         /**
@@ -87,8 +63,12 @@ namespace WhalesFargo.Helpers
         public string GetItem(string item)
         {
             // If it's been downloaded and isn't currently downloading, we can return it.
-            if (File.Exists(m_DownloadPath + "\\" + item) && !m_CurrentlyDownloading.Equals(item))
-                return m_DownloadPath + "\\" + item;
+            if (File.Exists($"{m_DownloadPath}\\{item}") && !m_CurrentlyDownloading.Equals(item))
+                return $"{m_DownloadPath}\\{item}";
+
+            // Check by filename without .mp3.
+            if (File.Exists($"{m_DownloadPath}\\{item}.mp3") && !m_CurrentlyDownloading.Equals(item))
+                return $"{m_DownloadPath}\\{item}.mp3";
 
             // Else we return blank. This means the item doesn't exist in our library.
             return null;
@@ -164,22 +144,22 @@ namespace WhalesFargo.Helpers
         }
 
         /**
-         * Next
+         * Pop
          * Gets the next song in the queue for download.
          */
-        private AudioFile Next()
+        private AudioFile Pop()
         {
             m_DownloadQueue.TryDequeue(out AudioFile nextSong);
             return nextSong;
         }
 
         /**
-         * Add
+         * Push
          * Adds a song to the queue for download.
          * 
          * @param song - song to be downloaded in the future.
          */
-        public void Add(AudioFile song)
+        public void Push(AudioFile song)
         {
             m_DownloadQueue.Enqueue(song); // Only add if there's no errors.
         }
@@ -197,7 +177,7 @@ namespace WhalesFargo.Helpers
             while (m_DownloadQueue.Count > 0)
             {
                 if (!m_IsRunning) return; // Stop downloading.
-                await DownloadAsync(Next());
+                await DownloadAsync(Pop());
             }
             m_IsRunning = false;
         }
@@ -256,6 +236,7 @@ namespace WhalesFargo.Helpers
                 }
 
                 // Update the filename with the local directory, set it to local and downloaded to true.
+                // Remember, the title is already set.
                 song.FileName = filename;
                 song.IsNetwork = false; // Network is now false.
                 song.IsDownloaded = true;
@@ -291,6 +272,11 @@ namespace WhalesFargo.Helpers
          *  GetAudioFileInfo
          *  Extracts data from the current path, by finding it locally or on the network.
          *  Puts all the information into an AudioFile and returns it.
+         *  
+         *  Filename - source by local filename or from network link.
+         *  Title - name of the song.
+         *  IsNetwork - If it's local or network.
+         *  
          *  Returns null if it can't be extracted through it's path.
          *  
          *  @param path - string of the source path
