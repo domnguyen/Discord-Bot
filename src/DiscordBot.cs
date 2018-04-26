@@ -16,24 +16,45 @@ namespace WhalesFargo
     /**
      * Main program to run the discord bot.
      */
-    class DiscordBot
+    public class DiscordBot
     {
+        // Static variables.
+        public static string ConnectionStatus = "Disconnected";
+
         // Private variables.
-        private DiscordSocketClient m_Client; // Discord client.
-        private CommandService m_Commands; // Command service to link modules.
-        private IServiceProvider m_Services; // Service provider to add services to these modules.
-        private string m_Token = ""; // Bot Token. Do not share if you plan to hardcode it here. Otherwise create a BotToken.txt file.
+        private DiscordSocketClient m_Client;       // Discord client.
+        private CommandService m_Commands;          // Command service to link modules.
+        private IServiceProvider m_Services;        // Service provider to add services to these modules.
+        private string m_Token = "";                // Bot Token. Do not share if you plan to hardcode it here.
+        private string m_TokenFile = "";            // If we have the token in a file, make sure it's the first line.
+        private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
+        private bool m_DesktopNotifications = true; // Flag for desktop notifications in minimized mode.
 
         /**
-         * MainAsync
+         * GetDesktopNotifications
+         * Returns if we want to send desktop notifications in the UI, from the System Tray.
+         */
+        public bool GetDesktopNotifications() { return m_DesktopNotifications; }
+
+        /**
+         * RunAsync
          * 
          */
         public async Task RunAsync()
         {
+            // Already running...
+            if (m_Client != null)
+            {
+                if (m_Client.ConnectionState == ConnectionState.Connecting ||
+                m_Client.ConnectionState == ConnectionState.Connected)
+                    return;
+            }
+              
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService();
             m_Services = InstallServices(); // We install services by adding it to a service collection.
+            m_RetryConnection = true;
 
             // The bot will automatically reconnect once the initial connection is established. 
             // To keep trying, we put it in a loop.
@@ -42,8 +63,11 @@ namespace WhalesFargo
                 // Attempt to connect.
                 try
                 {
+                    // Set the connecting status.
+                    SetConnectionStatus("Connecting");
+
                     // Get the token from the application settings.
-                    string token = GetBotToken("BotToken.txt");
+                    string token = GetBotToken(m_TokenFile);
                     if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
 
                     // Login using the bot token.
@@ -52,19 +76,48 @@ namespace WhalesFargo
                     // Startup the client.
                     await m_Client.StartAsync();
 
+                    // Install commands once the client has logged in.
+                    await InstallCommands();
+
                     break;
                 }
                 catch
                 {
-                    Console.WriteLine("Failed to connect.");
+                    await Log(new LogMessage(LogSeverity.Error, "RunAsync", "Failed to connect."));
+                    if (m_RetryConnection == false)
+                    {
+                        SetConnectionStatus("Disconnected");
+                        return;
+                    }
                 }
             }
 
-            // Install commands once the client has logged in.
-            await InstallCommands();
-
             // Doesn't end the program until the whole thing is done.
             await Task.Delay(-1);
+        }
+
+        /**
+         * Cancel
+         * 
+         */
+        public async Task CancelAsync()
+        {
+            m_RetryConnection = false;
+            await Task.Delay(0);
+        }
+
+        /**
+         *  SetToken
+         *  Sets the token to be from file or direct string.
+         */
+        public void SetBotToken(string token)
+        {
+            m_Token = "";
+            m_TokenFile = "";
+            if (System.IO.File.Exists(token))
+                m_TokenFile = token;
+            else
+                m_Token = token;
         }
 
         /**
@@ -77,9 +130,25 @@ namespace WhalesFargo
             string token = "";
             if (File.Exists(filename))
             {
-                token = File.ReadLines("BotToken.txt").First();
+                token = File.ReadLines(filename).First();
             }
             return token;
+        }
+
+        /**
+         * SetConnectionStatus
+         * Sets the connection status.
+         * 
+         */
+        private void SetConnectionStatus(string s, Exception arg = null)
+        {
+            ConnectionStatus = s;
+            if (arg != null) Console.WriteLine(arg);
+            if (Program.UI != null)
+            {
+                Program.UI.SetConnectionStatus(s);
+                if (ConnectionStatus.Equals("Connected")) Program.UI.DisableConnectionToken();
+            }
         }
 
         /**
@@ -196,7 +265,7 @@ namespace WhalesFargo
         */
         private Task Connected()
         {
-            Console.WriteLine("Status : Connected");
+            SetConnectionStatus("Connected");
             return Task.CompletedTask;
         }
 
@@ -208,7 +277,7 @@ namespace WhalesFargo
         */
         private Task Disconnected(Exception arg)
         {
-            Console.WriteLine("Status : Disconnected \n" + arg);
+            SetConnectionStatus("Disconnected", arg);
             return Task.CompletedTask;
         }
 
@@ -221,6 +290,7 @@ namespace WhalesFargo
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
+            if (Program.UI != null) Program.UI.SetConsoleText(msg.ToString());
             return Task.CompletedTask;
         }
 

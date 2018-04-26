@@ -166,7 +166,7 @@ namespace WhalesFargo.Services
             // If there was an error with extracting the path, return.
             if (song == null)
             {
-                Log($"Cannot play the audio source specified : {song}");
+                Log($"Cannot play the audio source specified.");
                 return;
             }
 
@@ -384,7 +384,7 @@ namespace WhalesFargo.Services
         {
             if (!m_AutoPlay)
             {
-               Log("Autoplay service hasn't been started.");
+                Log("Autoplay service hasn't been started.");
                 return;
             }
             if (!m_AudioPlayer.IsRunning())
