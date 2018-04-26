@@ -67,20 +67,20 @@ namespace WhalesFargo.Services
          */
         protected void Log(string s, int output = (int)E_LogOutput.Console)
         {
-            string str = $"{DateTime.Now.ToString("hh:mm:ss")} DiscordBot {s}";
+            string withDate = $"{DateTime.Now.ToString("hh:mm:ss")} DiscordBot {s}";
 #if (DEBUG_VERBOSE)
             Console.WriteLine("AudioService [DEBUG] -- " + str);
 #endif
             if (output == (int)E_LogOutput.Console)
             {
-                if (Program.UI != null) Program.UI.SetConsoleText(str);
-                Console.WriteLine("DEBUG -- " + str);
+                if (Program.UI != null) Program.UI.SetConsoleText(withDate);
+                Console.WriteLine("DEBUG -- " + withDate);
             }
-            if (output == (int)E_LogOutput.Reply) DiscordReply($"`{str}`");
+            if (output == (int)E_LogOutput.Reply) DiscordReply($"`{s}`");
             if (output == (int)E_LogOutput.Playing)
             {
-                if (Program.UI != null) Program.UI.SetAudioText(str);
-                DiscordPlaying(str);
+                if (Program.UI != null) Program.UI.SetAudioText(s);
+                DiscordPlaying(s);
             }
         }
 

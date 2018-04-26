@@ -437,7 +437,7 @@ namespace WhalesFargo.Services
 
                     // Filename.
                     string file = items[index].Split(Path.DirectorySeparatorChar).Last(); // Get just the file name.
-                    emb.AddInlineField(zeros + index, file);
+                    emb.AddField(zeros + index, file);
                 }
 
                 DiscordReply($"Page {p+1}", emb);
