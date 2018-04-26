@@ -225,10 +225,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>youtube-dl.exe</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="BotToken.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>BotToken.txt</TargetPath>
-    </ContentWithTargetPath>
   </ItemGroup>
   <!-- App Configuration -->
   <ItemGroup>
