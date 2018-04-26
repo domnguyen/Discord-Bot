@@ -1,1 +1,5 @@
-
+# Simple Build Testing
+language: csharp
+solution: WhalesFargo.sln
+install:
+  - nuget restore WhalesFargo.sln
