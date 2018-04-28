@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
+using System.Threading.Tasks;
 using WhalesFargo.Helpers;
 using WhalesFargo.Services;
 
@@ -9,15 +9,26 @@ namespace WhalesFargo.Modules
 
     /**
      * AudioModule
-     * Class that handles the audio portion of the program.
-     * An audio module is created here with commands that interact with an AudioService.
+     * This handles all the audio commands for the bot.
+     * 
+     * This supports playing local songs (from the machine the bot is running on) and most network
+     * songs that youtube-dl supports.
+     * 
+     * It also maintains it's own playlist and can be mixed between local and network sources.
+     * 
+     * Since this is meant to run on a single server, it should only be joined in a single
+     * voice channel at a time. We set it up to allow multiple channel connections, but we only
+     * have a single instance of the audioplayer. If the bot exists in multiple servers, it will only
+     * interact with the voice chat in the last server it received the commands in.
+     * 
+     * As a module, this will interact with AudioService, using commands from Discord.
      */
     [Name("Audio")]
     [Summary("Audio module to interact with voice chat. Currently, used to playback audio in a stream.")]
     public class AudioModule : CustomModule
     {
         // Private variables
-        private readonly AudioService m_Service;
+        private readonly AudioService m_Service;        // Reference to the service.
 
         // Dependencies are automatically injected via this constructor.
         // Remember to add an instance of the AudioService
@@ -46,7 +57,7 @@ namespace WhalesFargo.Modules
             if (m_Service.GetDelayAction()) return; // Stop multiple attempts to join too quickly.
             await m_Service.JoinAudioAsync(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
 
-            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            // Start the autoplay service if enabled, but not yet started.
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
@@ -63,21 +74,22 @@ namespace WhalesFargo.Modules
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
-            // Extract the audio. Download here if necessary.
-            AudioFile audio = await m_Service.ExtractPathAsync(m_Service.GetLocalSong(song));
+            // Extract the audio.
+            AudioFile audio = await m_Service.GetAudioFileAsync(m_Service.GetLocalSong(song));
 
-            // Play the audio. This function is BLOCKING.
+            // Play the audio. We check if audio is null when we attempt to play. This function is BLOCKING.
             await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
 
-            // Start the autoplay service if already on, but not started. This function is BLOCKING.
-            // If the force play, played a song, we can resume autoplay here.
+            // Start the autoplay service if enabled, but not yet started.
+            // Once force play is done, if auto play is enabled, we can resume the autoplay here.
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("play", RunMode = RunMode.Async)]
         public async Task PlayVoiceChannelByIndex([Remainder] int index)
         {
-            await PlayVoiceChannel(m_Service.GetLocalSong(index));
+            // Play a song by it's local index in the download folder.
+            await PlayVoiceChannel(m_Service.GetLocalSong(index)); 
         }
 
         [Command("pause", RunMode = RunMode.Async)]
@@ -86,7 +98,7 @@ namespace WhalesFargo.Modules
         public async Task PauseVoiceChannel()
         {
             m_Service.PauseAudio();
-            await Task.Delay(0);
+            await Task.Delay(0); // Suppress async warrnings.
         }
 
         [Command("resume", RunMode = RunMode.Async)]
@@ -95,7 +107,7 @@ namespace WhalesFargo.Modules
         public async Task ResumeVoiceChannel()
         {
             m_Service.ResumeAudio();
-            await Task.Delay(0);
+            await Task.Delay(0); // Suppress async warrnings.
         }
 
         [Command("stop", RunMode = RunMode.Async)]
@@ -104,7 +116,7 @@ namespace WhalesFargo.Modules
         public async Task StopVoiceChannel()
         {
             m_Service.StopAudio();
-            await Task.Delay(0);
+            await Task.Delay(0); // Suppress async warrnings.
         }
 
         [Command("volume")]
@@ -113,7 +125,7 @@ namespace WhalesFargo.Modules
         public async Task VolumeVoiceChannel([Remainder] float volume)
         {
             m_Service.AdjustVolume(volume);
-            await Task.Delay(0);
+            await Task.Delay(0); // Suppress async warrnings.
         }
 
         [Command("add", RunMode = RunMode.Async)]
@@ -121,15 +133,17 @@ namespace WhalesFargo.Modules
         [Summary("Adds a song by url or local path to the playlist.")]
         public async Task AddVoiceChannel([Remainder] string song)
         {
-            await m_Service.PlaylistAddAsync(song);
+            // Add it to the playlist.
+            await m_Service.PlaylistAddAsync(m_Service.GetLocalSong(song));
 
-            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            // Start the autoplay service if enabled, but not yet started.
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("add", RunMode = RunMode.Async)]
         public async Task AddVoiceChannelByIndex([Remainder] int index)
         {
+            // Add a song by it's local index in the download folder.
             await AddVoiceChannel(m_Service.GetLocalSong(index));
         }
 
@@ -159,7 +173,7 @@ namespace WhalesFargo.Modules
         {
             m_Service.SetAutoPlay(enable);
 
-            // Start the autoplay service if already on, but not started. This function is BLOCKING.
+            // Start the autoplay service if already on, but not started.
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
@@ -173,7 +187,7 @@ namespace WhalesFargo.Modules
 
         [Command("songs", RunMode = RunMode.Async)]
         [Remarks("!songs [page]")]
-        [Summary("Shows what's currently in our local folder.")]
+        [Summary("Shows songs in our local folder in pages.")]
         public async Task PrintSongDirectory(int page = 0)
         {
             m_Service.PrintLocalSongs(page);
@@ -182,7 +196,7 @@ namespace WhalesFargo.Modules
 
         [Command("cleanupsongs", RunMode = RunMode.Async)]
         [Remarks("!cleanupsongs")]
-        [Summary("Cleans the local folder of duplicate files.")]
+        [Summary("Cleans the local folder of duplicate files created by our downloader.")]
         public async Task CleanSongDirectory()
         {
             await m_Service.RemoveDuplicateSongsAsync();

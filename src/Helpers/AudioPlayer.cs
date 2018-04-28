@@ -93,7 +93,7 @@ namespace WhalesFargo.Helpers
 
             // Start a new process and create an output stream. Decide between network or local.
             m_Process = (bool)song.IsNetwork ? CreateNetworkStream(song.FileName) : CreateLocalStream(song.FileName);
-            m_Stream = client.CreatePCMStream(AudioApplication.Music);
+            m_Stream = client.CreatePCMStream(AudioApplication.Music); // Consider setting custom bitrate, buffers, and packet loss props.
             m_IsPlaying = true; // Set this to true to start the loop properly.
 
             await Task.Delay(5000); // We should wait for ffmpeg to buffer some of the audio first.

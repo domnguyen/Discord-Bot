@@ -11,6 +11,8 @@ namespace WhalesFargo.Helpers
     *  AudioDownloader
     *  Helper class to download files in the background.
     *  This can be used to optimize network audio sources.
+    *  This is also the only class that's using youtube-dl, 
+    *  which will be the primary executable for downloading audio.
     */
     public class AudioDownloader
     {
@@ -129,17 +131,12 @@ namespace WhalesFargo.Helpers
                 var isDuplicate = int.TryParse(filename.Split('_').Last(), out int n);
                 if (isDuplicate) filename = filename.Split(new char[] { '_' }, 2)[0];
 
+                // Get the current count, then update the count.
                 duplicates.TryRemove(filename, out int count);
                 duplicates.TryAdd(filename, ++count);
 
-                try
-                {
-                    if (count >= 2) File.Delete(item);
-                }
-                catch
-                {
-                    Console.WriteLine("Problem whiler deleting duplicates.");
-                }
+                try { if (count >= 2) File.Delete(item); }
+                catch { Console.WriteLine("Problem while deleting duplicates."); }
             }
         }
 
@@ -159,10 +156,7 @@ namespace WhalesFargo.Helpers
          * 
          * @param song - song to be downloaded in the future.
          */
-        public void Push(AudioFile song)
-        {
-            m_DownloadQueue.Enqueue(song); // Only add if there's no errors.
-        }
+        public void Push(AudioFile song) { m_DownloadQueue.Enqueue(song); } // Only add if there's no errors. 
 
         /**
          * StartDownloadAsync
@@ -283,6 +277,7 @@ namespace WhalesFargo.Helpers
          */
         public async Task<AudioFile> GetAudioFileInfo(string path)
         {
+            if (path == null) return null;
             Console.WriteLine("Extracting Meta Data for : " + path);
 
             // Verify if it's a network path or not.

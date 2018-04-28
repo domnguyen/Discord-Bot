@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using WhalesFargo.Helpers;
 
 namespace WhalesFargo.UI
 {
@@ -50,20 +51,20 @@ namespace WhalesFargo.UI
 
         private void SetToken(string s)
         {
-            if (m_DiscordBot != null) m_DiscordBot.SetBotToken(ConnectionToken.Text);
+            if (m_DiscordBot != null) m_DiscordBot.SetBotToken(s);
         }
 
         private void ConnectionButton_Click(object sender, EventArgs e)
         {
-            if (DiscordBot.ConnectionStatus.Equals("Connecting"))
+            if (DiscordBot.ConnectionStatus.Equals(Strings.Connecting))
             {
                 Program.Cancel();
-                ConnectionButton.Text = "Connect";
+                ConnectionButton.Text = Strings.ConnectButton;
             }
             else
             {
                 Program.Run();
-                ConnectionButton.Text = "Cancel";
+                ConnectionButton.Text = Strings.CancelButton;
             }
         }
 
@@ -86,9 +87,9 @@ namespace WhalesFargo.UI
                 return;
             }
             ConnectionStatus.Text = s;
-            if (s.Equals("Disconnected")) ConnectionStatus.BackColor = System.Drawing.Color.Red;
-            if (s.Equals("Connecting")) ConnectionStatus.BackColor = System.Drawing.Color.Yellow;
-            if (s.Equals("Connected")) ConnectionStatus.BackColor = System.Drawing.Color.Green;
+            if (s.Equals(Strings.Disconnected)) ConnectionStatus.BackColor = System.Drawing.Color.Red;
+            if (s.Equals(Strings.Connecting)) ConnectionStatus.BackColor = System.Drawing.Color.Yellow;
+            if (s.Equals(Strings.Connected)) ConnectionStatus.BackColor = System.Drawing.Color.Green;
         }
 
         public void SetConsoleText(string s)
@@ -111,7 +112,15 @@ namespace WhalesFargo.UI
 
             AudioText.Text = s.PadRight(s.Length + 20);
 
-            if (m_AudioTextTimer.Enabled == false) m_AudioTextTimer.Enabled = true;
+            // Turn off scroll if we're playing nothing.
+            if (s.Equals(Strings.NotPlaying))
+            {
+                m_AudioTextTimer.Enabled = false;
+                return;
+            }
+            else if (m_AudioTextTimer.Enabled == false) m_AudioTextTimer.Enabled = true;
+
+            // If desktop notifications and we didn't return, show balloon text.
             if (m_DiscordBot != null && m_DiscordBot.GetDesktopNotifications() && SystemTray.Visible)
             {
                 SystemTray.BalloonTipText = s;
