@@ -176,6 +176,11 @@
     <Compile Include="Helpers\AudioDownloader.cs" />
     <Compile Include="Helpers\AudioFile.cs" />
     <Compile Include="Helpers\AudioPlayer.cs" />
+    <Compile Include="Helpers\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\Tools.cs" />
     <Compile Include="Modules\AdminModule.cs" />
     <Compile Include="Modules\AudioModule.cs" />
@@ -225,10 +230,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>youtube-dl.exe</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="BotToken.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>BotToken.txt</TargetPath>
-    </ContentWithTargetPath>
   </ItemGroup>
   <!-- App Configuration -->
   <ItemGroup>
@@ -245,6 +246,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Helpers\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\Window.resx">
       <DependentUpon>Window.cs</DependentUpon>
     </EmbeddedResource>
