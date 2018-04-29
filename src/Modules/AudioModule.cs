@@ -74,11 +74,8 @@ namespace WhalesFargo.Modules
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
-            // Extract the audio.
-            AudioFile audio = await m_Service.GetAudioFileAsync(m_Service.GetLocalSong(song));
-
             // Play the audio. We check if audio is null when we attempt to play. This function is BLOCKING.
-            await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, audio);
+            await m_Service.ForcePlayAudioAsync(Context.Guild, Context.Channel, song);
 
             // Start the autoplay service if enabled, but not yet started.
             // Once force play is done, if auto play is enabled, we can resume the autoplay here.
@@ -135,7 +132,7 @@ namespace WhalesFargo.Modules
         public async Task AddVoiceChannel([Remainder] string song)
         {
             // Add it to the playlist.
-            await m_Service.PlaylistAddAsync(m_Service.GetLocalSong(song));
+            await m_Service.PlaylistAddAsync(song);
 
             // Start the autoplay service if enabled, but not yet started.
             await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);

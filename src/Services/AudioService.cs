@@ -39,7 +39,7 @@ namespace WhalesFargo.Services
         private readonly AudioPlayer m_AudioPlayer = new AudioPlayer();
 
         // Private variables.
-        private int m_NumPlaysCalled = 0;           // This is to check for the last play called.
+        private int m_NumPlaysCalled = 0;           // This is to check for the last 'ForcePlay' call.
         private int m_DelayActionLength = 10000;    // To prevent connection issues, we set it to a fairly 'large' value.
         private bool m_DelayAction = false;         // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
@@ -137,14 +137,18 @@ namespace WhalesFargo.Services
             Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
         }
 
+        // Returns the number of async calls to ForcePlayAudioSync.
         public int GetNumPlaysCalled() { return m_NumPlaysCalled; }
 
         // Force Play the current audio in the voice channel of the target.
         // TODO: Consider adding it to autoplay list if it is already playing.
-        public async Task ForcePlayAudioAsync(IGuild guild, IMessageChannel channel, AudioFile song)
+        public async Task ForcePlayAudioAsync(IGuild guild, IMessageChannel channel, string path)
         {
             // We can't play from an empty guild.
             if (guild == null) return;
+
+            // Get audio info.
+            AudioFile song = await GetAudioFileAsync(path);
 
             // Can't play an empty song.
             if (song == null) return;
@@ -330,11 +334,22 @@ namespace WhalesFargo.Services
         // Extracts simple meta data from the path and fills a new AudioFile
         // information about the audio source. If it fails in the downloader or here,
         // we simply return null.
-        public async Task<AudioFile> GetAudioFileAsync(string path)
+        private async Task<AudioFile> GetAudioFileAsync(string path)
         {
             try // We put this in a try catch block.
             {
-                return await m_AudioDownloader.GetAudioFileInfo(path);
+                AudioFile song = await m_AudioDownloader.GetAudioFileInfo(path);
+                if (song != null) // We check for a local available version.
+                {
+                    string filename = m_AudioDownloader.GetItem(song.Title);
+                    if (filename != null) // We found a local version.
+                    {
+                        song.FileName = filename;
+                        song.IsNetwork = false; // Network is now false.
+                        song.IsDownloaded = true;
+                    }
+                }
+                return song;
             }
             catch
             {
@@ -395,10 +410,6 @@ namespace WhalesFargo.Services
                 DiscordReply($"Page {p+1}", emb);
             }
         }
-
-        // Returns the path with the specified song by filename.
-        // Otherwise, returns the input string.
-        public string GetLocalSong(string filename) { string local = m_AudioDownloader.GetItem(filename); return (local != null) ? local : filename; }
 
         // Returns the name with the specified song by index.
         // Returns null if a local song doesn't exist.
