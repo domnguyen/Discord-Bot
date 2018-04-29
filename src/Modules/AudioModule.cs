@@ -1,5 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 using WhalesFargo.Helpers;
 using WhalesFargo.Services;
@@ -82,11 +84,12 @@ namespace WhalesFargo.Modules
 
             // Start the autoplay service if enabled, but not yet started.
             // Once force play is done, if auto play is enabled, we can resume the autoplay here.
-            await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
+            // We also write a counter to make sure this is the last play called, to avoid cascading auto plays.
+            if (m_Service.GetNumPlaysCalled() == 0) await m_Service.CheckAutoPlayAsync(Context.Guild, Context.Channel);
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        public async Task PlayVoiceChannelByIndex([Remainder] int index)
+        public async Task PlayVoiceChannelByIndex(int index)
         {
             // Play a song by it's local index in the download folder.
             await PlayVoiceChannel(m_Service.GetLocalSong(index)); 

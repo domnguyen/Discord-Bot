@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WhalesFargo.Helpers;
 
@@ -38,6 +39,7 @@ namespace WhalesFargo.Services
         private readonly AudioPlayer m_AudioPlayer = new AudioPlayer();
 
         // Private variables.
+        private int m_NumPlaysCalled = 0;           // This is to check for the last play called.
         private int m_DelayActionLength = 10000;    // To prevent connection issues, we set it to a fairly 'large' value.
         private bool m_DelayAction = false;         // Temporary Semaphore to control leaving and joining too quickly.
         private bool m_AutoPlay = false;            // Flag to check if autoplay is currently on or not.
@@ -135,6 +137,8 @@ namespace WhalesFargo.Services
             Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
         }
 
+        public int GetNumPlaysCalled() { return m_NumPlaysCalled; }
+
         // Force Play the current audio in the voice channel of the target.
         // TODO: Consider adding it to autoplay list if it is already playing.
         public async Task ForcePlayAudioAsync(IGuild guild, IMessageChannel channel, AudioFile song)
@@ -144,7 +148,10 @@ namespace WhalesFargo.Services
 
             // Can't play an empty song.
             if (song == null) return;
-            
+
+            // We can only resume autoplay on the last 'play' wait loop. We have to check other 'play's haven't been called.
+            Interlocked.Increment(ref m_NumPlaysCalled);
+
             // Stop any other audio running.
             if (m_AudioPlayer.IsRunning()) StopAudio();
             while (m_AudioPlayer.IsRunning()) await Task.Delay(1000);
@@ -162,6 +169,9 @@ namespace WhalesFargo.Services
                 // If we can't get it from the dictionary, we're probably not connected to it yet.
                 Log("Unable to play in the proper channel. Make sure the audio client is connected.");
             }
+
+            // Uncount this play.
+            Interlocked.Decrement(ref m_NumPlaysCalled);
         }
 
         // This is for the autoplay function which waits after each playback and pulls from the playlist.
