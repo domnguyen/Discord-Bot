@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
-using WhalesFargo.Helpers;
 using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
@@ -119,10 +118,10 @@ namespace WhalesFargo.Modules
 
         [Command("volume")]
         [Remarks("!volume [num]")]
-        [Summary("Changes the volume to [0.0, 1.0].")]
-        public async Task VolumeVoiceChannel([Remainder] float volume)
+        [Summary("Changes the volume to [0 - 100].")]
+        public async Task VolumeVoiceChannel(int volume)
         {
-            m_Service.AdjustVolume(volume);
+            m_Service.AdjustVolume((float)volume / 100.0f);
             await Task.Delay(0); // Suppress async warrnings.
         }
 
@@ -139,7 +138,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("add", RunMode = RunMode.Async)]
-        public async Task AddVoiceChannelByIndex([Remainder] int index)
+        public async Task AddVoiceChannelByIndex(int index)
         {
             // Add a song by it's local index in the download folder.
             await AddVoiceChannel(m_Service.GetLocalSong(index));
@@ -167,7 +166,7 @@ namespace WhalesFargo.Modules
         [Command("autoplay", RunMode = RunMode.Async)]
         [Remarks("!autoplay [enable]")]
         [Summary("Starts the autoplay service on the current playlist.")]
-        public async Task AutoPlayVoiceChannel([Remainder] bool enable)
+        public async Task AutoPlayVoiceChannel(bool enable)
         {
             m_Service.SetAutoPlay(enable);
 

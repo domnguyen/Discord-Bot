@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace WhalesFargo.Helpers
 {
     /**
-     *  AudioPlayer
-     *  Helper class to handle a single audio playback.
+     * AudioPlayer
+     * Helper class to handle a single audio playback.
      */
     class AudioPlayer
     {
@@ -20,13 +20,8 @@ namespace WhalesFargo.Helpers
         private float m_Volume = 1.0f;              // Volume value that's checked during playback. Reference: PlayAudioAsync.
         private int m_BLOCK_SIZE = 3840;            // Custom block size for playback, in bytes.
 
-        /**
-         *  CreateLocalStream
-         *  Creates a local stream using the file path specified and ffmpeg to stream it directly.
-         *  The format Discord takes is 16-bit 48000Hz PCM
-         *  
-         *  @param path - string of the source path (local)
-         */
+        // Creates a local stream using the file path specified and ffmpeg to stream it directly.
+        // The format Discord takes is 16-bit 48000Hz PCM
         private Process CreateLocalStream(string path)
         {
             try
@@ -47,14 +42,9 @@ namespace WhalesFargo.Helpers
             }
         }
 
-        /**
-         *  CreateNetworkStream
-         *  Creates a network stream using youtube-dl.exe, then piping it to ffmpeg to stream it directly.
-         *  The format Discord takes is 16-bit 48000Hz PCM
-         *  TODO: Catch any errors that happen when creating PCM streams.
-         *  
-         *  @param path - string of the source path (network)
-         */
+        // Creates a network stream using youtube-dl.exe, then piping it to ffmpeg to stream it directly.
+        // The format Discord takes is 16-bit 48000Hz PCM
+        // TODO: Catch any errors that happen when creating PCM streams.
         private Process CreateNetworkStream(string path)
         {
             try
@@ -75,17 +65,11 @@ namespace WhalesFargo.Helpers
             }
         }
 
-        /**
-         *  AudioPlaybackAsync
-         *  Async function that handles the playback of the audio. This function is technically blocking in it's for loop.
-         *  It can be broken by cancelling m_Process or when it reads to the end of the file. 
-         *  At the start, m_Process, m_Stream, amd m_IsPlaying is flushed.
-         *  While it is playing, these will hold values of the current playback audio. It will depend on m_Volume for the volume.
-         *  In the end, the three are flushed again.
-         *  
-         *  @param client
-         *  @param song
-         */
+        // Async function that handles the playback of the audio. This function is technically blocking in it's for loop.
+        // It can be broken by cancelling m_Process or when it reads to the end of the file. 
+        // At the start, m_Process, m_Stream, amd m_IsPlaying is flushed.
+        // While it is playing, these will hold values of the current playback audio. It will depend on m_Volume for the volume.
+        // In the end, the three are flushed again.
         private async Task AudioPlaybackAsync(IAudioClient client, AudioFile song)
         {
             // Set running to true.
@@ -146,13 +130,8 @@ namespace WhalesFargo.Helpers
             m_IsRunning = false;
         }
 
-        /**
-         * ScaleVolumeSafeAllocateBuffers
-         * Adjusts the byte array by the volume, scaling it by a factor [0.0f,1.0f]
-         * 
-         * @param audioSamples - The source audio sample from the ffmpeg stream
-         * @param volume - The volume to adjust to, ranges [0.0f,1.0f]
-         */
+        // ScaleVolumeSafeAllocateBuffers
+        // Adjusts the byte array by the volume, scaling it by a factor [0.0f,1.0f]
         private byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
         {
             if (audioSamples == null) return null;
@@ -171,12 +150,12 @@ namespace WhalesFargo.Helpers
                 }
 
                 // 16-bit precision for the multiplication
-                int volumeFixed = (int)Math.Round(volume * 65536d);
+                int volumeFixed = (int)Math.Round(volume//65536d);
                 for (var i = 0; i < output.Length; i += 2)
                 {
                     // The cast to short is necessary to get a sign-extending conversion
                     int sample = (short)((audioSamples[i + 1] << 8) | audioSamples[i]);
-                    int processed = (sample * volumeFixed) >> 16;
+                    int processed = (sample//volumeFixed) >> 16;
 
                     output[i] = (byte)processed;
                     output[i + 1] = (byte)(processed >> 8);
@@ -190,12 +169,7 @@ namespace WhalesFargo.Helpers
             }
         }
 
-        /**
-         *  AdjustVolume
-         *  Adjusts the current volume to the value passed. This affects the current AudioPlaybackAsync.
-         *  
-         *  @param volume - A value from 0.0f - 1.0f.
-         */
+        // Adjusts the current volume to the value passed. This affects the current AudioPlaybackAsync.
         public void AdjustVolume(float volume)
         {
             // Adjust bounds
@@ -207,24 +181,14 @@ namespace WhalesFargo.Helpers
             m_Volume = volume; // Update the volume
         }
 
-        /**
-         *  IsRunning
-         *  Returns if AudioPlaybackAsync is currently running.
-         */
+        // Returns if AudioPlaybackAsync is currently running.
         public bool IsRunning() { return m_IsRunning; }
 
-        /**
-         *  IsPlaying
-         *  Returns if the process is in the middle of AudioPlaybackAsync.
-         */
+        // Returns if the process is in the middle of AudioPlaybackAsync.
         public bool IsPlaying() { return ((m_Process != null) && m_IsPlaying); }
 
-        /**
-         *  Play
-         *           
-         *  @param client
-         *  @param song
-         */
+        // Starts the audioplayer playback for the specific song.
+        // If something else is already playing, we stop it before putting this into the loop.
         public async Task Play(IAudioClient client, AudioFile song)
         {
             // Stop the current song. We wait until it's done to play the next song.
@@ -235,22 +199,13 @@ namespace WhalesFargo.Helpers
             await AudioPlaybackAsync(client, song);
         }
 
-        /**
-         *  Pause
-         *  Stops the stream if it's playing. This affects the current AudioPlaybackAsync.
-         */
+        // Pauses the stream if it's playing. This affects the current AudioPlaybackAsync.
         public void Pause() { m_IsPlaying = false; }
 
-        /**
-         *  Resume
-         *  Stops the stream if it's playing. This affects the current AudioPlaybackAsync.
-         */
+        // Resumes the stream if it's playing, but paused. This affects the current AudioPlaybackAsync.
         public void Resume() { m_IsPlaying = true; }
 
-        /**
-         *  Stop
-         *  Stops the stream if it's playing. This affects the current AudioPlaybackAsync.
-         */
+        // Stops the stream if it's playing. This affects the current AudioPlaybackAsync.
         public void Stop() { if (m_Process != null) m_Process.Kill(); } // This basically stops the current loop by exiting the process.
 
     }

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace WhalesFargo.Helpers
 {
     /**
-    *  AudioDownloader
-    *  Helper class to download files in the background.
-    *  This can be used to optimize network audio sources.
-    *  This is also the only class that's using youtube-dl, 
-    *  which will be the primary executable for downloading audio.
-    */
+     * AudioDownloader
+     * Helper class to download files in the background.
+     * This can be used to optimize network audio sources.
+     * This is also the only class that's using youtube-dl, 
+     * which will be the primary executable for downloading audio.
+     */
     public class AudioDownloader
     {
         // Concurrent Library to keep track of the current downloads order.
@@ -25,28 +25,16 @@ namespace WhalesFargo.Helpers
         private string m_CurrentlyDownloading = "";         // Currently downloading file.
         private bool m_AllowDuplicates = true;              // Flag for downloading duplicate items.
 
-        /**
-         *  GetDirectory
-         *  Returns the current downloading folder.
-         */
+        // Returns the current downloading folder.
         public string GetDownloadPath() { return m_DownloadPath; }
 
-        /**
-         * IsRunning
-         * Returns the status of the downloader.
-         */
+        // Returns the status of the downloader.
         public bool IsRunning() { return m_IsRunning; }
 
-        /**
-         * CurrentlyDownloading
-         * Returns the current download status.
-         */
+        // Returns the current download status.
         public string CurrentlyDownloading() { return m_CurrentlyDownloading; }
 
-        /**
-         *  GetAllItems
-         *  Returns a string with downloaded song names.
-         */
+        // Returns a string with downloaded song names.
         public string[] GetAllItems()
         {
             // Check the files in the directory.
@@ -56,32 +44,27 @@ namespace WhalesFargo.Helpers
             return itemEntries;
         }
 
-        /**
-         *  GetItem
-         *  Returns a path to the downloaded item, if already downloaded.
-         *  
-         *  @param item
-         */
+        // Returns a path to the downloaded item, if already downloaded.
         public string GetItem(string item)
         {
             // If it's been downloaded and isn't currently downloading, we can return it.
-            if (File.Exists($"{m_DownloadPath}\\{item}") && !m_CurrentlyDownloading.Equals(item))
-                return $"{m_DownloadPath}\\{item}";
-
+            try
+            {
+                if (File.Exists($"{m_DownloadPath}\\{item}") && !m_CurrentlyDownloading.Equals(item))
+                    return $"{m_DownloadPath}\\{item}";
+            } catch { }
             // Check by filename without .mp3.
-            if (File.Exists($"{m_DownloadPath}\\{item}.mp3") && !m_CurrentlyDownloading.Equals(item))
-                return $"{m_DownloadPath}\\{item}.mp3";
+            try
+            {
+                if (File.Exists($"{m_DownloadPath}\\{item}.mp3") && !m_CurrentlyDownloading.Equals(item))
+                    return $"{m_DownloadPath}\\{item}.mp3";
+            } catch { }
 
             // Else we return blank. This means the item doesn't exist in our library.
             return null;
         }
 
-        /**
-         *  GetItem
-         *  Returns a path to the downloaded item, if already downloaded.
-         *  
-         *  @param item
-         */
+        // Returns a path to the downloaded item, if already downloaded.
         public string GetItem(int index)
         {
             // Check the files in the directory.
@@ -92,12 +75,8 @@ namespace WhalesFargo.Helpers
             return itemEntries[index].Split(Path.DirectorySeparatorChar).Last();
         }
 
-        /**
-         * GetDuplicateItem
-         * Returns the proper filename by searching the path for an existing file.
-         * 
-         * @param item - The song title we're searching for, without the .mp3.
-         */
+        // Returns the proper filename by searching the path for an existing file.
+        // We use the song title we're searching for, without the .mp3.
         private string GetDuplicateItem(string item)
         {
             string filename = null;
@@ -113,10 +92,7 @@ namespace WhalesFargo.Helpers
             return filename;
         }
 
-        /**
-         * RemoveDuplicateItems
-         * Remove any duplicates created by the downloader.
-         */
+        // Remove any duplicates created by the downloader.
         public void RemoveDuplicateItems()
         {
             ConcurrentDictionary<string, int> duplicates = new ConcurrentDictionary<string, int>();
@@ -140,28 +116,17 @@ namespace WhalesFargo.Helpers
             }
         }
 
-        /**
-         * Pop
-         * Gets the next song in the queue for download.
-         */
+        // Gets the next song in the queue for download.
         private AudioFile Pop()
         {
             m_DownloadQueue.TryDequeue(out AudioFile nextSong);
             return nextSong;
         }
 
-        /**
-         * Push
-         * Adds a song to the queue for download.
-         * 
-         * @param song - song to be downloaded in the future.
-         */
+        // Adds a song to the queue for download.
         public void Push(AudioFile song) { m_DownloadQueue.Enqueue(song); } // Only add if there's no errors. 
 
-        /**
-         * StartDownloadAsync
-         * Starts the download loop and downloads from the front of the queue.
-         */
+        // Starts the download loop and downloads from the front of the queue.
         public async Task StartDownloadAsync()
         {
             if (m_IsRunning) return; // Download is already running, stop to avoid conflicts/race conditions.
@@ -176,13 +141,8 @@ namespace WhalesFargo.Helpers
             m_IsRunning = false;
         }
 
-        /**
-         *  DownloadAsync
-         *  Downloads the file in the background and sets downloaded to true when done.
-         *  This can be used to optimize network audio sources.
-         *  
-         *  @param song - AudioFile from the concurrentqueue
-         */
+        // Downloads the file in the background and sets downloaded to true when done.
+        // This can be used to optimize network audio sources.
         private async Task DownloadAsync(AudioFile song)
         {
             // First we check if it's a network file that needs to be downloaded.
@@ -240,41 +200,26 @@ namespace WhalesFargo.Helpers
             await Task.Delay(0);
         }
 
-        /**
-         * StopDownload
-         * Stops the download loop.
-         */
+        // Stops the download loop.
         public void StopDownload()
         {
             m_IsRunning = false;
         }
 
-        /**
-         *  VerifyNetworkPath
-         *  Verifies that the path is a network path and not a local path. Checks here before extracting.
-         *  Add more arguments here, but we'll just check based on http and assume a network link.
-         *  
-         *  @param path - The path to the file
-         */
+        // Verifies that the path is a network path and not a local path. Checks here before extracting.
+        // TODO: Add more arguments here, but we'll just check based on http and assume a network link.
         public bool? VerifyNetworkPath(string path)
         {
             if (path == null) return null;
             return path.StartsWith("http");
         }
 
-        /**
-         *  GetAudioFileInfo
-         *  Extracts data from the current path, by finding it locally or on the network.
-         *  Puts all the information into an AudioFile and returns it.
-         *  
-         *  Filename - source by local filename or from network link.
-         *  Title - name of the song.
-         *  IsNetwork - If it's local or network.
-         *  
-         *  Returns null if it can't be extracted through it's path.
-         *  
-         *  @param path - string of the source path
-         */
+        // Extracts data from the current path, by finding it locally or on the network.
+        // Puts all the information into an AudioFile and returns it.
+        // 
+        // Filename - source by local filename or from network link.
+        // Title - name of the song.
+        // IsNetwork - If it's local or network.
         public async Task<AudioFile> GetAudioFileInfo(string path)
         {
             if (path == null) return null;

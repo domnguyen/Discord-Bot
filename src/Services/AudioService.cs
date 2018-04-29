@@ -156,11 +156,11 @@ namespace WhalesFargo.Services
             // We can only resume autoplay on the last 'play' wait loop. We have to check other 'play's haven't been called.
             Interlocked.Increment(ref m_NumPlaysCalled);
 
-            // Stop any other audio running.
+            // To avoid any issues, we stop any other audio running. The audioplayer will also stop the current song...
             if (m_AudioPlayer.IsRunning()) StopAudio();
             while (m_AudioPlayer.IsRunning()) await Task.Delay(1000);
 
-            // Start the stream, this is the main part of 'play'. This will stop the current song.
+            // Start the stream, this is the main part of 'play'
             if (m_ConnectedChannels.TryGetValue(guild.Id, out var audioClient))
             {
                 Log($"Now Playing: {song.Title}", (int)E_LogOutput.Reply); // Reply in the text channel.
@@ -179,6 +179,8 @@ namespace WhalesFargo.Services
         }
 
         // This is for the autoplay function which waits after each playback and pulls from the playlist.
+        // Since the playlist extracts the audio information, we can safely assume that it's chosen the local
+        // if it exists, or just uses the network link.
         public async Task AutoPlayAudioAsync(IGuild guild, IMessageChannel channel)
         {
             // We can't play from an empty guild.
@@ -187,7 +189,7 @@ namespace WhalesFargo.Services
             if (m_AutoPlayRunning) return; // Only allow one instance of autoplay.
             while (m_AutoPlayRunning = m_AutoPlay)
             {
-                // If something else is already playing, we need to wait until it's fully finished.
+                // If the audio player is already playing, we need to wait until it's fully finished.
                 if (m_AudioPlayer.IsRunning()) await Task.Delay(1000);
 
                 // We do some checks before entering this loop.
@@ -207,7 +209,7 @@ namespace WhalesFargo.Services
                     else
                         Log($"Cannot play the audio source specified : {song}");
 
-                    // We do the same checks again to make sure we exit right away.
+                    // We do the same checks again to make sure we exit right away. May not be necessary, but let's check anyways.
                     if (m_Playlist.IsEmpty || !m_AutoPlayRunning || !m_AutoPlay) break;
 
                     // Is null or done with playback.
@@ -227,27 +229,24 @@ namespace WhalesFargo.Services
         // Returns if the audio player is currently playing or not.
         public bool IsAudioPlaying() { return m_AudioPlayer.IsPlaying(); }
 
+        // AudioPlayback Functions. Pause, Resume, Stop, AdjustVolume.
+        public void PauseAudio() { m_AudioPlayer.Pause(); }
+        public void ResumeAudio() { m_AudioPlayer.Resume(); }
+        public void StopAudio() { m_AutoPlay = false; m_AutoPlayRunning = false; m_AudioPlayer.Stop(); }
+        public void AdjustVolume(float volume) { m_AudioPlayer.AdjustVolume(volume); } // Takes in a value from [0.0f - 1.0f].
+
+        // Sets the autoplay service to be true. Likely, wherever this is set, we also check and start auto play.
+        public void SetAutoPlay(bool enable) { m_AutoPlay = enable; }
+
+        // Returns the current state of the autoplay service.
+        public bool GetAutoPlay() { return m_AutoPlay; }
+
         // Checks if autoplay is true, but not started yet. If not started, we start autoplay here.
         public async Task CheckAutoPlayAsync(IGuild guild, IMessageChannel channel)
         {
             if (m_AutoPlay && !m_AutoPlayRunning && !m_AudioPlayer.IsRunning()) // if autoplay or force play isn't playing.
                 await AutoPlayAudioAsync(guild, channel);
         }
-
-        // Sets the autoplay service to be true. Likely, wherever this is set, we also check and start auto play.
-        public void SetAutoPlay(bool enable) { m_AutoPlay = enable; }
-        
-        // Returns the current state of the autoplay service.
-        public bool GetAutoPlay() { return m_AutoPlay; }
-
-        // Adjusts the current volume to the value passed. This affects the current AudioPlaybackAsync.
-        // Takes in a value from [0.0f - 1.0f].
-        public void AdjustVolume(float volume) { m_AudioPlayer.AdjustVolume(volume); }
-
-        // AudioPlayback Functions. Pause, Resume, Stop.
-        public void PauseAudio() { m_AudioPlayer.Pause(); }
-        public void ResumeAudio() { m_AudioPlayer.Resume(); }
-        public void StopAudio() { m_AutoPlay = false; m_AutoPlayRunning = false; m_AudioPlayer.Stop(); }
 
         // Prints the playlist information.
         public void PrintPlaylist()
