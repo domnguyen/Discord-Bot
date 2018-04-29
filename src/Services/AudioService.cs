@@ -243,7 +243,7 @@ namespace WhalesFargo.Services
         // AudioPlayback Functions. Pause, Resume, Stop.
         public void PauseAudio() { m_AudioPlayer.Pause(); }
         public void ResumeAudio() { m_AudioPlayer.Resume(); }
-        public void StopAudio() { m_AutoPlayRunning = false; m_AudioPlayer.Stop(); }
+        public void StopAudio() { m_AutoPlay = false; m_AutoPlayRunning = false; m_AudioPlayer.Stop(); }
 
         // Prints the playlist information.
         public void PrintPlaylist()

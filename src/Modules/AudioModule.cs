@@ -1,7 +1,5 @@
 ﻿using Discord;
 using Discord.Commands;
-using System;
-using System.Threading;
 using System.Threading.Tasks;
 using WhalesFargo.Helpers;
 using WhalesFargo.Services;
