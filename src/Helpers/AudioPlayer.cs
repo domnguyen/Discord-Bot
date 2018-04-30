@@ -150,12 +150,12 @@ namespace WhalesFargo.Helpers
                 }
 
                 // 16-bit precision for the multiplication
-                int volumeFixed = (int)Math.Round(volume//65536d);
+                int volumeFixed = (int)Math.Round(volume * 65536d);
                 for (var i = 0; i < output.Length; i += 2)
                 {
                     // The cast to short is necessary to get a sign-extending conversion
                     int sample = (short)((audioSamples[i + 1] << 8) | audioSamples[i]);
-                    int processed = (sample//volumeFixed) >> 16;
+                    int processed = (sample * volumeFixed) >> 16;
 
                     output[i] = (byte)processed;
                     output[i + 1] = (byte)(processed >> 8);
