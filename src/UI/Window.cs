@@ -6,9 +6,9 @@ namespace WhalesFargo.UI
 {
     public partial class Window : Form
     {
-        private DiscordBot m_DiscordBot = null; // Reference to the bot.
-        private Timer m_AudioTextTimer = new Timer(); // Text timer to scroll the audio's title.
-        private const int m_AudioTextInterval = 600; // Interval for scroll speed (in milliseconds).
+        private DiscordBot m_DiscordBot = null;         // Reference to the bot.
+        private Timer m_AudioTextTimer = new Timer();   // Text timer to scroll the audio's title.
+        private const int m_AudioTextInterval = 600;    // Interval for scroll speed (in milliseconds).
 
         public Window(DiscordBot bot)
         {
@@ -57,27 +57,22 @@ namespace WhalesFargo.UI
 
         private void ConnectionButton_Click(object sender, EventArgs e)
         {
-            if (DiscordBot.ConnectionStatus.Equals(Strings.Connecting))
+            // If it's already connected, then we stop the connection, then reset the text.
+            if (DiscordBot.ConnectionStatus.Equals(Strings.Connected))
             {
-                Program.Cancel();
-                ConnectionButton.Text = Strings.ConnectButton;
+               if (System.Windows.Forms.MessageBox.Show(Strings.DisconnectPrompt, Strings.DisconnectPromptTitle, 
+                   MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                    Program.Stop();
             }
-            else
-            {
-                Program.Run();
-                ConnectionButton.Text = Strings.CancelButton;
-            }
-        }
 
-        public void DisableConnectionToken()
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action(DisableConnectionToken));
-                return;
-            }
-            ConnectionToken.Enabled = false;
-            ConnectionButton.Enabled = false;
+            // If it's in the middle of connecting and keeps failing, we can cancel the attempt.
+            else if (DiscordBot.ConnectionStatus.Equals(Strings.Connecting)) { Program.Cancel(); }
+
+            // Otherwise, we perform a connection
+            else { Program.Run(); }
+            
+            // Update the connection status.
+            SetConnectionStatus(DiscordBot.ConnectionStatus);
         }
 
         public void SetConnectionStatus(string s)
@@ -87,10 +82,28 @@ namespace WhalesFargo.UI
                 Invoke(new Action<string>(SetConnectionStatus), new object[] { s });
                 return;
             }
+
+            // Set the status text.
             ConnectionStatus.Text = s;
-            if (s.Equals(Strings.Disconnected)) ConnectionStatus.BackColor = System.Drawing.Color.Red;
-            if (s.Equals(Strings.Connecting)) ConnectionStatus.BackColor = System.Drawing.Color.Yellow;
-            if (s.Equals(Strings.Connected)) ConnectionStatus.BackColor = System.Drawing.Color.Green;
+
+            if (s.Equals(Strings.Disconnected))
+            {
+                ConnectionStatus.BackColor = System.Drawing.Color.Red;
+                ConnectionToken.Enabled = true;
+                ConnectionButton.Text = Strings.ConnectButton;
+            }
+
+            if (s.Equals(Strings.Connecting))
+            {
+                ConnectionStatus.BackColor = System.Drawing.Color.Yellow;
+                ConnectionButton.Text = Strings.CancelButton;
+            }
+            if (s.Equals(Strings.Connected))
+            {
+                ConnectionStatus.BackColor = System.Drawing.Color.Green;
+                ConnectionToken.Enabled = false;
+                ConnectionButton.Text = Strings.DisconnectButton;
+            }
         }
 
         public void SetConsoleText(string s)

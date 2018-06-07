@@ -21,5 +21,6 @@
         // Connect to the bot, or cancel before the connection happens.
         public static void Run() => System.Threading.Tasks.Task.Run(() => BOT.RunAsync());
         public static void Cancel() => System.Threading.Tasks.Task.Run(() => BOT.CancelAsync());
+        public static void Stop() => System.Threading.Tasks.Task.Run(() => BOT.StopAsync());
     }
 }

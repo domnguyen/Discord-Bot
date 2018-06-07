@@ -129,8 +129,17 @@
   <data name="Connecting" xml:space="preserve">
     <value>Connecting</value>
   </data>
+  <data name="DisconnectButton" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
   <data name="Disconnected" xml:space="preserve">
     <value>Disconnected</value>
+  </data>
+  <data name="DisconnectPrompt" xml:space="preserve">
+    <value>Are you sure you want to disconnect from the current server?</value>
+  </data>
+  <data name="DisconnectPromptTitle" xml:space="preserve">
+    <value>Disconnect Client</value>
   </data>
   <data name="NotPlaying" xml:space="preserve">
     <value>Nothing</value>

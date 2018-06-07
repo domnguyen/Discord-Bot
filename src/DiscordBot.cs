@@ -32,6 +32,8 @@ namespace WhalesFargo
         private string m_TokenFile = "";            // If we have the token in a file, make sure it's the first line.
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
         private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
+        private bool m_Running = false;             // Flag for checking if it's running.
+        private const int m_RunningInterval = 1000; // Interval in milliseconds to check if running.
         private bool m_DesktopNotifications = true; // Flag for desktop notifications in minimized mode.
 
         // Returns if we want to send desktop notifications in the UI, from the System Tray.
@@ -53,6 +55,7 @@ namespace WhalesFargo
             m_Commands = new CommandService(); // Start the command service to add all our commands. See 'InstallCommands'
             m_Services = InstallServices(); // We install services by adding it to a service collection.
             m_RetryConnection = true; // Always set reconnect to true. Set this to false when we cancel the connection.
+            m_Running = false; // Explicit.
 
             // The bot will automatically reconnect once the initial connection is established. 
             // To keep trying, keep it in a loop.
@@ -76,6 +79,9 @@ namespace WhalesFargo
                     // Install commands once the client has logged in.
                     await InstallCommands();
 
+                    // Successfully connected and running.
+                    m_Running = true;
+
                     break;
                 }
                 catch
@@ -90,14 +96,28 @@ namespace WhalesFargo
                 }
             }
 
+            while (m_Running) { await Task.Delay(1000); }
+
             // Doesn't end the program until the whole thing is done.
-            await Task.Delay(-1);
+            if (m_Client.ConnectionState == ConnectionState.Connecting ||
+                m_Client.ConnectionState == ConnectionState.Connected)
+            {
+                try { m_Client.StopAsync().Wait(); }
+                catch { }
+            }
         }
 
         // In the connection loop, cancels the request.
         public async Task CancelAsync()
         {
             m_RetryConnection = false;
+            await Task.Delay(0);
+        }
+        
+        // If connected, disconnect from the server.
+        public async Task StopAsync()
+        {
+            if (m_Running) m_Running = false;
             await Task.Delay(0);
         }
 
@@ -129,11 +149,7 @@ namespace WhalesFargo
         {
             ConnectionStatus = s;
             if (arg != null) Console.WriteLine(arg);
-            if (Program.UI != null)
-            {
-                Program.UI.SetConnectionStatus(s);
-                if (ConnectionStatus.Equals("Connected")) Program.UI.DisableConnectionToken(); // Disable button.
-            }
+            if (Program.UI != null) { Program.UI.SetConnectionStatus(s); }
         }
 
         // This is where you install all necessary services for our bot.

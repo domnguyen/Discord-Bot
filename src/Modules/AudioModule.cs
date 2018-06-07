@@ -27,7 +27,7 @@ namespace WhalesFargo.Modules
     public class AudioModule : CustomModule
     {
         // Private variables
-        private readonly AudioService m_Service;        // Reference to the service.
+        private readonly AudioService m_Service;
 
         // Dependencies are automatically injected via this constructor.
         // Remember to add an instance of the AudioService
