@@ -130,8 +130,7 @@ namespace WhalesFargo.Helpers
             m_IsRunning = false;
         }
 
-        // ScaleVolumeSafeAllocateBuffers
-        // Adjusts the byte array by the volume, scaling it by a factor [0.0f,1.0f]
+        // Adjusts the byte array by the volume, scaling it by a factor [0.0f, 1.0f]
         private byte[] ScaleVolumeSafeAllocateBuffers(byte[] audioSamples, float volume)
         {
             if (audioSamples == null) return null;

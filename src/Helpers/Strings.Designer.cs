@@ -97,11 +97,38 @@ namespace WhalesFargo.Helpers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        public static string DisconnectButton {
+            get {
+                return ResourceManager.GetString("DisconnectButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disconnected.
         /// </summary>
         public static string Disconnected {
             get {
                 return ResourceManager.GetString("Disconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to disconnect from the current server?.
+        /// </summary>
+        public static string DisconnectPrompt {
+            get {
+                return ResourceManager.GetString("DisconnectPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect Client.
+        /// </summary>
+        public static string DisconnectPromptTitle {
+            get {
+                return ResourceManager.GetString("DisconnectPromptTitle", resourceCulture);
             }
         }
         

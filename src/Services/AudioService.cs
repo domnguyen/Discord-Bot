@@ -46,6 +46,7 @@ namespace WhalesFargo.Services
         private bool m_AutoPlayRunning = false;     // Flag to check if autoplay is currently running or not. More of a 'sanity' check really.
         private bool m_AutoDownload = true;         // Flag to auto download network items in the playlist.
         private bool m_AutoStop = false;            // Flag to stop the autoplay service when we're done playing all songs in the playlist.
+        private Timer m_VoiceChannelTimer = null;
 
         // Using the flag as a semaphore, we pass in a function to lock in between it. Added for better practice.
         // Any async function that's called after this, if required can check for m_DelayAction before continuing.
@@ -102,6 +103,8 @@ namespace WhalesFargo.Services
                 if (m_ConnectedChannels.TryAdd(guild.Id, audioClient))
                 {
                     Log("The client is now connected to the current voice channel.");
+
+                    // Start check to see if anyone is even in the channel.
                     return;
                 }
             }
@@ -135,6 +138,24 @@ namespace WhalesFargo.Services
 
             // If we can't remove it from the dictionary, error.
             Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
+        }
+
+        private async void CheckVoiceChannelForUsers(IVoiceChannel channel)
+        {
+            // We can't check anything if the client is null.
+            if (channel == null) return;
+
+            // Check user count.
+            int count = await channel.GetUsersAsync().Count();
+            if (count < 2)
+            {
+                await LeaveAudioAsync(channel.Guild);
+                if (m_VoiceChannelTimer != null)
+                {
+                    m_VoiceChannelTimer.Dispose();
+                    m_VoiceChannelTimer = null;
+                }
+            }
         }
 
         // Returns the number of async calls to ForcePlayAudioSync.

@@ -4,40 +4,24 @@ using System.Threading.Tasks;
 namespace WhalesFargo.Services
 {
     /**
-    * Chat Services
+    * ChatService
+    * Handles the simple chat services like responses and manipulating chat text.
     */
     public class ChatService : CustomService
     {
-        /**
-         *  SayMessage
-         *  Replies in the text channel using the parent module.
-         *  
-         *  @param s - Message to reply in the channel
-         */
+        // Replies in the text channel using the parent module.
         public void SayMessage(string s)
         {
             DiscordReply(s);
         }
 
-        /**
-         *  SetStatus
-         *  Sets the bot playikng status.
-         *  
-         *  @param s - Message to set the playing message to.
-         */
+        // Sets the bot playing status.
         public void SetStatus(string s)
         {
             DiscordPlaying(s);
         }
 
-        /**
-         *  ClearMessages
-         *  Clears [num] number of messages from the current text channel.
-         *  
-         *  @param guild
-         *  @param channel
-         *  @param num
-         */
+        // Clears [num] number of messages from the current text channel.
         public async Task ClearMessagesAsync(IGuild guild, IMessageChannel channel, IUser user , int num)
         {
             // Check usage case.
