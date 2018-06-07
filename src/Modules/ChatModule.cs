@@ -7,7 +7,7 @@ namespace WhalesFargo.Modules
 {
 
     /**
-     * Chat
+     * ChatModule
      * Class that handles the Chat response portion of the program.
      * A chat module is created here with commands that interact with the ChatService.
      */

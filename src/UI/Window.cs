@@ -6,8 +6,9 @@ namespace WhalesFargo.UI
 {
     public partial class Window : Form
     {
-        private DiscordBot m_DiscordBot = null;
-        private Timer m_AudioTextTimer = new Timer();
+        private DiscordBot m_DiscordBot = null; // Reference to the bot.
+        private Timer m_AudioTextTimer = new Timer(); // Text timer to scroll the audio's title.
+        private const int m_AudioTextInterval = 600; // Interval for scroll speed (in milliseconds).
 
         public Window(DiscordBot bot)
         {
@@ -18,7 +19,7 @@ namespace WhalesFargo.UI
         private void Window_Load(object sender, EventArgs e)
         {
             SetToken(ConnectionToken.Text);
-            m_AudioTextTimer.Interval = 600;
+            m_AudioTextTimer.Interval = m_AudioTextInterval;
             m_AudioTextTimer.Tick += new System.EventHandler(AudioText_Scroll);
         }
 

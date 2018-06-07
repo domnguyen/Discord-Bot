@@ -9,17 +9,20 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using WhalesFargo.Helpers;
 using WhalesFargo.Services;
 
 namespace WhalesFargo
 {
     /**
-     * Main program to run the discord bot.
+     * DiscordBot
+     * Main program to run the Discord Bot.
+     * 
      */
     public class DiscordBot
     {
         // Static variables.
-        public static string ConnectionStatus = "Disconnected";
+        public static string ConnectionStatus = Strings.Disconnected;
 
         // Private variables.
         private DiscordSocketClient m_Client;       // Discord client.
@@ -28,18 +31,13 @@ namespace WhalesFargo
         private string m_Token = "";                // Bot Token. Do not share if you plan to hardcode it here.
         private string m_TokenFile = "";            // If we have the token in a file, make sure it's the first line.
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
+        private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
         private bool m_DesktopNotifications = true; // Flag for desktop notifications in minimized mode.
 
-        /**
-         * GetDesktopNotifications
-         * Returns if we want to send desktop notifications in the UI, from the System Tray.
-         */
+        // Returns if we want to send desktop notifications in the UI, from the System Tray.
         public bool GetDesktopNotifications() { return m_DesktopNotifications; }
 
-        /**
-         * RunAsync
-         * 
-         */
+        // Starts the async loop.
         public async Task RunAsync()
         {
             // Already running...
@@ -49,19 +47,18 @@ namespace WhalesFargo
                 m_Client.ConnectionState == ConnectionState.Connected)
                     return;
             }
-              
+
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
-            m_Commands = new CommandService();
+            m_Commands = new CommandService(); // Start the command service to add all our commands. See 'InstallCommands'
             m_Services = InstallServices(); // We install services by adding it to a service collection.
-            m_RetryConnection = true;
+            m_RetryConnection = true; // Always set reconnect to true. Set this to false when we cancel the connection.
 
             // The bot will automatically reconnect once the initial connection is established. 
-            // To keep trying, we put it in a loop.
+            // To keep trying, keep it in a loop.
             while (true)
             {
-                // Attempt to connect.
-                try
+                try // Attempt to connect.
                 {
                     // Set the connecting status.
                     SetConnectionStatus("Connecting");
@@ -89,6 +86,7 @@ namespace WhalesFargo
                         SetConnectionStatus("Disconnected");
                         return;
                     }
+                    await Task.Delay(1000); // Make sure we don't reconnect too fast.
                 }
             }
 
@@ -96,20 +94,14 @@ namespace WhalesFargo
             await Task.Delay(-1);
         }
 
-        /**
-         * Cancel
-         * 
-         */
+        // In the connection loop, cancels the request.
         public async Task CancelAsync()
         {
             m_RetryConnection = false;
             await Task.Delay(0);
         }
 
-        /**
-         *  SetToken
-         *  Sets the token to be from file or direct string.
-         */
+        // Sets the token to be from file or direct string.
         public void SetBotToken(string token)
         {
             m_Token = "";
@@ -120,11 +112,8 @@ namespace WhalesFargo
                 m_Token = token;
         }
 
-        /**
-         * GetBotToken
-         * Attempt to get the bot token from BotToken.txt
-         * If it doesn't exist, we can't return anything.
-         */
+        // Attempt to get the bot token.
+        // If it doesn't exist, we can't return anything.
         private string GetBotToken(string filename)
         {
             string token = "";
@@ -135,11 +124,7 @@ namespace WhalesFargo
             return token;
         }
 
-        /**
-         * SetConnectionStatus
-         * Sets the connection status.
-         * 
-         */
+        // Sets the connection status.
         private void SetConnectionStatus(string s, Exception arg = null)
         {
             ConnectionStatus = s;
@@ -147,15 +132,14 @@ namespace WhalesFargo
             if (Program.UI != null)
             {
                 Program.UI.SetConnectionStatus(s);
-                if (ConnectionStatus.Equals("Connected")) Program.UI.DisableConnectionToken();
+                if (ConnectionStatus.Equals("Connected")) Program.UI.DisableConnectionToken(); // Disable button.
             }
         }
 
-        /**
-         * InstallServices
-         * This is where you install all necessary services for our bot.
-         * TODO: Make sure to add additional services here!!
-         */
+        // This is where you install all necessary services for our bot.
+        // TODO: Make sure to add any additional services you want here!!
+        // In those services, if you have any commands, it will automatically 
+        // discovered in 'InstallCommands'
         private IServiceProvider InstallServices()
         {
             ServiceCollection services = new ServiceCollection();
@@ -169,11 +153,9 @@ namespace WhalesFargo
             return services.BuildServiceProvider();
         }
 
-        /**
-         * InstallCommands
-         * This is where you install all possible commands for our bot.
-         * Essentially, it will take the Messages Received and send it into our Handler 
-         */
+        // This is where you install all possible commands for the Discord Client.
+        // Essentially, it will take the Messages Received and send it into our Handler 
+        // TODO: Add any necessary functions to receive or handle Discord Socket Events.
         private async Task InstallCommands()
         {
             // Before we install commands, we should check if everything was set up properly. Check if logged in.
@@ -194,12 +176,8 @@ namespace WhalesFargo
             await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-        /**
-         * MessageReceived
-         * Handles commands with prefixes '!' and mention prefix.
-         * Others get handled differently.
-         * @param messageParam   The command parsed as a SocketMessage.
-         */
+        // Handles commands with prefixes '!' and mention prefix.
+        // Others get handled differently.
         private async Task MessageReceived(SocketMessage messageParam)
         {
             // Don't process the command if it was a System Message
@@ -212,7 +190,8 @@ namespace WhalesFargo
             // Determine if the message is a command, based on if it starts with '!' or a mention prefix
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
             {
-                // If it isn't a command, decide what to do with it here. TODO: Add others here.
+                // If it isn't a command, decide what to do with it here. 
+                // TODO: Add any special handlers here.
                 return;
             }
 
@@ -226,67 +205,41 @@ namespace WhalesFargo
                 await context.Channel.SendMessageAsync(result.ErrorReason);
         }
 
-        /**
-         * Ready
-         * This sets the bots status as default. Can easily be changed. 
-         */
+        // This sets the bots status as default. Can easily be changed. 
         private async Task Ready()
         {
             await m_Client.SetGameAsync("Type !help for help!");
         }
 
-        /**
-         * UserJoined
-         * This message is sent once a user joins the server.
-         * 
-         * @param user - A single user.
-         */
+        // This function is called once a user joins the server.
         private async Task UserJoined(SocketGuildUser user)
         {
             var channel = user.Guild.DefaultChannel;  // You can add references to any channel you wish
             await channel.SendMessageAsync("Welcome to the Discord server" + user.Mention + "! Feel free to ask around if you need help!");
         }
 
-        /**
-         * UserLeft
-         * This message is sent once a user joins the server. 
-         * 
-         * @param user - A single user.
-         */
+        // This function is called once a user joins the server. 
         private async Task UserLeft(SocketGuildUser user)
         {
             var channel = user.Guild.DefaultChannel; // You can add references to any channel you wish
             await channel.SendMessageAsync(user.Mention + " has left the Discord server.");
         }
 
-        /** 
-        * Connected
-        * Once fully connected, prints out here.
-        */
+        // This function is called, when the client is fully connected.
         private Task Connected()
         {
             SetConnectionStatus("Connected");
             return Task.CompletedTask;
         }
 
-        /** 
-        * Disconnected
-        * Handles if the bot is suddenly disconnected.
-        * 
-        * @param arg - Exception thrown if disconnected for any reason.
-        */
+        // This function is called, when the client suddenly disconnects.
         private Task Disconnected(Exception arg)
         {
             SetConnectionStatus("Disconnected", arg);
             return Task.CompletedTask;
         }
 
-        /**
-         * Log
-         * Bot will log to Console 
-         * 
-         * @param msg - Message to write out to Console.
-         */
+        // This function is used for any client logging.
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());

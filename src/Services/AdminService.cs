@@ -4,18 +4,16 @@ using System.Threading.Tasks;
 
 namespace WhalesFargo.Services
 {
+    /**
+    * AdminService
+    * Simple service for performing administrative functions. This is typically for admin users.
+    * We place simple restrictions on this, but can be handled in any way.
+    */
     public class AdminService : CustomService
     {
-        // Private variables.
-      
-        /**
-         *  MuteUser
-         *  Mutes the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param channel
-         */
+        // Private variables. TODO: Add any here.
+
+        // Mutes the specific user.
         public async Task MuteUser(IGuild guild, IUser user)
         {
             try
@@ -29,14 +27,7 @@ namespace WhalesFargo.Services
             }
         }
 
-        /**
-         *  UnmuteUser
-         *  Unmutes the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param channel
-         */
+        // Unmutes the specific user.
         public async Task UnmuteUser(IGuild guild, IUser user)
         {
             try
@@ -46,18 +37,11 @@ namespace WhalesFargo.Services
             }
             catch
             {
-                Log($"Error while trying to unmute {user}." );
+                Log($"Error while trying to unmute {user}.");
             }
         }
 
-        /**
-         *  KickUser
-         *  kicks the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param reason
-         */
+        // Kicks the specific user.
         public async Task KickUser(IGuild guild, IUser user, string reason = null)
         {
             try
@@ -70,14 +54,7 @@ namespace WhalesFargo.Services
             }
         }
 
-        /**
-         *  BanUser
-         *  bans the specific user.
-         *  
-         *  @param guild
-         *  @param user
-         *  @param reason
-         */
+        // Bans the specific user.
         public async Task BanUser(IGuild guild, IUser user, string reason = null)
         {
             try
@@ -90,6 +67,7 @@ namespace WhalesFargo.Services
             }
         }
 
+        // From the list of roles, find a role by name.
         private IRole FindRole(IGuild guild, string name)
         {
             var roles = guild.Roles;
@@ -101,6 +79,7 @@ namespace WhalesFargo.Services
             return null;
         }
 
+        // Create a new role by name, given that it doesn't exist already.
         private async Task CreateRole(IGuild guild, string name)
         {
             // Let's see if the role exists.
@@ -109,6 +88,7 @@ namespace WhalesFargo.Services
                 role = await guild.CreateRoleAsync(name, GuildPermissions.All);
         }
 
+        // Adds a role by name to the user's roles.
         public async Task AddRoleUser(IGuild guild, IUser user, string name)
         {
             var role = FindRole(guild, name);
@@ -122,6 +102,7 @@ namespace WhalesFargo.Services
             }
         }
 
+        // Removes a role by name from the user's roles.
         public async Task RemoveRoleUser(IGuild guild, IUser user, string name)
         {
             var role = FindRole(guild, name);

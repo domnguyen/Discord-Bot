@@ -5,6 +5,10 @@ using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
 {
+    /**
+     * AdminModule
+     * Perform administrative level commands.
+     */
     [Name("Admin")]
     [Summary("Admin module to manage this discord server.")]
     public class AdminModule : CustomModule
