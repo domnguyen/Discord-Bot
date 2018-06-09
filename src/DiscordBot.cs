@@ -92,11 +92,12 @@ namespace WhalesFargo
                         SetConnectionStatus("Disconnected");
                         return;
                     }
-                    await Task.Delay(1000); // Make sure we don't reconnect too fast.
+                    await Task.Delay(m_RetryInterval); // Make sure we don't reconnect too fast.
                 }
             }
 
-            while (m_Running) { await Task.Delay(1000); }
+            // Stays in this loop while running.
+            while (m_Running) { await Task.Delay(m_RunningInterval); }
 
             // Doesn't end the program until the whole thing is done.
             if (m_Client.ConnectionState == ConnectionState.Connecting ||
