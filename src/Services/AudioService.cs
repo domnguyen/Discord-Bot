@@ -46,7 +46,8 @@ namespace WhalesFargo.Services
         private bool m_AutoPlayRunning = false;     // Flag to check if autoplay is currently running or not. More of a 'sanity' check really.
         private bool m_AutoDownload = true;         // Flag to auto download network items in the playlist.
         private bool m_AutoStop = false;            // Flag to stop the autoplay service when we're done playing all songs in the playlist.
-        private Timer m_VoiceChannelTimer = null;
+        private Timer m_VoiceChannelTimer = null;   // Timer to check for active users in the voice channel.
+        private bool m_LeaveWhenEmpty = true;       // Flag to set up leaving the channel when there are no active users.
 
         // Using the flag as a semaphore, we pass in a function to lock in between it. Added for better practice.
         // Any async function that's called after this, if required can check for m_DelayAction before continuing.
@@ -105,6 +106,9 @@ namespace WhalesFargo.Services
                     Log("The client is now connected to the current voice channel.");
 
                     // Start check to see if anyone is even in the channel.
+                    if (m_LeaveWhenEmpty)
+                        m_VoiceChannelTimer = new Timer(CheckVoiceChannelState, target, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10));
+
                     return;
                 }
             }
@@ -140,13 +144,14 @@ namespace WhalesFargo.Services
             Log("Unable to disconnect from the current voice channel. Are you sure that it is currently connected?");
         }
 
-        private async void CheckVoiceChannelForUsers(IVoiceChannel channel)
+        // Checks the current status of the voice channel and leaves when empty.
+        private async void CheckVoiceChannelState(object state)
         {
             // We can't check anything if the client is null.
-            if (channel == null) return;
+            if (!(state is IVoiceChannel channel)) return;
 
             // Check user count.
-            int count = await channel.GetUsersAsync().Count();
+            int count = (await channel.GetUsersAsync().Flatten()).Count();
             if (count < 2)
             {
                 await LeaveAudioAsync(channel.Guild);
