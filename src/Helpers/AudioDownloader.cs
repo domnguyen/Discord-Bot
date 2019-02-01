@@ -27,6 +27,7 @@ namespace WhalesFargo.Helpers
 
         // Returns the current downloading folder.
         public string GetDownloadPath() { return m_DownloadPath; }
+        void SetDownloadPath(string path) { m_DownloadPath = path; }
 
         // Returns the status of the downloader.
         public bool IsRunning() { return m_IsRunning; }
