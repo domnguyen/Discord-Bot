@@ -55,11 +55,11 @@ namespace WhalesFargo.Modules
 
                 emb.AddField(module.Name, module.Summary);
             }
-
+            Embed embed = emb.Build();
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
                 await ReplyAsync("Module information cannot be found, please try again later.");
             else
-                await ReplyAsync("", false, emb);
+                await ReplyAsync("", false, embed);
         }
 
         [Command("help", RunMode = RunMode.Async)] // TODO: Change this once all summaries are added.
@@ -101,11 +101,12 @@ namespace WhalesFargo.Modules
                     emb.AddField(title, command.Summary);
                 }
             }
-
+            Embed embed = emb.Build();
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
                 await ReplyAsync("Command information cannot be found, please try again later.");
+
             else
-                await ReplyAsync("", false, emb);
+                await ReplyAsync("", false, embed);
         }
 
     }

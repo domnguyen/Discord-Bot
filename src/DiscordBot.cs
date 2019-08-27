@@ -190,7 +190,7 @@ namespace WhalesFargo
             m_Client.Log += Log;
 
             // Discover all of the commands in this assembly and load them.
-            await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly());
+           await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Services);
         }
 
         // Handles commands with prefixes '!' and mention prefix.

@@ -19,7 +19,7 @@ namespace WhalesFargo.Modules
             await ReplyAsync(s);
         }
 
-        public async Task ServiceReplyAsync(string title, EmbedBuilder emb)
+        public async Task ServiceReplyAsync(string title, Embed emb)
         {
             await ReplyAsync(title, false, emb);
         }
