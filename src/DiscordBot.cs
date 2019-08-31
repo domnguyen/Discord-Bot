@@ -36,6 +36,51 @@ namespace WhalesFargo
         private const int m_RunningInterval = 1000; // Interval in milliseconds to check if running.
         private bool m_DesktopNotifications = true; // Flag for desktop notifications in minimized mode.
 
+        // Sets the connection status.
+        private void SetConnectionStatus(string s, Exception arg = null)
+        {
+            ConnectionStatus = s;
+            if (arg != null) Console.WriteLine(arg);
+            if (Program.UI != null) { Program.UI.SetConnectionStatus(s); }
+        }
+
+        // This function is called, when the client is fully connected.
+        private Task Connected()
+        {
+            SetConnectionStatus("Connected");
+            return Task.CompletedTask;
+        }
+
+        // This function is called, when the client suddenly disconnects.
+        private Task Disconnected(Exception arg)
+        {
+            SetConnectionStatus("Disconnected", arg);
+            return Task.CompletedTask;
+        }
+
+        // Sets the token to be from file or direct string.
+        public void SetBotToken(string token)
+        {
+            m_Token = "";
+            m_TokenFile = "";
+            if (System.IO.File.Exists(token))
+                m_TokenFile = token;
+            else
+                m_Token = token;
+        }
+
+        // Attempt to get the bot token.
+        // If it doesn't exist, we can't return anything.
+        private string GetBotToken(string filename)
+        {
+            string token = "";
+            if (File.Exists(filename))
+            {
+                token = File.ReadLines(filename).First();
+            }
+            return token;
+        }
+
         // Returns if we want to send desktop notifications in the UI, from the System Tray.
         public bool GetDesktopNotifications() { return m_DesktopNotifications; }
 
@@ -122,37 +167,6 @@ namespace WhalesFargo
             await Task.Delay(0);
         }
 
-        // Sets the token to be from file or direct string.
-        public void SetBotToken(string token)
-        {
-            m_Token = "";
-            m_TokenFile = "";
-            if (System.IO.File.Exists(token))
-                m_TokenFile = token;
-            else
-                m_Token = token;
-        }
-
-        // Attempt to get the bot token.
-        // If it doesn't exist, we can't return anything.
-        private string GetBotToken(string filename)
-        {
-            string token = "";
-            if (File.Exists(filename))
-            {
-                token = File.ReadLines(filename).First();
-            }
-            return token;
-        }
-
-        // Sets the connection status.
-        private void SetConnectionStatus(string s, Exception arg = null)
-        {
-            ConnectionStatus = s;
-            if (arg != null) Console.WriteLine(arg);
-            if (Program.UI != null) { Program.UI.SetConnectionStatus(s); }
-        }
-
         // This is where you install all necessary services for our bot.
         // TODO: Make sure to add any additional services you want here!!
         // In those services, if you have any commands, it will automatically 
@@ -162,9 +176,9 @@ namespace WhalesFargo
             ServiceCollection services = new ServiceCollection();
 
             // Add all additional services here.
-            services.AddSingleton<AdminService>(); // AdminModule : AdminService
-            services.AddSingleton<AudioService>(); // AudioModule : AudioService
-            services.AddSingleton<ChatService>(); // ChatModule : ChatService
+            services.AddSingleton<AdminService>();      // AdminModule      : AdminService
+            services.AddSingleton<AudioService>();      // AudioModule      : AudioService
+            services.AddSingleton<ChatService>();       // ChatModule       : ChatService
 
             // Return the service provider.
             return services.BuildServiceProvider();
@@ -240,20 +254,6 @@ namespace WhalesFargo
         {
             var channel = user.Guild.DefaultChannel; // You can add references to any channel you wish
             await channel.SendMessageAsync(user.Mention + " has left the Discord server.");
-        }
-
-        // This function is called, when the client is fully connected.
-        private Task Connected()
-        {
-            SetConnectionStatus("Connected");
-            return Task.CompletedTask;
-        }
-
-        // This function is called, when the client suddenly disconnects.
-        private Task Disconnected(Exception arg)
-        {
-            SetConnectionStatus("Disconnected", arg);
-            return Task.CompletedTask;
         }
 
         // This function is used for any client logging.

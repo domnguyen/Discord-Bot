@@ -1,11 +1,10 @@
-using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using System.Threading.Tasks;
 using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
 {
-
     /**
      * ChatModule
      * Class that handles the Chat response portion of the program.
@@ -18,7 +17,8 @@ namespace WhalesFargo.Modules
         // Private variables
         private readonly ChatService m_Service;
 
-        // Remember to add an instance of the AudioService
+        // Dependencies are automatically injected via this constructor.
+        // Remember to add an instance of the service.
         // to your IServiceCollection when you initialize your bot!
         public ChatModule(ChatService service)
         {
@@ -55,7 +55,6 @@ namespace WhalesFargo.Modules
         {
             await m_Service.ClearMessagesAsync(Context.Guild, Context.Channel, Context.User, num);
         }
-
     }
 }
 

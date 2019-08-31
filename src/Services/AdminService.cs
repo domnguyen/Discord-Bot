@@ -1,5 +1,4 @@
 ﻿using Discord;
-using System;
 using System.Threading.Tasks;
 
 namespace WhalesFargo.Services
@@ -11,7 +10,8 @@ namespace WhalesFargo.Services
     */
     public class AdminService : CustomService
     {
-        // Private variables. TODO: Add any here.
+        // Private variables. 
+        // TODO: Add any here.
 
         // Mutes the specific user.
         public async Task MuteUser(IGuild guild, IUser user)
@@ -115,6 +115,5 @@ namespace WhalesFargo.Services
                 Log($"Error while trying to remove the role {name} to {user}.");
             }
         }
-
     }
 }

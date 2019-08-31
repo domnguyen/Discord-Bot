@@ -51,5 +51,4 @@ namespace WhalesFargo.Services
             Log($"{user.Username} deleted {num} messages", (int)E_LogOutput.Reply);
         }
     }
-
 }
