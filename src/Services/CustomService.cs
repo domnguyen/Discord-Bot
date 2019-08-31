@@ -1,5 +1,5 @@
-﻿using System;
-using Discord;
+﻿using Discord;
+using System;
 using WhalesFargo.Modules;
 
 namespace WhalesFargo.Services
@@ -11,10 +11,12 @@ namespace WhalesFargo.Services
      * CustomService
      * Class that handles serves as a wrapper for services.
      * Add shared functionality here and shared properties between all services.
+     * This should be paired with the CustomModule to use these functions.
      */
     public class CustomService
     {
-        // We have a reference to the parent module to perform actions like replying and setting the current game properly.
+        // We have a reference to the parent module to perform actions 
+        // like replying and setting the current game properly.
         private CustomModule m_ParentModule = null;
 
         // This should always be called in the module constructor to 
@@ -46,7 +48,7 @@ namespace WhalesFargo.Services
         {
             string withDate = $"{DateTime.Now.ToString("hh:mm:ss")} DiscordBot {s}";
 #if (DEBUG_VERBOSE)
-            Console.WriteLine("AudioService [DEBUG] -- " + str);
+            Console.WriteLine("[DEBUG] -- " + str);
 #endif
             if (output == (int)E_LogOutput.Console)
             {

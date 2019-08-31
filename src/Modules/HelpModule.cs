@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Discord;
+using Discord.Commands;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 
 namespace WhalesFargo.Modules
 {
@@ -15,10 +15,15 @@ namespace WhalesFargo.Modules
      */
     public class HelpModule : ModuleBase
     {
-        private readonly CommandService m_Commands;
-        private readonly IServiceProvider m_Provider;
-        private bool m_UseRemarks = true; // Set this to true to use Remarks instead.
+        private readonly CommandService m_Commands;     // Reference to command service
+        private readonly IServiceProvider m_Provider;   // Reference to service provider
+        private readonly bool m_UseRemarks = true;      // Set this to true to use Remarks instead.
 
+        // This is a special type of module that doesn't need a service, since we link
+        // it directly here. This adds the help functionality and the logic simply checks
+        // for current tags and displays them if available. This requires that you have 
+        // both name and summary tags for each module and it's commmands that you want 
+        // to display here.
         public HelpModule(CommandService commands, IServiceProvider provider)
         {
             m_Commands = commands;
@@ -41,7 +46,7 @@ namespace WhalesFargo.Modules
             foreach (var module in modules)
             {
                 bool success = false;
-                foreach (var command in module.Commands)
+                foreach (var command in module.Commands) // Check if there are any commands
                 {
                     var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                     if (result.IsSuccess)
@@ -53,7 +58,7 @@ namespace WhalesFargo.Modules
                 if (!success)
                     continue;
 
-                emb.AddField(module.Name, module.Summary);
+                emb.AddField(module.Name, module.Summary); // Add to the list
             }
 
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
@@ -102,11 +107,11 @@ namespace WhalesFargo.Modules
                 }
             }
 
+            // Reply with a list of commands.
             if (emb.Fields.Count <= 0) // Added error checking in case we don't have summary tags yet.
                 await ReplyAsync("Command information cannot be found, please try again later.");
             else
                 await ReplyAsync("", false, emb);
         }
-
     }
 }

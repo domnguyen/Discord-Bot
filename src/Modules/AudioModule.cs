@@ -5,7 +5,6 @@ using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
 {
-
     /**
      * AudioModule
      * This handles all the audio commands for the bot.
@@ -30,7 +29,7 @@ namespace WhalesFargo.Modules
         private readonly AudioService m_Service;
 
         // Dependencies are automatically injected via this constructor.
-        // Remember to add an instance of the AudioService
+        // Remember to add an instance of the service.
         // to your IServiceCollection when you initialize your bot!
         public AudioModule(AudioService service)
         {
@@ -198,6 +197,5 @@ namespace WhalesFargo.Modules
         {
             await m_Service.RemoveDuplicateSongsAsync();
         }
-
     }
 }
