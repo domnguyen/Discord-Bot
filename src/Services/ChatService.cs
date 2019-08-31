@@ -40,8 +40,12 @@ namespace WhalesFargo.Services
             }
 
             // Delete.
-            var messages = await channel.GetMessagesAsync((int)num + 1).Flatten();
-            await channel.DeleteMessagesAsync(messages);
+            var messages = await channel.GetMessagesAsync((int)num + 1).FlattenAsync();
+            foreach(IMessage m in messages)
+            {
+                await channel.DeleteMessageAsync(m.Id);
+            }
+           
 
             // Reply with status.
             Log($"{user.Username} deleted {num} messages", (int)E_LogOutput.Reply);
