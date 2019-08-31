@@ -23,7 +23,7 @@ namespace WhalesFargo.Modules
         // Reply is the same as above except it can use the embed builder.
         public async Task ServiceReplyAsync(string title, EmbedBuilder emb)
         {
-            await ReplyAsync(title, false, emb); // Text-To-Speech is off.
+            await ReplyAsync(title, false, emb.Build()); // Text-To-Speech is off.
         }
 
         // Playing will allow the AudioService to set the current game.

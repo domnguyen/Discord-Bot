@@ -24,7 +24,7 @@ namespace WhalesFargo.Services
         public void SetParentModule(CustomModule parent) { m_ParentModule = parent; }
 
         // Replies in the text channel using the parent module and optional embed.
-        protected async void DiscordReply(string s, Embed emb = null)
+        protected async void DiscordReply(string s, EmbedBuilder emb = null)
         {
             if (m_ParentModule == null) return;
             if (emb != null)
