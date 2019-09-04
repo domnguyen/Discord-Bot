@@ -165,6 +165,7 @@ namespace WhalesFargo
             services.AddSingleton<AdminService>(); // AdminModule : AdminService
             services.AddSingleton<AudioService>(); // AudioModule : AudioService
             services.AddSingleton<ChatService>(); // ChatModule : ChatService
+            services.AddSingleton<PUBGService>(); // PUBGService : PUBGService
 
             // Return the service provider.
             return services.BuildServiceProvider();
