@@ -67,8 +67,9 @@ namespace WhalesFargo
                     SetConnectionStatus("Connecting");
 
                     // Get the token from the application settings.
-                    string token = GetBotToken(m_TokenFile);
-                    if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
+                    /*  string token = GetBotToken(m_TokenFile);
+                      if (!token.Equals("")) m_Token = token; // Overwrite if we find it.*/
+                    m_Token = Credentials.DiscordApiKey;
 
                     // Login using the bot token.
                     await m_Client.LoginAsync(TokenType.Bot, m_Token);
