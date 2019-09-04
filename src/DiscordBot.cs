@@ -80,6 +80,8 @@ namespace WhalesFargo
                     // Install commands once the client has logged in.
                     await InstallCommands();
 
+
+                    
                     // Successfully connected and running.
                     m_Running = true;
 

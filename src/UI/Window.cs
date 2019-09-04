@@ -25,7 +25,6 @@ namespace WhalesFargo.UI
         // On load, we setup the token and audiotimer for scrolling.
         private void Window_Load(object sender, EventArgs e)
         {
-            SetToken(ConnectionToken.Text);
             m_AudioTextTimer.Interval = m_AudioTextInterval;
             m_AudioTextTimer.Tick += new System.EventHandler(AudioText_Scroll);
         }
@@ -57,10 +56,7 @@ namespace WhalesFargo.UI
         }
 
         // Handler to set the current connection token.
-        private void ConnectionToken_TextChanged(object sender, EventArgs e)
-        {
-            SetToken(ConnectionToken.Text);
-        }
+       
 
         // Passes this token to the discord bot.
         private void SetToken(string s)
@@ -88,6 +84,8 @@ namespace WhalesFargo.UI
             
             // Update the connection status.
             SetConnectionStatus(DiscordBot.ConnectionStatus);
+
+           
         }
 
         // Sets the current connection status label and color.
@@ -105,7 +103,6 @@ namespace WhalesFargo.UI
             if (s.Equals(Strings.Disconnected))
             {
                 ConnectionStatus.BackColor = System.Drawing.Color.Red;
-                ConnectionToken.Enabled = true;
                 ConnectionButton.Text = Strings.ConnectButton;
             }
 
@@ -117,7 +114,6 @@ namespace WhalesFargo.UI
             if (s.Equals(Strings.Connected))
             {
                 ConnectionStatus.BackColor = System.Drawing.Color.Green;
-                ConnectionToken.Enabled = false;
                 ConnectionButton.Text = Strings.DisconnectButton;
             }
         }
