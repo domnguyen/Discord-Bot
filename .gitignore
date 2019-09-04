@@ -264,3 +264,4 @@ __pycache__/
 **.settings
 **.Designer.cs
 src/BotToken.txt
+src/Credentials.cs
