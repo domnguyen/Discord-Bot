@@ -10,9 +10,17 @@ namespace WhalesFargo.Services
     public class PUBGService : CustomService
     {
         // Replies in the text channel using the parent module.
-        public void SayMessage(string s)
+        public void SayMessage(string s, Embed e = null)
         {
-            DiscordReply(s);
+            if (e != null)
+            {
+                DiscordReply(s, e);
+            }
+            else
+            {
+                DiscordReply(s);
+
+            }
         }
 
         // Sets the bot playing status.

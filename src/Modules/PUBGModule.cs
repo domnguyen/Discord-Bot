@@ -95,29 +95,34 @@ division.bro.official.2018-07 | Is Current Season : False");
                 PlayerNames = new string[] { userName }
             };
 
+            var emb = new EmbedBuilder();
+
 
             var p_players = playerService.GetPlayers(PubgPlatform.Steam, request);
             foreach (PubgPlayer p in p_players) {
                 if(p.Name.ToLower().Equals(userName.ToLower()))
                 {
 
-                  
 
                     PubgPlayerSeason stats = playerService.GetPlayerSeason(PubgPlatform.Steam,p.Id, "division.bro.official.pc-2018-04", Credentials.ApiKey);
-                    toReturn += "Wins: " + stats.GameModeStats.SquadFPP.Wins;
-                    toReturn += "Total Games: " + stats.GameModeStats.SquadFPP.RoundsPlayed;
-                    toReturn += "K/D: " + Convert.ToDecimal(stats.GameModeStats.SquadFPP.Kills * (1.00) / stats.GameModeStats.SquadFPP.RoundsPlayed * (1.00));
-                    toReturn += "Top 10's: " + stats.GameModeStats.SquadFPP.Top10s;
+                    emb.AddField("Squad FPP", "SquadFPP");
+                    emb.AddField("Wins: ", stats.GameModeStats.SquadFPP.Wins);
+                    emb.AddField("Total Games: " , stats.GameModeStats.SquadFPP.RoundsPlayed);
+                    emb.AddField("K/D: " , Convert.ToDecimal(stats.GameModeStats.SquadFPP.Kills * (1.00) / stats.GameModeStats.SquadFPP.RoundsPlayed * (1.00)));
+                    emb.AddField("Top 10's: " , stats.GameModeStats.SquadFPP.Top10s);
+
+
 
 
                 }
             }
 
-            
+
+            Embed embed = emb.Build();
 
 
 
-            m_Service.SayMessage(toReturn);
+            m_Service.SayMessage(toReturn,embed);
             await Task.Delay(0);
         }
 
