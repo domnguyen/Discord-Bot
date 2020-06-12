@@ -29,11 +29,11 @@ namespace WhalesFargo
         private CommandService m_Commands;          // Command service to link modules.
         private IServiceProvider m_Services;        // Service provider to add services to these modules.
         private string m_Token = "";                // Bot Token. Do not share if you plan to hardcode it here.
-        private string m_TokenFile = "";            // If we have the token in a file, make sure it's the first line.
+        private string m_TokenFile = "token.txt";            // If we have the token in a file, make sure it's the first line.
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
         private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
         private bool m_Running = false;             // Flag for checking if it's running.
-        private const int m_RunningInterval = 1000; // Interval in milliseconds to check if running.
+        private const int m_RunningInterval = 60000; // Interval in milliseconds to check if running.
         private bool m_DesktopNotifications = true; // Flag for desktop notifications in minimized mode.
 
         // Returns if we want to send desktop notifications in the UI, from the System Tray.
@@ -67,9 +67,9 @@ namespace WhalesFargo
                     SetConnectionStatus("Connecting");
 
                     // Get the token from the application settings.
-                    /*  string token = GetBotToken(m_TokenFile);
+                     string token = GetBotToken(m_TokenFile);
                       if (!token.Equals("")) m_Token = token; // Overwrite if we find it.*/
-                    m_Token = Credentials.DiscordApiKey;
+                   
 
                     // Login using the bot token.
                     await m_Client.LoginAsync(TokenType.Bot, m_Token);
@@ -100,7 +100,14 @@ namespace WhalesFargo
             }
 
             // Stays in this loop while running.
-            while (m_Running) { await Task.Delay(m_RunningInterval); }
+            while (m_Running) {
+
+
+               
+                await Task.Delay(m_RunningInterval);
+                await CheckFlag();
+
+            }
 
             // Doesn't end the program until the whole thing is done.
             if (m_Client.ConnectionState == ConnectionState.Connecting ||
@@ -125,6 +132,8 @@ namespace WhalesFargo
             await Task.Delay(0);
         }
 
+
+        
         // Sets the token to be from file or direct string.
         public void SetBotToken(string token)
         {
@@ -168,10 +177,19 @@ namespace WhalesFargo
             services.AddSingleton<AdminService>(); // AdminModule : AdminService
             services.AddSingleton<AudioService>(); // AudioModule : AudioService
             services.AddSingleton<ChatService>(); // ChatModule : ChatService
-            services.AddSingleton<PUBGService>(); // PUBGService : PUBGService
+            services.AddSingleton<MapleService>(); // PUBGService : PUBGService
 
             // Return the service provider.
             return services.BuildServiceProvider();
+        }
+
+
+        private async Task CheckFlag()
+        {
+            MapleService t = new MapleService();
+            await t.CheckFlagRace(m_Client);
+
+
         }
 
         // This is where you install all possible commands for the Discord Client.
@@ -187,12 +205,12 @@ namespace WhalesFargo
 
             // Add tasks to send Messages, and userJoined to appropriate places
             m_Client.Ready += Ready;
-            m_Client.UserJoined += UserJoined;
-            m_Client.UserLeft += UserLeft;
+            //m_Client.UserJoined += UserJoined;
+            //m_Client.UserLeft += UserLeft;
             m_Client.Connected += Connected;
             m_Client.Disconnected += Disconnected;
             m_Client.Log += Log;
-
+           
             // Discover all of the commands in this assembly and load them.
            await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Services);
         }

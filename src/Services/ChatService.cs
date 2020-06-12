@@ -21,6 +21,25 @@ namespace WhalesFargo.Services
             DiscordPlaying(s);
         }
 
+
+        public async Task DeleteLastMessage(IGuild guild, IMessageChannel channel, IUser user, string Msg)
+        {
+            int num = 1;
+            // Delete.
+            var messages = await channel.GetMessagesAsync((int)num + 1).FlattenAsync();
+            foreach (IMessage m in messages)
+            {
+                await channel.DeleteMessageAsync(m.Id);
+            }
+
+           
+            Log($"{user.Username} Said" + Msg, (int)E_LogOutput.Reply);
+
+
+        }
+
+
+
         // Clears [num] number of messages from the current text channel.
         public async Task ClearMessagesAsync(IGuild guild, IMessageChannel channel, IUser user , int num)
         {

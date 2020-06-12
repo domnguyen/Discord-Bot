@@ -191,17 +191,16 @@
     <Compile Include="Helpers\Tools.cs" />
     <Compile Include="Modules\AdminModule.cs" />
     <Compile Include="Modules\AudioModule.cs" />
-    <Compile Include="Modules\PUBGModule.cs" />
     <Compile Include="Modules\CustomModule.cs" />
     <Compile Include="Services\AdminService.cs" />
     <Compile Include="Services\AudioService.cs" />
     <Compile Include="Modules\ChatModule.cs" />
-    <Compile Include="Services\PUBGService.cs" />
     <Compile Include="Services\ChatService.cs" />
     <Compile Include="Modules\HelpModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CustomService.cs" />
+    <Compile Include="Services\MapleService.cs" />
     <Compile Include="UI\Window.cs">
       <SubType>Form</SubType>
     </Compile>

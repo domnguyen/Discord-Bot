@@ -43,6 +43,7 @@ namespace WhalesFargo.Modules
         [Summary("The bot will respond in the same channel with the message said.")]
         public async Task Say([Remainder] string usr_msg = "")
         {
+            await m_Service.DeleteLastMessage(Context.Guild, Context.Channel, Context.User, usr_msg);
             m_Service.SayMessage(usr_msg);
             await Task.Delay(0);
         }
