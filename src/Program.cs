@@ -11,7 +11,7 @@
             // Check if an instance is already running. Remove this block if you want to run multiple instances.
             if (!INSTANCE_MUTEX.WaitOne(System.TimeSpan.Zero, false))
             {
-                System.Windows.Forms.MessageBox.Show("The applicaton is already running.");
+                System.Windows.Forms.MessageBox.Show("The application is already running.");
                 return;
             }
             // Start the UI.

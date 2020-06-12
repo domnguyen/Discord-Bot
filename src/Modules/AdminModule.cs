@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
+using System.Threading.Tasks;
 using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
@@ -17,7 +17,7 @@ namespace WhalesFargo.Modules
         private readonly AdminService m_Service;
 
         // Dependencies are automatically injected via this constructor.
-        // Remember to add an instance of the AudioService
+        // Remember to add an instance of the service.
         // to your IServiceCollection when you initialize your bot!
         public AdminModule(AdminService service)
         {
@@ -49,6 +49,7 @@ namespace WhalesFargo.Modules
         [Remarks("!kick [user] [reason]")]
         [Summary("This allows admins to kick users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task KickUser(IGuildUser user, [Remainder] string reason = null)
         {
             await m_Service.KickUser(Context.Guild, user, reason);
@@ -58,6 +59,7 @@ namespace WhalesFargo.Modules
         [Remarks("!ban [user] [reason]")]
         [Summary("This allows admins to ban users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.BanMembers)]
         public async Task BanUser(IGuildUser user, [Remainder] string reason = null)
         {
             await m_Service.BanUser(Context.Guild, user, reason);
@@ -67,6 +69,7 @@ namespace WhalesFargo.Modules
         [Remarks("!addrole [user]")]
         [Summary("This allows admins to add specific roles to a user.")]
         [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task AddRoleUser(IGuildUser user, [Remainder]string role)
         {
             await m_Service.AddRoleUser(Context.Guild, user, role);
@@ -77,11 +80,10 @@ namespace WhalesFargo.Modules
         [Remarks("!delrole [user]")]
         [Summary("This allows admins to remove specific roles to a user.")]
         [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task RemoveRoleUser(IGuildUser user, [Remainder]string role)
         {
             await m_Service.RemoveRoleUser(Context.Guild, user, role);
         }
-
-
     }
 }

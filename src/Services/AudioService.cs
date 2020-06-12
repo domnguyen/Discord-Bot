@@ -306,9 +306,8 @@ namespace WhalesFargo.Services
                 AudioFile current = m_Playlist.ElementAt(i);
                 emb.AddField(zeros + i, current);
             }
-            Embed embed = emb.Build();
 
-            DiscordReply("Playlist", embed);
+            DiscordReply("Playlist", emb);
         }
 
         // Adds a song to the playlist.
@@ -432,9 +431,8 @@ namespace WhalesFargo.Services
                     string file = items[index].Split(Path.DirectorySeparatorChar).Last(); // Get just the file name.
                     emb.AddField(zeros + index, file);
                 }
-                Embed embed = emb.Build();
 
-                DiscordReply($"Page {p+1}", embed);
+                DiscordReply($"Page {p+1}", emb);
             }
         }
 
