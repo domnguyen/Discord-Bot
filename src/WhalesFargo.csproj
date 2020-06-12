@@ -172,6 +172,7 @@
   </ItemGroup>
   <!-- Include Files Here. -->
   <ItemGroup>
+    <Compile Include="Credentials.cs" />
     <Compile Include="DiscordBot.cs" />
     <Compile Include="Helpers\AudioDownloader.cs" />
     <Compile Include="Helpers\AudioFile.cs" />
