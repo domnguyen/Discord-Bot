@@ -29,7 +29,7 @@ namespace WhalesFargo
         private CommandService m_Commands;          // Command service to link modules.
         private IServiceProvider m_Services;        // Service provider to add services to these modules.
         private string m_Token = "";                // Bot Token. Do not share if you plan to hardcode it here.
-        private string m_TokenFile = "";            // If we have the token in a file, make sure it's the first line.
+        
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
         private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
         private bool m_Running = false;             // Flag for checking if it's running.
@@ -58,14 +58,10 @@ namespace WhalesFargo
             return Task.CompletedTask;
         }
 
-        // Sets the token to be from file or direct string.
+        // Sets the token to be from class
         public void SetBotToken(string token)
         {
-            m_Token = "";
-            m_TokenFile = "";
-            if (System.IO.File.Exists(token))
-                m_TokenFile = token;
-            else
+
                 m_Token = token;
         }
 
