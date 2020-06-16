@@ -33,7 +33,6 @@
             this.ConsoleText = new System.Windows.Forms.TextBox();
             this.AudioLabel = new System.Windows.Forms.Label();
             this.ConnectionStatus = new System.Windows.Forms.Label();
-            this.ConnectionToken = new System.Windows.Forms.TextBox();
             this.ConnectionButton = new System.Windows.Forms.Button();
             this.ConnectionStatusLabel = new System.Windows.Forms.Label();
             this.SystemTray = new System.Windows.Forms.NotifyIcon(this.components);
@@ -77,22 +76,12 @@
             this.ConnectionStatus.Text = "Disconnected";
             this.ConnectionStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // ConnectionToken
-            // 
-            this.ConnectionToken.Location = new System.Drawing.Point(10, 55);
-            this.ConnectionToken.Margin = new System.Windows.Forms.Padding(2, 5, 2, 5);
-            this.ConnectionToken.Name = "ConnectionToken";
-            this.ConnectionToken.Size = new System.Drawing.Size(215, 21);
-            this.ConnectionToken.TabIndex = 6;
-            this.ConnectionToken.Text = "BotToken.txt";
-            this.ConnectionToken.TextChanged += new System.EventHandler(this.ConnectionToken_TextChanged);
-            // 
             // ConnectionButton
             // 
-            this.ConnectionButton.Location = new System.Drawing.Point(235, 53);
+            this.ConnectionButton.Location = new System.Drawing.Point(10, 53);
             this.ConnectionButton.Margin = new System.Windows.Forms.Padding(2, 5, 2, 5);
             this.ConnectionButton.Name = "ConnectionButton";
-            this.ConnectionButton.Size = new System.Drawing.Size(85, 25);
+            this.ConnectionButton.Size = new System.Drawing.Size(310, 25);
             this.ConnectionButton.TabIndex = 7;
             this.ConnectionButton.Text = "Connect";
             this.ConnectionButton.UseVisualStyleBackColor = true;
@@ -134,7 +123,6 @@
             this.Controls.Add(this.AudioText);
             this.Controls.Add(this.ConnectionStatusLabel);
             this.Controls.Add(this.ConnectionButton);
-            this.Controls.Add(this.ConnectionToken);
             this.Controls.Add(this.ConnectionStatus);
             this.Controls.Add(this.AudioLabel);
             this.Controls.Add(this.ConsoleText);
@@ -157,7 +145,6 @@
         private System.Windows.Forms.TextBox ConsoleText;
         private System.Windows.Forms.Label AudioLabel;
         private System.Windows.Forms.Label ConnectionStatus;
-        private System.Windows.Forms.TextBox ConnectionToken;
         private System.Windows.Forms.Button ConnectionButton;
         private System.Windows.Forms.Label ConnectionStatusLabel;
         private System.Windows.Forms.NotifyIcon SystemTray;

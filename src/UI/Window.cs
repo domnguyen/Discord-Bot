@@ -22,10 +22,9 @@ namespace WhalesFargo.UI
             m_DiscordBot = bot;
         }
 
-        // On load, we setup the token and audiotimer for scrolling.
+        // On load, we setup audiotimer for scrolling.
         private void Window_Load(object sender, EventArgs e)
         {
-            SetToken(ConnectionToken.Text);
             m_AudioTextTimer.Interval = m_AudioTextInterval;
             m_AudioTextTimer.Tick += new System.EventHandler(AudioText_Scroll);
         }
@@ -56,18 +55,6 @@ namespace WhalesFargo.UI
                 AudioText.Text = AudioText.Text.Substring(1, AudioText.Text.Length - 1) + AudioText.Text.Substring(0,1);
         }
 
-        // Handler to set the current connection token.
-        private void ConnectionToken_TextChanged(object sender, EventArgs e)
-        {
-            SetToken(ConnectionToken.Text);
-        }
-
-        // Passes this token to the discord bot.
-        private void SetToken(string s)
-        {
-            if (m_DiscordBot != null) m_DiscordBot.SetBotToken(s);
-        }
-
         // Handles the connection button state. It can be either connect, cancel (which cancels the connection process if failing),
         // and disconnect. We run the proper function for each, then send it to another function to handle the ui component.
         private void ConnectionButton_Click(object sender, EventArgs e)
@@ -77,7 +64,7 @@ namespace WhalesFargo.UI
             {
                if (System.Windows.Forms.MessageBox.Show(Strings.DisconnectPrompt, Strings.DisconnectPromptTitle, 
                    MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                    Program.Stop();
+                   Program.Stop();
             }
 
             // If it's in the middle of connecting and keeps failing, we can cancel the attempt.
@@ -105,7 +92,6 @@ namespace WhalesFargo.UI
             if (s.Equals(Strings.Disconnected))
             {
                 ConnectionStatus.BackColor = System.Drawing.Color.Red;
-                ConnectionToken.Enabled = true;
                 ConnectionButton.Text = Strings.ConnectButton;
             }
 
@@ -117,7 +103,6 @@ namespace WhalesFargo.UI
             if (s.Equals(Strings.Connected))
             {
                 ConnectionStatus.BackColor = System.Drawing.Color.Green;
-                ConnectionToken.Enabled = false;
                 ConnectionButton.Text = Strings.DisconnectButton;
             }
         }
