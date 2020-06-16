@@ -102,7 +102,9 @@ namespace WhalesFargo.Modules
                 var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                 if (result.IsSuccess)
                 {
-                    var title = (m_UseRemarks) ? command.Remarks : command.Aliases.First();
+                    var remarks = $"{Credentials.Prefix}{command.Remarks}";
+                    var alias = command.Aliases.First();
+                    var title = m_UseRemarks ? remarks : alias;
                     emb.AddField(title, command.Summary);
                 }
             }

@@ -26,7 +26,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("mute")]
-        [Remarks("!mute [user]")]
+        [Remarks("mute [user]")]
         [Summary("This allows admins to mute users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.MuteMembers)]
@@ -36,7 +36,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("unmute")]
-        [Remarks("!unmute [user]")]
+        [Remarks("unmute [user]")]
         [Summary("This allows admins to unmute users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.MuteMembers)]
@@ -46,7 +46,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("kick")]
-        [Remarks("!kick [user] [reason]")]
+        [Remarks("kick [user] [reason]")]
         [Summary("This allows admins to kick users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.KickMembers)]
@@ -56,7 +56,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("ban")]
-        [Remarks("!ban [user] [reason]")]
+        [Remarks("ban [user] [reason]")]
         [Summary("This allows admins to ban users.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.BanMembers)]
@@ -66,7 +66,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("addrole")]
-        [Remarks("!addrole [user]")]
+        [Remarks("addrole [user]")]
         [Summary("This allows admins to add specific roles to a user.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.ManageRoles)]
@@ -77,7 +77,7 @@ namespace WhalesFargo.Modules
 
         [Command("removerole")]
         [Alias("removerole", "delrole")]
-        [Remarks("!delrole [user]")]
+        [Remarks("delrole [user]")]
         [Summary("This allows admins to remove specific roles to a user.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireUserPermission(GuildPermission.ManageRoles)]

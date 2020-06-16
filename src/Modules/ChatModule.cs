@@ -28,7 +28,7 @@ namespace WhalesFargo.Modules
 
         [Command("botStatus")]
         [Alias("botstatus")]
-        [Remarks("!botstatus [status]")]
+        [Remarks("botstatus [status]")]
         [Summary("Allows admins to set the bot's current game to [status]")]
         [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task SetBotStatus([Remainder] string botStatus)
@@ -39,7 +39,7 @@ namespace WhalesFargo.Modules
 
         [Command("say")]
         [Alias("say")]
-        [Remarks("!say [msg]")]
+        [Remarks("say [msg]")]
         [Summary("The bot will respond in the same channel with the message said.")]
         public async Task Say([Remainder] string usr_msg = "")
         {
@@ -48,7 +48,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("Clear")]
-        [Remarks("!clear [num]")]
+        [Remarks("clear [num]")]
         [Summary("Allows admins to clear [num] amount of messages from current channel")]
         [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task ClearMessages([Remainder] int num = 0)
