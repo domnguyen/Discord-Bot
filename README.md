@@ -9,8 +9,9 @@ This bot is built to be run on any .NET Framework compatible machine. It is mean
 
 To install do the following:
 * Clone our repo
-* Create a file called BotToken.txt in the /src directory with your bot token to get connected.
-  * The file should contain only the token, nothing else.
+* ~Create a file called BotToken.txt in the /src directory with your bot token to get connected.~
+  * ~The file should contain only the token, nothing else.~
+  * [06/16] This will be moved to a config file.
 * Compile with Visual Studio, and it should be ready to go!
 
 ## Current Features:
