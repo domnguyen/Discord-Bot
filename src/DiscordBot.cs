@@ -5,8 +5,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using WhalesFargo.Helpers;
@@ -28,7 +26,6 @@ namespace WhalesFargo
         private DiscordSocketClient m_Client;       // Discord client.
         private CommandService m_Commands;          // Command service to link modules.
         private IServiceProvider m_Services;        // Service provider to add services to these modules.
-        private string m_Token = "";                // Bot Token. Do not share if you plan to hardcode it here.
         
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
         private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
@@ -58,25 +55,6 @@ namespace WhalesFargo
             return Task.CompletedTask;
         }
 
-        // Sets the token to be from class
-        public void SetBotToken(string token)
-        {
-
-                m_Token = token;
-        }
-
-        // Attempt to get the bot token.
-        // If it doesn't exist, we can't return anything.
-        private string GetBotToken(string filename)
-        {
-            string token = "";
-            if (File.Exists(filename))
-            {
-                token = File.ReadLines(filename).First();
-            }
-            return token;
-        }
-
         // Returns if we want to send desktop notifications in the UI, from the System Tray.
         public bool GetDesktopNotifications() { return m_DesktopNotifications; }
 
@@ -87,7 +65,7 @@ namespace WhalesFargo
             if (m_Client != null)
             {
                 if (m_Client.ConnectionState == ConnectionState.Connecting ||
-                m_Client.ConnectionState == ConnectionState.Connected)
+                    m_Client.ConnectionState == ConnectionState.Connected)
                     return;
             }
 
@@ -107,12 +85,8 @@ namespace WhalesFargo
                     // Set the connecting status.
                     SetConnectionStatus("Connecting");
 
-                    // Get the token from the application settings.
-                    string token = GetBotToken(Credentials.DiscordToken);
-                    if (!token.Equals("")) m_Token = token; // Overwrite if we find it.
-
                     // Login using the bot token.
-                    await m_Client.LoginAsync(TokenType.Bot, m_Token);
+                    await m_Client.LoginAsync(TokenType.Bot, Credentials.DiscordToken);
 
                     // Startup the client.
                     await m_Client.StartAsync();
@@ -203,7 +177,7 @@ namespace WhalesFargo
            await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Services);
         }
 
-        // Handles commands with prefixes '!' and mention prefix.
+        // Handles commands with prefix char and mention prefix.
         // Others get handled differently.
         private async Task MessageReceived(SocketMessage messageParam)
         {
@@ -214,8 +188,8 @@ namespace WhalesFargo
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
 
-            // Determine if the message is a command, based on if it starts with '!' or a mention prefix
-            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
+            // Determine if the message is a command, based on if it starts with the prefix char or a mention prefix
+            if (!(message.HasCharPrefix(Credentials.Prefix, ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
             {
                 // If it isn't a command, decide what to do with it here. 
                 // TODO: Add any special handlers here.
@@ -235,7 +209,7 @@ namespace WhalesFargo
         // This sets the bots status as default. Can easily be changed. 
         private async Task Ready()
         {
-            await m_Client.SetGameAsync("Type !help for help!");
+            await m_Client.SetGameAsync($"Type {Credentials.Prefix}help for help!");
         }
 
         // This function is called once a user joins the server.

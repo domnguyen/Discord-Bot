@@ -48,7 +48,7 @@ namespace WhalesFargo.Modules
         // instead, outsource to a service for that.'
 
         [Command("join", RunMode = RunMode.Async)]
-        [Remarks("!join")]
+        [Remarks("join")]
         [Summary("Joins the user's voice channel.")]
         public async Task JoinVoiceChannel()
         {
@@ -60,7 +60,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("leave", RunMode = RunMode.Async)]
-        [Remarks("!leave")]
+        [Remarks("leave")]
         [Summary("Leaves the current voice channel.")]
         public async Task LeaveVoiceChannel()
         {
@@ -68,7 +68,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        [Remarks("!play [url/index]")]
+        [Remarks("play [url/index]")]
         [Summary("Plays a song by url or local path.")]
         public async Task PlayVoiceChannel([Remainder] string song)
         {
@@ -89,7 +89,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("pause", RunMode = RunMode.Async)]
-        [Remarks("!pause")]
+        [Remarks("pause")]
         [Summary("Pauses the current song, if playing.")]
         public async Task PauseVoiceChannel()
         {
@@ -98,7 +98,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("resume", RunMode = RunMode.Async)]
-        [Remarks("!resume")]
+        [Remarks("resume")]
         [Summary("Pauses the current song, if paused.")]
         public async Task ResumeVoiceChannel()
         {
@@ -107,7 +107,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("stop", RunMode = RunMode.Async)]
-        [Remarks("!stop")]
+        [Remarks("stop")]
         [Summary("Stops the current song, if playing or paused.")]
         public async Task StopVoiceChannel()
         {
@@ -116,7 +116,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("volume")]
-        [Remarks("!volume [num]")]
+        [Remarks("volume [num]")]
         [Summary("Changes the volume to [0 - 100].")]
         public async Task VolumeVoiceChannel(int volume)
         {
@@ -125,7 +125,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("add", RunMode = RunMode.Async)]
-        [Remarks("!add [url/index]")]
+        [Remarks("add [url/index]")]
         [Summary("Adds a song by url or local path to the playlist.")]
         public async Task AddVoiceChannel([Remainder] string song)
         {
@@ -145,7 +145,7 @@ namespace WhalesFargo.Modules
 
         [Command("skip", RunMode = RunMode.Async)]
         [Alias("skip", "next")]
-        [Remarks("!skip")]
+        [Remarks("skip")]
         [Summary("Skips the current song, if playing from the playlist.")]
         public async Task SkipVoiceChannel()
         {
@@ -154,7 +154,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
-        [Remarks("!playlist")]
+        [Remarks("playlist")]
         [Summary("Shows what's currently in the playlist.")]
         public async Task PrintPlaylistVoiceChannel()
         {
@@ -163,7 +163,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("autoplay", RunMode = RunMode.Async)]
-        [Remarks("!autoplay [enable]")]
+        [Remarks("autoplay [enable]")]
         [Summary("Starts the autoplay service on the current playlist.")]
         public async Task AutoPlayVoiceChannel(bool enable)
         {
@@ -174,7 +174,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("download", RunMode = RunMode.Async)]
-        [Remarks("!download [http]")]
+        [Remarks("download [http]")]
         [Summary("Download songs into our local folder.")]
         public async Task DownloadSong([Remainder] string path)
         {
@@ -182,7 +182,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("songs", RunMode = RunMode.Async)]
-        [Remarks("!songs [page]")]
+        [Remarks("songs [page]")]
         [Summary("Shows songs in our local folder in pages.")]
         public async Task PrintSongDirectory(int page = 0)
         {
@@ -191,7 +191,7 @@ namespace WhalesFargo.Modules
         }
 
         [Command("cleanupsongs", RunMode = RunMode.Async)]
-        [Remarks("!cleanupsongs")]
+        [Remarks("cleanupsongs")]
         [Summary("Cleans the local folder of duplicate files created by our downloader.")]
         public async Task CleanSongDirectory()
         {

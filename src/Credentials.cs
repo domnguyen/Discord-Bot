@@ -9,8 +9,7 @@ namespace WhalesFargo
     public static class Credentials
     {
         public const string ApiKey = "YOUR API KEY";
-        public const string DiscordToken = "YOUR Token";
-
-
+        public const string DiscordToken = "YOUR TOKEN";
+        public const char Prefix = '!';
     }
 }
