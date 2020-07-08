@@ -9,85 +9,87 @@ This bot is built to be run on any .NET Framework compatible machine. It is mean
 
 To install do the following:
 * Clone our repo
-* ~Create a file called BotToken.txt in the /src directory with your bot token to get connected.~
-  * ~The file should contain only the token, nothing else.~
-  * [06/16] This will be moved to a config file.
-* Compile with Visual Studio, and it should be ready to go!
+* Compile with Visual Studio, and it should be ready to go[prefix]
+* Modify *config.json* with your bot token and other settings.
+  * Move this file to the same folder as your executable.
 
 ## Current Features:
 
 ### Admin Functions:
 
-!mute [user]
+[prefix]prefix [new prefix]
+(This allows admins to change the command prefix.)
+
+[prefix]mute [user]
 (This allows admins to mute users.)
 
-!unmute [user]
+[prefix]unmute [user]
 (This allows admins to unmute users.)
 
-!kick [user] [reason]
+[prefix]kick [user] [reason]
 (This allows admins to kick users.)
 
-!ban [user] [reason]
+[prefix]ban [user] [reason]
 (This allows admins to ban users.)
 
-!addrole [user]
+[prefix]addrole [user]
 (This allows admins to add specific roles to a user.)
 
-!delrole [user]
+[prefix]delrole [user]
 (This allows admins to remove specific roles to a user.)
 
 ### Music Functions:
 
-!join
+[prefix]join
 (Joins the user's voice channel.)
 
-!leave
+[prefix]leave
 (Leaves the current voice channel.)
 
-!play [url/index]
+[prefix]play [url/index]
 (Plays a song by url or local path.)
 
-!pause
+[prefix]pause
 (Pauses the current song, if playing.)
 
-!resume
+[prefix]resume
 (Pauses the current song, if paused.)
 
-!stop
+[prefix]stop
 (Stops the current song, if playing or paused.)
 
-!volume [num]
+[prefix]volume [num]
 (Changes the volume to [0.0, 1.0].)
 
-!add [url/index]
+[prefix]add [url/index]
 (Adds a song by url or local path to the playlist.)
 
-!skip
+[prefix]skip
 (Skips the current song, if playing from the playlist.)
 
-!playlist
+[prefix]playlist
 (Shows what's currently in the playlist.)
 
-!autoplay [enable]
+[prefix]autoplay [enable]
 (Starts the autoplay service on the current playlist.)
 
-!download
+[prefix]download
 (Download songs into our local folder.)
 
-!songs
+[prefix]songs
 (Shows what's currently in our local folder.)
 
-!cleanupsongs
+[prefix]cleanupsongs
 (Cleans the local folder of duplicate files.)
 
 ### Chat Functions:
 
-!botstatus [status]
+[prefix]botstatus [status]
 (Allows admins to set the bot's current game to [status])
 
-!say [msg]
+[prefix]say [msg]
 (The bot will respond in the same channel with the message said.)
 
-!clear [num]
+[prefix]clear [num]
 (Allows admins to clear [num] amount of messages from current channel)
 

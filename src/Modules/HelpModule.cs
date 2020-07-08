@@ -3,6 +3,7 @@ using Discord.Commands;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using WhalesFargo.Helpers;
 
 namespace WhalesFargo.Modules
 {
@@ -102,7 +103,7 @@ namespace WhalesFargo.Modules
                 var result = await command.CheckPreconditionsAsync(Context, m_Provider);
                 if (result.IsSuccess)
                 {
-                    var remarks = $"{Credentials.Prefix}{command.Remarks}";
+                    var remarks = $"{Config.Instance.Prefix}{command.Remarks}";
                     var alias = command.Aliases.First();
                     var title = m_UseRemarks ? remarks : alias;
                     emb.AddField(title, command.Summary);

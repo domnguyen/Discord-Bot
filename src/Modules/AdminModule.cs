@@ -25,6 +25,15 @@ namespace WhalesFargo.Modules
             m_Service.SetParentModule(this); // Reference to this from the service.
         }
 
+        [Command("prefix")]
+        [Remarks("prefix [new prefix]")]
+        [Summary("This allows admins change the command prefix.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task ChangePrefix([Remainder] char prefix)
+        {
+            await m_Service.ChangePrefix(prefix);
+        }
+
         [Command("mute")]
         [Remarks("mute [user]")]
         [Summary("This allows admins to mute users.")]

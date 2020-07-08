@@ -26,7 +26,8 @@ namespace WhalesFargo
         private DiscordSocketClient m_Client;       // Discord client.
         private CommandService m_Commands;          // Command service to link modules.
         private IServiceProvider m_Services;        // Service provider to add services to these modules.
-        
+
+        private string m_ConfigFile = "config.json";// Configuration filename.
         private bool m_RetryConnection = true;      // Flag for retrying connection, for the first connection.
         private const int m_RetryInterval = 1000;   // Interval in milliseconds, for each connection attempt.
         private bool m_Running = false;             // Flag for checking if it's running.
@@ -69,6 +70,9 @@ namespace WhalesFargo
                     return;
             }
 
+            // Read configuration
+            Config.Instance.Read(m_ConfigFile);
+
             // Start to make the connection to the server
             m_Client = new DiscordSocketClient();
             m_Commands = new CommandService(); // Start the command service to add all our commands. See 'InstallCommands'
@@ -86,7 +90,7 @@ namespace WhalesFargo
                     SetConnectionStatus("Connecting");
 
                     // Login using the bot token.
-                    await m_Client.LoginAsync(TokenType.Bot, Credentials.DiscordToken);
+                    await m_Client.LoginAsync(TokenType.Bot, Config.Instance.DiscordToken);
 
                     // Startup the client.
                     await m_Client.StartAsync();
@@ -129,7 +133,7 @@ namespace WhalesFargo
             m_RetryConnection = false;
             await Task.Delay(0);
         }
-        
+
         // If connected, disconnect from the server.
         public async Task StopAsync()
         {
@@ -174,7 +178,7 @@ namespace WhalesFargo
             m_Client.Log += Log;
 
             // Discover all of the commands in this assembly and load them.
-           await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Services);
+            await m_Commands.AddModulesAsync(Assembly.GetEntryAssembly(), m_Services);
         }
 
         // Handles commands with prefix char and mention prefix.
@@ -189,7 +193,7 @@ namespace WhalesFargo
             int argPos = 0;
 
             // Determine if the message is a command, based on if it starts with the prefix char or a mention prefix
-            if (!(message.HasCharPrefix(Credentials.Prefix, ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
+            if (!(message.HasCharPrefix(Config.Instance.Prefix, ref argPos) || message.HasMentionPrefix(m_Client.CurrentUser, ref argPos)))
             {
                 // If it isn't a command, decide what to do with it here. 
                 // TODO: Add any special handlers here.
@@ -209,7 +213,7 @@ namespace WhalesFargo
         // This sets the bots status as default. Can easily be changed. 
         private async Task Ready()
         {
-            await m_Client.SetGameAsync($"Type {Credentials.Prefix}help for help!");
+            await m_Client.SetGameAsync($"Type {Config.Instance.Prefix}help for help!");
         }
 
         // This function is called once a user joins the server.
