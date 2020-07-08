@@ -1,5 +1,6 @@
 ﻿using Discord;
 using System.Threading.Tasks;
+using WhalesFargo.Helpers;
 
 namespace WhalesFargo.Services
 {
@@ -12,6 +13,15 @@ namespace WhalesFargo.Services
     {
         // Private variables. 
         // TODO: Add any here.
+
+        // Changes the prefix.
+        public async Task ChangePrefix(char prefix)
+        {
+            Config.Instance.Prefix = prefix;
+            Config.Instance.Write(); // Update local file
+            Log($"Prefix has been changed to {prefix}", (int)E_LogOutput.Reply);
+            await Task.Delay(0);
+        }
 
         // Mutes the specific user.
         public async Task MuteUser(IGuild guild, IUser user)
