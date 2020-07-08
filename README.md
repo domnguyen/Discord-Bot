@@ -17,6 +17,9 @@ To install do the following:
 
 ### Admin Functions:
 
+[prefix]prefix [new prefix]
+(This allows admins to change the command prefix.)
+
 [prefix]mute [user]
 (This allows admins to mute users.)
 
