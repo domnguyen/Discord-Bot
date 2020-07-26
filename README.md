@@ -18,4 +18,4 @@ To install do the following:
 
 ## Resources
 
-- [Features](../../wiki/Features)
+- [Features](https://github.com/domnguyen/Discord-Bot/wiki/Features)
