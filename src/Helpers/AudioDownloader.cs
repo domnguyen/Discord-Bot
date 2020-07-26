@@ -25,9 +25,17 @@ namespace WhalesFargo.Helpers
         private string m_CurrentlyDownloading = "";         // Currently downloading file.
         private bool m_AllowDuplicates = true;              // Flag for downloading duplicate items.
 
-        // Returns the current downloading folder.
-        public string GetDownloadPath() { return m_DownloadPath; }
-        void SetDownloadPath(string path) { m_DownloadPath = path; }
+        // Sets the current downloading folder.
+        public void SetDownloadPath(string path)
+        {
+            // Update download path
+            if (path != null)
+                m_DownloadPath = path;
+
+            // Create the directory if it does not exist
+            if (!Directory.Exists(m_DownloadPath))
+                Directory.CreateDirectory(m_DownloadPath);
+        }
 
         // Returns the status of the downloader.
         public bool IsRunning() { return m_IsRunning; }

@@ -47,5 +47,8 @@ namespace WhalesFargo.Helpers
 
         [JsonProperty]
         public char Prefix { get; set; }
+
+        [JsonProperty]
+        public string DownloadPath { get; set; }
     }
 }

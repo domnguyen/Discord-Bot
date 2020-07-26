@@ -436,6 +436,9 @@ namespace WhalesFargo.Services
             }
         }
 
+        // Sets the audio download path. This should only be called during init.
+        public void SetDownloadPath(string path) { m_AudioDownloader.SetDownloadPath(path);}
+
         // Returns the name with the specified song by index.
         // Returns null if a local song doesn't exist.
         public string GetLocalSong(int index) { return m_AudioDownloader.GetItem(index); }

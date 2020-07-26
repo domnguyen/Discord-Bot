@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
+using WhalesFargo.Helpers;
 using WhalesFargo.Services;
 
 namespace WhalesFargo.Modules
@@ -35,6 +36,7 @@ namespace WhalesFargo.Modules
         {
             m_Service = service;
             m_Service.SetParentModule(this); // Reference to this from the service.
+            m_Service.SetDownloadPath(Config.Instance.DownloadPath); // Should only be called once.
         }
 
         // You *MUST* mark these commands with 'RunMode.Async'
